@@ -11,6 +11,11 @@
     {% endblock %}
     <title>SwiftShop SaaS | Replicating Cruip Solid Theme</title>
     
+    <!-- PWA Integration Manifest & App configuration -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#875ef5">
+    <link rel="apple-touch-icon" href="https://preview.cruip.com/solid/dist/images/logo.svg">
+    
     <!-- Google Fonts: Heebo (Cruip Solid Signature Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,6 +158,30 @@
             border-bottom-color: #875ef5;
             background-color: rgba(135, 94, 245, 0.05);
         }
+
+        /* Mobile Navigation Overlay Drawer Custom CSS overrides */
+        .mobile-drawer {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 280px !important;
+            background-color: rgba(29, 32, 35, 0.98) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            z-index: 9999 !important;
+            padding: 24px !important;
+            border-left: 1px solid #24282c !important;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            transform: translateX(100%) !important;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0) !important;
+        }
     </style>
     {% endblock %}
     
@@ -171,7 +200,7 @@
     <nav class="border-b solid-border sticky top-0 w-full z-50 bg-[#151719]/90 backdrop-blur-md transition-all duration-300 py-3.5">
         <div class="max-w-6xl mx-auto px-4 md:px-8 w-full flex items-center justify-between">
             <!-- Logo Block -->
-            <div class="flex items-center gap-2.5 w-1/4">
+            <div class="flex items-center gap-2.5 w-auto md:w-1/4">
                 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="logo-a">
@@ -186,15 +215,15 @@
                 </span>
             </div>
             
-            <!-- Navigation Menu Links -->
+            <!-- Navigation Menu Links (Desktop) -->
             <div class="hidden md:flex items-center justify-center gap-8 w-2/4">
                 <a href="#features" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Features</a>
                 <a href="#details" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">How it works</a>
                 <a href="#register-portal" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Register</a>
             </div>
 
-            <!-- Auth CTAs -->
-            <div class="flex items-center justify-end gap-4 w-1/4">
+            <!-- Auth CTAs (Desktop Only) -->
+            <div class="hidden md:flex items-center justify-end gap-4 w-1/4">
                 {% if request.user.is_authenticated %}
                     <a href="/authentication" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">
                         Dashboard
@@ -211,8 +240,61 @@
                     </a>
                 {% endif %}
             </div>
+
+            <!-- Hamburger Icon Button (Mobile / Tablet) -->
+            <button onclick="toggleMobileMenu(true)" class="md:hidden text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer" aria-label="Open Mobile Menu">
+                <i class="fal fa-bars text-xl"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Navigation Overlay Drawer Container -->
+    <div id="mobile-menu-overlay" class="mobile-drawer md:hidden">
+        <!-- Close Button Header -->
+        <div class="flex items-center justify-between pb-4 border-b solid-border mb-6">
+            <div class="flex items-center gap-2">
+                <svg width="24" height="24" viewBox="0 0 32 32">
+                    <path d="M16 0L32 16L16 32L0 16L16 0Z" fill="#875ef5" />
+                </svg>
+                <span class="font-bold text-sm tracking-wider text-white-pure">SOLID MENU</span>
+            </div>
+            <button onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer" aria-label="Close Mobile Menu">
+                <i class="fal fa-times text-lg"></i>
+            </button>
+        </div>
+        
+        <!-- Drawer Menu Navigation Links -->
+        <div class="flex flex-col gap-5 text-xs font-semibold uppercase tracking-wider mb-6 text-left">
+            <a href="#features" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+                <i class="fal fa-bolt text-[#875ef5]"></i> Features
+            </a>
+            <a href="#details" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+                <i class="fal fa-cogs text-[#875ef5]"></i> How it works
+            </a>
+            <a href="#register-portal" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+                <i class="fal fa-user-plus text-[#875ef5]"></i> Register
+            </a>
+        </div>
+
+        <!-- Drawer Auth CTAs (Mobile) -->
+        <div class="flex flex-col gap-3 mt-auto">
+            {% if request.user.is_authenticated %}
+                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                    Dashboard
+                </a>
+                <a href="{% url 'main:logout' %}" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                    Log Out
+                </a>
+            {% else %}
+                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                    Log In
+                </a>
+                <a href="#register-portal" onclick="toggleMobileMenu(false)" class="solid-btn-primary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                    Register Shop
+                </a>
+            {% endif %}
+        </div>
+    </div>
 
     <!-- Main Content Container -->
     <main class="flex-grow z-10 relative">
@@ -578,6 +660,25 @@
             once: true,
             duration: 800
         });
+
+        // Mobile menu drawer toggle handler
+        function toggleMobileMenu(isOpen) {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            if (isOpen) {
+                overlay.classList.add('open');
+            } else {
+                overlay.classList.remove('open');
+            }
+        }
+
+        // Progressive Web App (PWA) Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/js/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registered scope:', reg.scope))
+                    .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+            });
+        }
 
         // Form tabs interactive switching
         function toggleForm(tabName) {

@@ -1,48 +1,173 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block meta %}
     {% endblock %}
-    <title>{{title}}</title>
+    <title>{{title|default:"Solid SaaS | Authentication Gateway"}}</title>
+    
+    <!-- Google Fonts: Heebo (Cruip Solid Signature Font) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/static/plugins/fontawesomepro/css/all.min.css" />
     <link href="/static/plugins/bootstrap 5.0.2/bootstrap.min.css" rel="stylesheet">
     <link href="/static/plugins/aos/aos.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="/static/css/global.css" />
+    
     {% block style %}
     {% endblock %}
+    
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif !important;
+            background-color: #151719 !important;
+            color: #ffffff !important;
+            overflow-x: hidden;
+        }
+        
+        .solid-glass-card {
+            background-color: #1d2023 !important;
+            border: 1px solid #2e333a !important;
+            border-radius: 8px !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* High-specificity inputs overrides for the login portal inputs */
+        input[type="text"], input[type="password"], input[type="email"] {
+            background-color: #24282c !important;
+            color: #ffffff !important;
+            border: 1px solid #2e333a !important;
+            border-radius: 4px !important;
+            height: 48px !important;
+            padding-left: 14px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+            border-color: #875ef5 !important;
+            background-color: #2b3036 !important;
+            box-shadow: 0 0 0 3px rgba(135, 94, 245, 0.25) !important;
+            outline: none !important;
+        }
+
+        .solid-btn-primary {
+            background-color: #875ef5 !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            height: 48px !important;
+            border: none !important;
+            transition: all 0.2s ease !important;
+        }
+        .solid-btn-primary:hover {
+            background-color: #9d7df7 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(135, 94, 245, 0.3) !important;
+        }
+    </style>
+    
     <script src="/static/js/jquery-3.6.3.min.js"></script>
     {% tailwind_css %}
 </head>
-<body>
-    <div class="h-[100dvh] w-full">
-        <div class="flex h-full">
-            <div class="hidden lg:flex flex-col justify-center w-[55%] h-full relative ">
-                <h1 class="text-center text-[#1b38e6] font-bold text-5xl mb-4">
-                    W Express<br> Fleet Management System
-    
-                </h1>
-                <img src="/static/image/bgg.png" class="w-full object-contain bg-primaryColor"/>
-                <div class="absolute z-30 bottom-10 p-5" data-aos="fade-up" > 
-                    <!-- <div class="text-3xl text-white w-[90%]">
-                        Easy-to-use business management software for Dermatology and Aesthetic clinics.
-                    </div> -->
+<body class="h-full relative bg-[#151719]">
+
+    <!-- Ambient glowing circular vector backgrounds -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#875ef5]/5 filter blur-3xl"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#ab90fa]/5 filter blur-3xl"></div>
+    </div>
+
+    <div class="h-full w-full relative z-10">
+        <div class="flex h-full items-center">
+            
+            <!-- Left showcase column (Desktop Only) -->
+            <div class="hidden lg:flex flex-col justify-center w-[50%] h-full relative z-10 px-16 border-r border-[#2e333a]">
+                <div class="max-w-md mx-auto" data-aos="fade-right" data-aos-duration="1000">
+                    <div class="flex items-center gap-3 mb-6">
+                        <svg width="40" height="40" viewBox="0 0 32 32">
+                            <defs>
+                                <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="logo-b">
+                                    <stop stop-color="#ab90fa" offset="0%"/>
+                                    <stop stop-color="#875ef5" offset="100%"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M16 0L32 16L16 32L0 16L16 0Z" fill="url(#logo-b)" />
+                        </svg>
+                        <span class="font-extrabold text-2xl tracking-wider text-white">SOLID<span class="text-[#875ef5]">.</span></span>
+                    </div>
+
+                    <h1 class="font-bold text-4xl text-white tracking-tight leading-tight mb-4">
+                        Modern Fleet Management Console
+                    </h1>
+                    <p class="text-[#9ca9b3] font-light text-md mb-8 leading-relaxed">
+                        Control your logistics network, manage storefront routing, and analyze merchant supply logs in real-time.
+                    </p>
+
+                    <!-- Interactive Glass dashboard mockup -->
+                    <div class="solid-glass-card p-5 relative overflow-hidden rounded-xl border border-[#2e333a] shadow-2xl">
+                        <!-- Window header dots -->
+                        <div class="flex items-center justify-between pb-3 border-b border-[#2e333a] mb-4">
+                            <div class="flex gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></span>
+                            </div>
+                            <span class="text-[10px] text-[#6c7d8a] font-mono">fms.solid-saas.com/console</span>
+                        </div>
+
+                        <!-- Mini Dashboard stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-[#24282c] border border-[#2e333a] p-3 rounded">
+                                <span class="text-[10px] uppercase tracking-wider text-[#6c7d8a] font-bold">Active Fleet</span>
+                                <div class="text-lg font-bold text-white mt-1">1,482 <span class="text-xs text-green-500 font-normal"><i class="fal fa-arrow-up"></i> +12%</span></div>
+                            </div>
+                            <div class="bg-[#24282c] border border-[#2e333a] p-3 rounded">
+                                <span class="text-[10px] uppercase tracking-wider text-[#6c7d8a] font-bold">System Status</span>
+                                <div class="text-xs font-bold text-emerald-400 mt-2 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE / SECURE
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visual charts representation -->
+                        <div class="bg-[#24282c] border border-[#2e333a] p-3 rounded">
+                            <span class="text-[10px] uppercase tracking-wider text-[#6c7d8a] font-bold">Weekly Performance</span>
+                            <div class="flex items-end gap-2.5 justify-between mt-4 h-16">
+                                <div class="w-full bg-[#2e333a] rounded-t h-[40%] hover:bg-[#875ef5] transition-all"></div>
+                                <div class="w-full bg-[#2e333a] rounded-t h-[65%] hover:bg-[#875ef5] transition-all"></div>
+                                <div class="w-full bg-[#2e333a] rounded-t h-[50%] hover:bg-[#875ef5] transition-all"></div>
+                                <div class="w-full bg-[#875ef5] rounded-t h-[90%] transition-all shadow-[0_0_10px_rgba(135,94,245,0.4)]"></div>
+                                <div class="w-full bg-[#2e333a] rounded-t h-[60%] hover:bg-[#875ef5] transition-all"></div>
+                                <div class="w-full bg-[#2e333a] rounded-t h-[75%] hover:bg-[#875ef5] transition-all"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="w-full lg:w-[45%] h-full py-20 md:p-0">
-                <div class="grid place-items-center h-[95%]">
+            
+            <!-- Right form column -->
+            <div class="w-full lg:w-[50%] h-full flex flex-col justify-between py-12 px-6 sm:px-16">
+                <div></div> <!-- spacing element -->
+                
+                <div class="w-full max-w-md mx-auto">
                     {% block content %}
                     {% endblock %}
                 </div>
-                <div class="h-[5%] flex justify-center">
-                    COPYRIGHT  © 2023 W Express, All rights Reserved
+                
+                <!-- Footer Copyright -->
+                <div class="text-center text-xs text-[#6c7d8a] mt-8">
+                    COPYRIGHT  © 2026 Solid SaaS Platform, All rights Reserved
                 </div>
             </div> 
+            
         </div> 
     </div>
+
     <script src="/static/plugins/bootstrap 5.0.2/bootstrap.bundle.min.js"></script>
     <script src="/static/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="/static/js/global.js"></script>
@@ -52,8 +177,11 @@
     <script src="/static/js/axios.min.js"></script>
     <script src="/static/js/api_request.js"></script> 
     <script> 
-        setupAxios("{{csrf_token}}")
-        AOS.init();  
+        setupAxios("{{csrf_token}}");
+        AOS.init({
+            once: true,
+            duration: 800
+        });  
     </script>
     {% block scripts %}
     {% endblock %}

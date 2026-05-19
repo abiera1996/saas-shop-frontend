@@ -44,7 +44,7 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                primaryColor: '#2f6cbb',
+                primaryColor: '#875ef5',
                 lighBlue:'#C9DEF7',
                 lightGreen: '#CCE9D9',
                 paleOrange: '#FEEBBA'
