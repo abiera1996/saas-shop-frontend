@@ -1,0 +1,103 @@
+{% load custom_filters %}
+
+<form  id="form-add-data" class="CRTMPRTVHCLE"
+    action="{% url 'vehicle:update_vehicle' id %}"
+>
+
+    <div class="col-xl-12  bg-white p-8 ">  
+        <div class="flex">
+            <div class="flex-1">
+                <div  class="text-2xl font-semibold">
+                    Vehicle Information
+                </div>
+                <div class="text-xs text-black">
+                    Complete the needed information.
+                </div>
+            </div> 
+            <div class="CRTMPRTVHCLE">
+                {% include 'components/buttons/btn_regular.html' with title='UPDATE VEHICLE' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+
+            </div>
+        </div>
+        <div class="row mt-4"> 
+            <div class="col-xl-12"> 
+                <div class="bg-white py-3 px-4">
+                    <div class="row mt-2">
+                        <div class="mt-2 col-xl-12">
+                            {% url 'branch:branch_search' as branch_search %}
+                            {% include 'components/inputs/input_with_label.html' with label="ASSIGNED TO" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch" classBorder="border-gray-400" required=True disabled=is_readonly %}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="mt-2 col-lg-12">
+                            {% include 'components/inputs/input_with_label.html' with label="START DATE ASSIGNMENT" name='start_date_assignment' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="start_date_assignment" required=True value=details.start_date_assignment %}
+                        </div> 
+                    </div>
+                    <div class="row mt-2">   
+                        <div class="mt-2 col-xl-6">
+                            {% include 'components/inputs/input_with_label.html' with label="PLATE NO." placeholder="Enter Plate No." name="plate_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.plate_no  %}
+                            
+                        </div>   
+                        <div class="mt-2 col-xl-6">
+                            {% include 'components/inputs/input_with_label.html' with label="CONDUCTION STICKER NO." placeholder="Enter Conduction Sticker (Required id no Plate No.)" name="conduction_sticker_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.conduction_sticker_no  %}
+                        </div>  
+                    </div> 
+                    <div class="row mt-2">
+                        <div class="mt-2 col-lg-6">
+                            {% include 'components/inputs/input_with_label.html' with label="MAKE/SERIES" placeholder="Enter Make/Series" name="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.make_series  %}
+                        </div>   
+                        <div class="mt-2 col-xl-6">
+                            {% include 'components/inputs/input_with_label.html' with label="YEAR MODEL" placeholder="Enter Year Model" name="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.year_model  %}
+                            
+                        </div>   
+                    </div> 
+                    <div class="row mt-2">
+                        <div class="mt-2 col-lg-6">
+                            {% include 'components/inputs/input_with_label.html' with label="CATEGORY" name="category" options=category_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=details.category %}
+                        </div>   
+                        <div class="mt-2 col-lg-6">
+                            {% include 'components/inputs/input_with_label.html' with label="VEHICLE STATUS" name="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=details.vehicle_status  disabled=is_readonly %}
+                        </div>   
+                    </div>  
+                    <div class="row mt-2">
+                        <div class="mt-2 col-lg-12">
+                            {% include 'components/inputs/input_with_label.html' with label="DISPOSAL DATE" name='disposal_date' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="disposal_date" value=details.disposal_date %}
+                        </div> 
+                    </div>
+                   
+                </div>  
+            </div>
+        </div>  
+    </div>
+</form>
+
+
+<script>  
+   API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+
+    {% if id %}
+        $('#branch').html(`
+            <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+        `).trigger('change')  
+    {% endif %}
+ </script>

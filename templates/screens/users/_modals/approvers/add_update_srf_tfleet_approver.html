@@ -1,0 +1,112 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            {% if id %} 
+                Update 
+            {% else %}
+                Create
+            {% endif %}
+            Approvers
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% url 'user:update_srf_tfleet_approver' id %}"
+        {% else %}
+            action="{% url 'user:create_srf_tfleet_approver' %}"
+        {% endif %}
+        >
+        <div class="bg-white px-4"> 
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Approver Sequence" number_validation="number" placeholder="Enter number of sequence of the approver" name="sequence" id="sequence" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.sequence required=True  %}
+                </div>   
+            </div> 
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Approver Name" placeholder="ex. Tfleet Manager" name="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.name required=True  %}
+                </div>   
+            </div> 
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12"> 
+                    {% url 'user:user_role_search' as user_role_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Applied to User Roles" placeholder="Select user roles" url=user_role_search name="user_role" id="user_role" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True required=True modalParent=True %}
+                </div> 
+                 
+            </div> 
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Status to Display" placeholder="ex. Queued to Tfleet Manager" name="status_name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.status_name required=True  %}
+                    <!-- <span> This will be display in the VDF pending for approval status.</span> -->
+                </div>   
+            </div>  
+             
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12"> 
+                    {% url 'user:user_role_search' as user_role_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Displayed Status can View by" placeholder="Select user roles" url=user_role_search name="can_view_by_user_role" id="can_view_by_user_role" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True modalParent=True %}
+                </div>  
+            </div>  
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE APPROVER' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='CREATE APPROVER' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div> 
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+
+    {% if id %}
+        $('#user_role').html(`
+            {% for user_role_data in details.user_role.all %} 
+                <option value="{{user_role_data.pk}}" selected>{{user_role_data.name}}</option>
+            {% endfor %} 
+        `).trigger('change')
+
+        $('#can_view_by_user_role').html(`
+            {% for can_view_by_user_role in details.can_view_by_user_role.all %} 
+                <option value="{{can_view_by_user_role.pk}}" selected>{{can_view_by_user_role.name}}</option>
+            {% endfor %} 
+        `).trigger('change')
+    {% endif %}
+</script> 

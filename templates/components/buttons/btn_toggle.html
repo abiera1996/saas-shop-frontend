@@ -1,0 +1,10 @@
+<label class="relative inline-flex items-center cursor-pointer"> 
+    <input type="checkbox" value="{{value}}" name="{{name}}" class="{{class}} sr-only peer"
+    {% if isChecked %}
+    checked
+    {% endif %}>
+    <div class="w-11 h-6 border bg-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full
+        peer-checked:after:bg-primaryColor after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:border-gray-300 after:border 
+        after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white"></div>
+    
+</label>

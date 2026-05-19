@@ -1,0 +1,23 @@
+ 
+    {% include 'components/tables/table1.html' with data=data_lists table_id=table_id %} 
+ 
+
+<script>
+    var request_data = {}
+    {% if request_data %}
+        request_data = {{request_data|safe}}
+    {% endif %} 
+    var {{table_id}}_handler = new TablePaginationHandler(
+        subpageURL='{{subpage_url}}',
+        tableID='{{table_id}}',
+        columnCount="{{data_lists.column|length}}",
+        parameters={ 
+            is_hide_pagination: {% if is_hide_pagination %}true{% else %}false{% endif %},
+            table_id: "{{table_id}}",
+            ...request_data
+        },
+        {% if request_data.callback %}
+            callback={{request_data.callback}}
+        {% endif %}
+    )
+</script>

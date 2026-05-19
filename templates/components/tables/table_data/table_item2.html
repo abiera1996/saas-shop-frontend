@@ -1,0 +1,119 @@
+{% comment %}
+    Variables 
+    - data_lists:object
+        Sample 
+        type: (value, image_name, checkbox, html)
+        {   
+            'column_count': 5,
+            'data': [ 
+                [
+                    {
+                        'type': 'value',
+                        'value': '001',
+                        'td_class': 'whitespace-nowrap'
+                    },
+                    {
+                        'type': 'image_name',
+                        'image': '/static/image/test/test3.png',
+                        'name': 'Cendy De Vera',
+                        'td_class': 'whitespace-nowrap'
+                    },
+                    {
+                        'type': 'value',
+                        'value': 'Cryo Facial Age Freeze Treatment'
+                    },
+                    {
+                        'type': 'value',
+                        'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        'is_ellipsis_value': True
+                    },
+                    {
+                        'type': 'value',
+                        'value': '₱3000'
+                    }
+                ]
+            ],
+            'empty': {
+                'image': '/static/image/rafiki.png',
+                'message': 'No recent transactions!'
+            }
+        }
+{% endcomment %}
+
+{% if data_lists.data|length == 0 %}
+    <tr>
+        <td class="py-6" colspan="{{data_lists.column_count}}">
+            <div class="w-full grid place-items-center">
+                <div>
+                    <img src="{{data_lists.empty.image}}" class="w-40 h-40 object-contain"/>
+                </div>
+                <div class="text-black font-bold text-xl">
+                    {{data_lists.empty.message}}
+                </div>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    {% for details in data_lists.data %}
+        <tr class="bg-white border-b {{ tr_class }} active">
+            {% for detail in details %}
+                {% cycle 'odd' 'even' %}
+                <td scope="row" class="px-6 py-4 font-normal text-black {{detail.td_class}} border-x 
+                {% if forloop.parentloop.counter|divisibleby:2 %}
+                    bg-gray-100
+                {% endif %}">
+                    
+                    {% if detail.type == 'value' %}
+                        {% if detail.is_ellipsis_value %}
+                            <div class="whitespace-nowrap w-52 overflow-hidden text-ellipsis">
+                                {{detail.value|safe}}
+                            </div>  
+                        {% else %}
+                            {{detail.value|safe}}
+                        {% endif %}
+                        
+                    {% elif detail.type == 'image_name' %}
+                        {% include 'components/tables/table_data/image_name.html' with image=detail.image name=detail.name %} 
+                    {% elif detail.type == 'html' %}
+                        {{detail.value|safe}}
+                    {% elif detail.type == 'checkbox' %} 
+                        <div class="flex items-center">
+                            <input id="checkbox-table-search-1" name="{{table_id}}_checkbox" value="{{detail.value}}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+                        </div> 
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+{% endif %}
+
+{% if not is_hide_pagination %}
+    {% if data_lists.pages.num_pages|length > 1 %}
+        <tr>
+            <td class="py-6 px-4" colspan="{{data_lists.column_count}}">
+                <div class="w-full grid place-items-start md:place-items-end">
+                    <div class="flex items-center">
+                        <!-- Help text -->
+                        <span class="text-sm text-gray-700 mr-3">
+                            Showing <span class="font-semibold text-gray-900 ">{{data_lists.pages.num_pages.0}}</span> to <span class="font-semibold text-gray-900 ">{{data_lists.pages.num_pages|last}}</span> of <span class="font-semibold text-gray-900 ">{{data_lists.pages.count}}</span> Items
+                        </span>
+                        <!-- Buttons -->
+                        <div class="inline-flex mt-2 xs:mt-0">
+                            <a href="#" data-status="{% if data_lists.pages.prev %}active{% else %}disabled{% endif %}" 
+                                class="prev-page block px-3 py-2 ml-0 leading-tight text-black bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 ">
+                                <span class="sr-only">Previous</span>
+                                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            </a>
+                            <a href="#" data-status="{% if data_lists.pages.next %}active{% else %}disabled{% endif %}" 
+                            class="next-page block px-3 py-2 leading-tight text-black bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700">
+                                <span class="sr-only">Next</span>
+                                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,80 @@
+{% comment %}
+    Variables
+    - id:string
+    - inputID:string
+    - class:string
+    - classItem
+    - name:string  
+    - label
+    - items
+    - classContainer
+    - icon
+
+{% endcomment %}
+
+<div class="{{class}}">
+    {% if label %}
+        <div class="mb-2">
+            {{label}}
+        </div>
+    {% endif %} 
+        <select id="{{id}}" name="{{name}}"  
+            {{attribute}}
+            style="padding: 4.3px 9px;width:100%;"
+        {% if required %}  
+            required
+        {% endif %}>
+        {% comment %} value(id) and text is required for edit to show the default selected option {% endcomment %}
+        {% for option in default_value %}
+            <option value="{{option.id}}" selected>
+                {{option.text}}
+            </option>
+        {% endfor %}
+        </select>
+        
+        <script>       
+            {% if url %}              
+                $("#{{id}}").select2({
+                    theme: "bootstrap-5",
+                    allowClear:true,
+                    placeholder: "{{placeholder}}",
+                    closeOnSelect: true,
+                    {% if multiple %}
+                        multiple: true,
+                    {% else %} 
+                        multiple: false, 
+                    {% endif %}
+                    ajax: {
+                        url: "{{url}}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                search: params.term,
+                                page: params.page || 1,
+                                limit: 10
+                            };
+                        },
+                        processResults: function(response, params) {
+                            params.page = params.page || 1;
+                            return {
+                                results: response.data,
+                                pagination: {
+                                    more: (params.page) < response.page_count
+                                }
+                            };
+                        },
+                        cache: true
+                        },
+                });
+            {% endif %}
+                {% for option in default_value %}
+                    var $newOption{{option.id}} = $("<option selected='selected'></option>").val("{{option.id}}").text("{{option.text}}");
+                    {% if not forloop.last %}
+                        $("#{{id}}").append($newOption{{option.id}}).trigger('change');
+                    {% endif %}
+                {% endfor %}
+                
+        </script>  
+    <input id="{{inputID}}" type="hidden" name="{{name}}"/>
+</div>

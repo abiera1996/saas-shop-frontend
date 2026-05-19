@@ -1,0 +1,163 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Gasoline Consumption Create
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% url 'vehicle:update_vehicle' id %}"
+        {% else %}
+            action="{% url 'vehicle:create_vehicle' %}"
+        {% endif %}
+        >
+        <div class="bg-white py-3 px-4"> 
+            <div class="col-12">
+                <div class="mt-2">
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="BRANCH" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch_2" classBorder="border-gray-400" required=True %}
+                </div>
+            </div>  
+       
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                        {% include 'components/inputs/input_with_label.html' with label="Request Unit" placeholder="Please select vehicle" name="requesting_unit" id="requesting_unit" labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=profile.country %}
+                    
+                    <div class="CRTMPRTVHCLE flex justify-start mt-3">
+                        {% url 'vehicle:modal_vehicle' as modal_vehicle %}   
+                        {% include 'components/buttons/btn_regular.html' with title='CREATE VEHICLE' link=modal_vehicle id="modal_vehicle" isModal=True size="xs" class='bg-primaryColor text-white rounded-3xl px-4' %} 
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="START DATE ASSIGNMENT" name='start_date_assignment' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="start_date_assignment" required=True value=details.start_date_assignment %}
+                </div> 
+            </div>
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-6">
+                    {% include 'components/inputs/input_with_label.html' with label="PLATE NO." placeholder="Enter Plate No." name="plate_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.plate_no  %}
+                    
+                </div>   
+                <div class="mt-2 col-xl-6">
+                    {% include 'components/inputs/input_with_label.html' with label="CONDUCTION STICKER NO." placeholder="Enter Conduction Sticker (Required if no Plate No.)" name="conduction_sticker_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.conduction_sticker_no  %}
+                </div>  
+            </div> 
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-6">
+                    {% include 'components/inputs/input_with_label.html' with label="MAKE/SERIES" placeholder="Enter Make/Series" name="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.make_series  %}
+                </div>   
+                <div class="mt-2 col-xl-6">
+                    {% include 'components/inputs/input_with_label.html' with label="YEAR MODEL" placeholder="Enter Year Model" name="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.year_model  %}
+                    
+                </div>   
+            </div> 
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-6">
+                    {% include 'components/inputs/input_with_label.html' with label="CATEGORY" name="category" options=category_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=details.category %}
+                </div>   
+                <div class="mt-2 col-lg-6">
+                    {% include 'components/inputs/input_with_label.html' with label="VEHICLE STATUS" name="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=details.vehicle_status %}
+                </div>   
+            </div>  
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="DISPOSAL DATE" name='disposal_date' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="disposal_date" value=details.disposal_date %}
+                </div> 
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='ONBOARD BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        {% if data.is_srf %}
+                            $('#branch_2').trigger('change')
+                            setTimeout(() => {
+                                $('#requesting_unit').val(response.data.id).trigger('change');
+                            }, 500);
+                            $("#modal_rounded").modal('hide');
+                        {% else %}
+                            location.reload() 
+                        {% endif %}
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+    
+
+    $('#branch_2').on('change', function() {
+            const branch_id = $(this).val();  
+            
+            $('#requesting_unit').html(`<option value="">Please select vehicle</option>`); 
+            
+            var query_params = urlParameterize({
+                "paginated": "false",
+                "branch": branch_id
+            });
+            
+            $.ajax({
+                url: '{% url "vehicle:vehicle_search" %}?' + query_params,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response){
+                    if(response){   
+                        let requesting_unit = "{{details.requesting_unit.pk}}"; 
+                        response.data.map((val, idx) => { 
+                            $('#requesting_unit').append(`<option value="${val.id}" ${requesting_unit == val.id?'selected': ''}>${val.text}</option>`); 
+                        })
+                    }
+                }
+            })
+        }) 
+
+        $("#requesting_unit").select2({
+            theme: "bootstrap-5",
+            placeholder: "Please select vehicle"
+        });
+    
+    {% if data.branch_id %}
+        $('#branch').html(`
+            <option value="{{data.branch_id}}" selected>{{data.branch_name}}</option>
+        `).trigger('change')  
+    {% endif %}
+</script> 

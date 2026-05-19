@@ -1,0 +1,34 @@
+{% comment %}
+    Variables
+    - id
+    - class 
+    - icon
+    - iconBgClass
+    - title
+    - value
+{% endcomment %}
+
+
+
+<div id="{{id}}" class="{{class}} flex">
+    <div>
+        <div class="{{iconBgClass}} p-[23px] rounded-xl">
+            <img src="{{icon}}" class="object-contain w-7 h-7"/>
+        </div>
+    </div>
+    <div class="ml-3 mt-2">
+        <div class="font-bold text-lg">
+            {% if changing_value %}
+                <div class="text-md font-bold" id="{{changing_id}}">
+                    <i class="text-dark fas fa-spinner fa-spin"></i>
+                </div>
+            {% else %}
+                {{value}}
+            {% endif %}
+            
+        </div>
+        <div class="font-light text-sm">
+            {{title}}
+        </div>
+    </div>
+</div> 

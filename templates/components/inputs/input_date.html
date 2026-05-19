@@ -1,0 +1,26 @@
+{% comment %}
+    Variables
+    - id:string 
+    - class:string
+    - classItem
+    - name:string  
+    - label
+    - placeholder
+    - value
+
+{% endcomment %}
+
+<div class="w-full ">
+    <div class="mb-2">
+        {{label}}
+    </div>
+    <div class="w-full {{class}} border-1 rounded-md px-3 py-[3px]"  data-mdb-format="mm-dd-yyyy"  id="{{id}}" data-mdb-toggle-button="false">  
+        <input type="text" class=" w-full focus:outline-none border-0 bg-transparent" value="{{value}}" name="{{name}}" data-mdb-toggle="datepicker" placeholder="{{placeholder}}"/> 
+    </div> 
+</div> 
+<script>
+    var {{name}} = document.querySelector('#{{id}}'); 
+    new mdb.Datepicker({{name}}, {
+        datepicker: { format: 'mm-dd-yyyy'},
+    });
+</script>

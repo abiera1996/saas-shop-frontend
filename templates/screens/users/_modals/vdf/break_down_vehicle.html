@@ -1,0 +1,317 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Replacement of breakdown T-fleet vehicle
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-parts">
+        <div class="bg-white py-3 px-4">
+            <input type="hidden" name="id" value="{{details.pk}}">
+            <div class="row"> 
+                <div class="col-xl-12">
+                    <div class="row mt-2">
+                        <div class="mt-2 col-xl-12">
+                            {% url 'vehicle:vehicle_search' as vehicle_search %}
+                            {% include 'components/inputs/input_with_label.html' with label="Vehicle" url=vehicle_search placeholder="Please select vehicle" name="vehicle_break" id="vehicle_break" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" required=True value=details.vehicle modalParent=True %}
+                           
+                        </div>
+                        <div class="mt-2 col-lg-12">
+                            {% include 'components/inputs/input_with_label.html' with label="Status as of VDF date" name="vehicle_status" id="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=details.vehicle_status required=True %}
+                        </div> 
+
+                        <div class="col-lg-12 mt-2" id="target_date_container"> 
+                            {% include 'components/inputs/input_with_label.html' with label="Target date to repair" name="target_date" id="target_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.start_break_date_from required=True %}
+                        </div>
+                        <div class="col-12 mt-2" id="srf_container"> 
+                                {% include 'components/inputs/input_with_label.html' with label="SRF Created to meet the target repair date"  name="srf_multi" id="srf_multi" labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=profile.country disabled=is_readonly %}    
+                         
+                        </div>
+                        <div class="col-lg-6 mt-2"> 
+                            {% include 'components/inputs/input_with_label.html' with label="Covered period (From)" name="covered_period_breakdown_from" id="covered_period_breakdown_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.start_break_date_from required=True %}
+                        </div>
+                        <div class="col-lg-6 mt-2"> 
+                            {% include 'components/inputs/input_with_label.html' with label="Covered period (To)" name="covered_period_breakdown_to" id="covered_period_breakdown_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.start_break_date_from required=True %}
+                        </div> 
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CLOSE' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                {% if params.id %}
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='ADD' type="submit" class='bg-primaryColor text-white rounded-md ' %}
+                </div>
+                {% else %}
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='ADD' type="submit" class='bg-primaryColor text-white rounded-md ' %}
+                </div>
+                {% endif %}
+               
+            </div>
+            <div id="container_data" class="col-12 mt-3">
+                            
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    
+    $('#form-add-parts').on('submit', async function(e){
+        e.preventDefault();
+        let id = makeid(6) 
+        let formData = new FormData($(this)[0]); 
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        $.ajax({
+                    url:"{% url 'vehicle_registration:validate_vdf_replacement' %}",
+                    data: formData,
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
+                    success: function(response){
+                        console.log(response)
+                        if(response.is_valid){
+                            {% if params.id %}
+                                id = "{{params.id}}"
+                             {% endif %}
+
+                             
+                             let formatted = `<ul>
+                            ${$('#srf_multi').select2('data')
+                                    .map(item => `<li>${item.text}</li>`)
+                                    .join('')}
+                            </ul>`;
+                            
+                            const srfs = $('#srf_multi').select2('data')
+                                    .map(item => `${item.text}`)
+                                    .join(',')
+                            $('#body_empty').hide()
+
+                             let newRow = `
+                            <tr id="${id}" class="parts-item bg-white border-b"> 
+                                <td scope="row" class="px-6 py-4 font-normal text-black whitespace-nowrap ">
+                                    ${$('#vehicle_break').find(":selected").text()}
+                                    <input type="hidden" name="vehicle_replacement_text" value="${$('#vehicle_break').find(":selected").text()}"/>
+                                    <input type="hidden" name="vehicle_replacement" value="${$('#vehicle_break').val()}" />
+                                </td>
+                                <td scope="row" class="px-6 py-4 font-normal text-black">
+                                    ${$('#vehicle_status').val()}
+                                    <input type="hidden" name="status_replacement" value="${$('#vehicle_status').val()}" />
+                                </td>
+                                <td scope="row" class="px-6 py-4 font-normal text-black">
+                                    ${$('input[name=target_date]').val()}
+                                    <input type="hidden" name="target_date_replacement" value="${$('input[name=target_date]').val()}" />
+                                </td>
+                                <td scope="row" class="px-6 py-4 font-normal text-black">
+                                    ${formatted}
+                                    <input type="hidden" name="srf_replacement_text" value="${srfs}" />
+                                    <input type="hidden" name="srf_replacement" value="${$('#srf_multi').val()}" />
+                                </td> 
+                                <td scope="row" class="px-6 py-4 font-normal text-black">
+                                    ${$('input[name=covered_period_breakdown_from]').val()}
+                                    <input type="hidden" name="covered_period_breakdown_from_replacement" value="${$('input[name=covered_period_breakdown_from]').val()}" />
+                                </td>
+                                <td scope="row" class="px-6 py-4 font-normal text-black">
+                                    ${$('input[name=covered_period_breakdown_to]').val()}
+                                    <input type="hidden" name="covered_period_breakdown_to_replacement" value="${$('input[name=covered_period_breakdown_to]').val()}" />
+                                </td>
+                                <td scope="row" class="px-6 py-4 font-normal text-black d-flex gap-2">
+                                    <div style="display:flex;align-items:center;justify-content:center;">
+                                        <div data-val="${id}" class="btn-edit-service cursor-pointer" style="color:white;background:gray;padding:8px 10px;border-radius:5px;text-align:center;margin-right:7px;">
+                                            <i class="fal fa-pencil-alt"></i>
+                                        </div> 
+                                    </div>
+                                    <div style="display:flex;align-items:center;justify-content:center;">
+                                        <div data-val="${id}" class="btn-remove-service cursor-pointer" style="color:white;background:#FF6262;padding:8px 10px;border-radius:5px;text-align:center;margin-right:7px;">
+                                            <i class="fal fa-trash-alt"></i>
+                                        </div> 
+                                    </div>
+                                </td>
+                            </tr>`;
+
+                            let existingRow = $(`#table_service tr#${id}`);
+
+                            // If row exists → replace it; else → append it
+                            if (existingRow.length > 0) {
+                                existingRow.replaceWith(newRow);
+                            } else {
+                                $('#table_service').append(newRow);
+                            }
+                            let modal_vehicle = $('#add-break').attr('href'); 
+                            $('#add-break').attr('href', modal_vehicle.split('?')[0])  
+ 
+                            $("#modal_rounded").modal('hide');
+                        } else {
+                            Swal.fire(
+                            "Message",
+                               response?.message || "Cover period is not within the start and end date of breakdown status. Please refer to Vehicle Status History and add / update vehicle status as needed.",
+                                "warning"
+                            )
+                        }
+                    }
+                })
+     
+
+       
+        return false
+    })
+    
+</script> 
+
+<script>
+    var isLoadedSRF = true
+     
+       $(document).ready(function() {
+        setTimeout(() => {
+            {% if params.id %}
+
+            $('#vehicle_break').html(`
+                <option value="{{params.vehicle_replacement}}" selected>{{params.vehicle_replacement_text}}</option>
+            `).trigger('change') 
+
+            $('#vehicle_status').val("{{params.status_replacement}}")
+            $('input[name=target_date]').val("{{params.target_date_replacement}}")
+
+            const srfsText = "{{params.srf_replacement_text}}".split(',')
+            const srfsVal = "{{params.srf_replacement}}".split(',')
+            let srfPopulate = ''
+            for (let i=0;i < srfsText.length; i++){
+                srfPopulate += `
+                <option value="${srfsVal[i]}" selected>
+                            ${srfsText[i]}
+                        </option>
+                `
+            } 
+            $('#srf_multi').html(srfPopulate).trigger('change')
+
+            setTimeout(() => {
+                isLoadedSRF = true
+            }, 1000);
+
+            $('input[name=covered_period_breakdown_from]').val("{{params.covered_period_breakdown_from_replacement}}")
+            $('input[name=covered_period_breakdown_to]').val("{{params.covered_period_breakdown_to_replacement}}")
+            {% else %}
+            isLoadedSRF = true
+            {% endif %} 
+
+        }, 1000);
+       })
+    $('#vehicle_break').on('change', function() {
+        const vehicle_id = $(this).val(); 
+         
+        var query_params = urlParameterize({
+            "vehicle_id": vehicle_id,  
+            "is_vdf": true,
+            "with_category_text": true
+        });
+
+        $('#container_data').loadSubpage({
+                url: "/vehicle/subpage-vehicle-status-history/" + vehicle_id +"?export=0&add_status=1"
+            })
+        $('#srf_multi').html(``);
+        $.ajax({
+            url: '{% url "vehicle:srf_search" %}?' + query_params,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                if(response){    
+                    let srf_multi = "{{details.srf_multi.pk}}";
+                    if(isLoadedSRF){ 
+                        response.data.map((val, idx) => {
+                            $('#srf_multi').append(`<option value="${val.id}" ${srf_multi == val.id?'selected': ''}>${val.text}</option>`);
+                            
+                        })
+                        setTimeout(() => {
+                            $('#srf_multi').change()
+                        }, 500);
+                    }
+               
+                }
+            }
+        }) 
+    }) 
+ 
+        $("#srf_multi").select2({
+            theme: "bootstrap-5",
+            placeholder: "Not yet prepared",
+            multiple: true, 
+            width:'100%',
+            dropdownParent: $("#modal_rounded"),
+        }); 
+ 
+
+
+    function validateInput(id) {
+        let formData = new FormData($('#form-add-parts')[0]); 
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        $.ajax({
+            url:"{% url 'vehicle_registration:validate_vdf_replacement' %}",
+            data: formData,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            success: function(response){ 
+                // if(!response.is_valid){
+                // $('input[name=covered_period_breakdown_from]').val(response.start)
+                // $('input[name=covered_period_breakdown_to]').val(response.end)
+                // }
+                if(!response.is_valid){
+                    // response.errors.map(data => {
+                    //     $(`#message-${data.key}`).html(data.message)
+                    // }) 
+                         Swal.fire(
+                            "Message",
+                               response?.message || "Cover period is not within the start and end date of breakdown status. Please refer to Vehicle Status History and add / update vehicle status as needed.",
+                                "warning"
+                            )
+                } else{
+                    if(id) {
+                        $(`#message-${id}`).html('');
+                        return
+                    }
+                    
+                    $(`.input-message-component`).html('');
+
+                }
+            }
+        })
+    }
+    var available_date_input = document.querySelector('#covered_period_breakdown_from') 
+    available_date_input.addEventListener('dateChange.mdb.datepicker', (e) => {  
+        validateInput('covered_period_breakdown_from')
+    })
+
+    var available_date_input2 = document.querySelector('#covered_period_breakdown_to') 
+    available_date_input2.addEventListener('dateChange.mdb.datepicker', (e) => {  
+        validateInput('covered_period_breakdown_to')
+    })
+
+    $('#vehicle_status').on('change', function() {
+    
+        if(['active', 'for disposal', 'disposed'].includes($(this).val())){
+            $('#target_date_container').hide()
+            $('input[name=target_date]').val('')
+            $('#srf_container').hide()
+            $('#srf_multi').val(null).trigger('change')
+        } else {
+            $('#target_date_container').show()
+            $('#srf_container').show()
+        }
+    })
+
+    $('#vehicle_break').on('change', function() { 
+        
+    })
+</script>

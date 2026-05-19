@@ -1,0 +1,63 @@
+{% load custom_filters %}
+<div class="col-xl-12  bg-white 
+{% if params.add_status != '1' %} p-8 {% endif %}">  
+    <div class="flex">
+        <div class="flex-1">
+            <div  class="text-2xl font-semibold">
+                Vehicle Status History
+            </div>
+            <div class="text-xs text-black">
+                List of Vehicle Status History
+            </div>
+        </div> 
+        <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+            {% if params.export != '0' %}
+                {% url 'vehicle:export_status_history' as export_filter_modal %}
+                {% with export_filter_modal|addstr:'?vehicle_id='|addstr:id|addstr:'&repair_status=done&status=complete' as export_srf_filter_modal %}
+                    {% include 'components/buttons/btn_border.html' with title='Export' link=export_srf_filter_modal class='w-full rounded-md' icon="fal fa-file-export" %}
+                {% endwith %}  
+            {% endif %}
+
+            {% if params.add_status != '0' %}
+                {% url 'vehicle:modal_vehicle_status' id as modal_vehicle_status %}
+                {% with modal_vehicle_status|addstr:'?reload=loadTable' as modal_vehicle_status_new %}
+                    {% include 'components/buttons/btn_border.html' with isModal=True modalSize='modal-md' modalType='modal_rounded_overlay' title='Add New Vehicle Status' link=modal_vehicle_status_new class='w-full rounded-md' icon="fal fa-plus" %}
+                {% endwith %}   
+            {% endif %}
+        </div>  
+    </div>
+    <div class="row mt-4"> 
+        <div id="container_branch" class="bg-white rounded-md w-full permission-container">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(e){
+        loadTable();   
+    }) 
+
+    
+
+    function loadTable(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10;
+        var filter_status = $("input[name=filter_status]").val() || "{{ params.vehicle_status }}"; 
+        var filter_repair_status = $("input[name=filter_repair_status]").val() || ""; 
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "vehicle_id": "{{id}}",
+            "repair_status": filter_repair_status,
+            "previous_status": filter_status,
+            {% if params.add_status != '0' %}
+             "reload": 'loadTable',
+            {% endif %}
+        }); 
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_status_history' %}?"+query_params,
+        })
+    } 
+</script>

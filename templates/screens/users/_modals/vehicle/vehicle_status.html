@@ -1,0 +1,85 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Vehicle Status
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% if update_history %}{% url 'vehicle:update_vehicle_status_history' id %}{% else %}{% url 'vehicle:update_vehicle' id %}{% endif %}"
+        {% else %}
+            action="{% url 'vehicle:create_vehicle' %}"
+        {% endif %}
+        >
+        <input type="hidden" name="is_update_status" value="1">
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="START DATE OF STATUS" name='status_effectivity_date' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" value=default_date classBorder="border-gray-400" id="status_effectivity_date" required=True %}
+                </div> 
+            </div>
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="END DATE OF STATUS" name='status_effectivity_end_date' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" value=details.end_date  classBorder="border-gray-400" id="status_effectivity_end_date"   %}
+                </div> 
+            </div>
+            <div class="row mt-2">  
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="VEHICLE STATUS" name="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=details.previous_status %}
+                </div>   
+            </div>  
+            
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if update_history %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE STATUS' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                         {% include 'components/buttons/btn_regular.html' with title='ADD STATUS' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        {% if params.reload %}
+                        {{ params.reload }}()
+                        $("#modal_rounded_overlay").modal('hide');
+                        {% else %}
+                        location.reload() 
+                        {% endif %}
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+</script> 

@@ -1,0 +1,63 @@
+{% comment %}
+    Variables
+    - id:string
+    - inputID:string
+    - class:string
+    - classItem
+    - name:string  
+    - label
+    - items
+    - classContainer
+    - icon
+
+{% endcomment %}
+
+<div class="{{classContainer}}">
+    {% if label %}
+        <div class="mb-2">
+            {{label}}
+        </div>
+    {% endif %}
+    <div> 
+        <button class="{{class}} w-full dropdown-toggle flex items-center justify-center border-1 px-3 py-2 font-dmsans-medium" id="{{id}}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if icon %} 
+                <i class="{{icon}} mr-2"></i> 
+            {% endif %}
+            <span id="title-{{id}}">{{title}}</span>
+        </button> 
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            
+            {% for item in items %}
+                <li>
+                    {% if item.isHeader %}
+                        <div class="dropdown-header font-bold text-black">
+                            {{item.name}}
+                        </div> 
+                    {% else %}
+                        {% if item.url %}
+                            <a class="dropdown-item {{classItem}}" href="{{item.url}}" data-value="{{item.value}}">{{item.name}}</a>
+                        {% else %}
+                            <div class="dropdown-item {{classItem}} cursor-pointer" data-value="{{item.value}}">
+                                {{item.name}}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                </li>
+            {% endfor %} 
+        </ul>
+    </div>
+    <input id="{{inputID}}" type="hidden" name="{{name}}" value="{{initialValue}}"/>
+</div>
+<script>
+    {% if classItem %}
+        $(document).off('click', '.{{classItem}}')
+        {% if name and id %}
+            $(document).on('click', '.{{classItem}}', function() {
+                const value = $(this).data('value');
+                $('input[name={{name}}]').val(value)
+                $('#title-{{id}}').html($(this).html())
+            })
+        {% endif %}
+    {% endif %}
+</script>

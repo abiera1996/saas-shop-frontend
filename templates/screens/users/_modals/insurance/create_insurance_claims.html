@@ -1,0 +1,138 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Create Insurance claims
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% url 'insurance:update_insurance_claims' id %}"
+        {% else %}
+            action="{% url 'insurance:create_insurance_claims' %}"
+        {% endif %}
+        >
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-xl-12">
+                    {% url 'vehicle:vehicle_search' as vehicle_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Vehicle" url=vehicle_search placeholder="Please select vehicle" name="vehicle" id="vehicle" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" required=True value=details.vehicle modalParent=True %}
+                   
+                </div>
+            </div>
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="POLICY NUMBER" placeholder="Enter Policy number" name="policy_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.policy_no required=True %}
+                    
+                </div>   
+                <div class="mt-2 col-xl-12">
+                    <div class="text-black text-left self-start text-sm mb-2">
+                        TYPE
+                    </div>
+                    <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                        <div class="flex items-stretch justify-center flex-1">
+                            <select id="type" name="type" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                                <option value="">
+                                    Please select type {{details.type}}
+                                </option>
+                                <option value="Comprehensive" 
+                                {% if details.type == 'Comprehensive' %}selected{% endif %}>
+                                    Comprehensive
+                                </option>
+                            
+                                <option value="CTPL"
+                                {% if details.type == 'CTPL' %}selected{% endif %}>
+                                    CTPL
+                                </option>  
+                            </select> 
+                        </div> 
+                    </div> 
+                </div>
+                
+            </div> 
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-6">
+                    {% include 'components/inputs/input_with_label.html' with label="AMOUNT CLAIMS" number_validation='money' id="amount_claim" name="amount_claim" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.amount_claim required=True %}
+                </div> 
+                <div class="mt-2 col-xl-6">
+                    {% include 'components/inputs/input_with_label.html' with label="INSURANCE COMPANY" placeholder="Enter Insurance Company" name="insurance_company" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.insurance_company required=True %}
+                    
+                </div>  
+              
+            </div>
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Date Filed by WE" name='date_filed_we' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="date_filed_we" required=True value=details.date_filed_we %}
+                </div>  
+            </div>  
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Date Paid by Insurance Company " name='date_paid_by_insurance_company' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="date_paid_by_insurance_company" value=details.date_paid_by_insurance_company %}
+                </div>  
+            </div>  
+            <div class="row mt-2">
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Remarks" name="remarks" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" value=details.remarks  %}
+                </div>
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE INSURANCE CLAIMS' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='CREATE INSURANCE CLAIMS' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+
+    {% if id %}
+        $('#vehicle').html(`
+            <option value="{{details.vehicle.pk}}" selected>
+                {% if details.vehicle.plate_no %}
+                    {{details.vehicle.plate_no}}
+                {% else %}
+                    {{details.vehicle.conduction_sticker_no}}
+                {% endif %}  
+                </option>
+        `).trigger('change')  
+    {% endif %}
+</script> 

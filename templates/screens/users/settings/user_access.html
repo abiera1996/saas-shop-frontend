@@ -1,0 +1,129 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %}  
+<div class="bg-white w-full px-8 py-4 flex">
+    <div class="pr-9">
+        {% include 'components/buttons/btn_back.html' %}
+    </div> 
+    <div class="flex-1">
+        <div class="font-bold text-xl">
+            User Role
+        </div>
+        <div class="text-black text-[10px]">
+            Settings > User Role
+        </div>
+    </div> 
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <form  id="form-add-role" 
+            action="{% url 'user:update_user_access' profile_id %}" >
+            <div class="bg-white p-4 rounded-lg">
+                <div class="flex flex-wrap">
+                    <div class="w-full xl:w-[50%] flex items-center">
+                        <div class="w-[100px] h-[100px] ">
+                            <img src="{{profile.image|placeholder_image:'avatar'}}" class="w-full h-full object-cover rounded-xl"/>
+                        </div>
+                        <div class="ml-4">
+                            <div class="font-semibold text-xl">
+                                {{profile.user.first_name}} {{profile.user.last_name}}
+                            </div>
+                            <div class="text-sm">
+                                User Role: {{profile.user_role.name}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full xl:w-[50%]">
+                        <div class="row">
+                            <div class="col-xl-6 mt-3">
+                                <div class="text-sm">
+                                    Email
+                                </div>
+                                <div class="font-semibold">
+                                    {{profile.user.email}}
+                                </div>
+                            </div> 
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-12  mt-6 bg-white p-8">  
+                <div  class="text-lg font-semibold">
+                    User Role
+                </div>
+                <div class="text-xs text-black">
+                    Give user access rights on system.
+                </div> 
+                <div class="flex flex-wrap p-2 ">
+                    {% for module in permission_module %}
+                        <div class="w-full xl:w-[50%] 2xl:w-[33.3%] p-2 mt-5">
+                            <div class="mb-3">
+                                {{module.name}}
+                            </div>
+                            <div> 
+                                {% for permission in module.get_user_permission %}
+                                <div class="flex items-center mb-2">
+                                    <input id="{{permission.code}}-checkbox" type="checkbox" 
+                                    name="permissions"
+                                    value="{{permission.pk}}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 "
+                                    {% if permission.code in list_permission %}
+                                        checked
+                                    {% endif %}>
+                                    <label for="{{permission.code}}-checkbox" class="ml-2 text-sm font-medium text-gray-900 ">{{permission.name}}</label>
+                                </div>
+                                {% endfor %} 
+    
+                            </div>
+                        </div>  
+                    {% endfor %} 
+                </div> 
+                <div class="DDDTSR ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                    <div class="mr-2">
+                        {% include 'components/buttons/btn_regular.html' with title='Save' type="submit" class='bg-primaryColor text-white rounded-md ' %} 
+                    </div>
+                    <div>
+                        {% include 'components/buttons/btn_regular.html' with title='Discard' type="reset" class='bg-transparent text-black rounded-md ' %} 
+                    </div>
+                    
+                </div> 
+            </div>
+        </form>
+        
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+   API.formRequest(
+        '#form-add-role',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => { 
+            return true
+        },
+        callback=(response)=>{
+            console.log(response)
+            Swal.fire({
+                icon: [200,201].includes(response.status)?'success':'error',
+                title:  'Message', 
+                text: response.message || response.data?.message, 
+            }).then(()=>{
+                if([200,201].includes(response.status)){ 
+                    location.reload()
+                } 
+            })
+            
+        },
+        isMultiForm=true
+    )
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Replace Part Details
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-parts">
+        <div class="bg-white py-3 px-4">
+            <input type="hidden" name="id" value="{{details.pk}}">
+            <div class="row"> 
+                <div class="col-xl-12">
+                    <div class="row mt-2">
+                        <div class="mt-2 col-lg-12">
+                            {% include 'components/inputs/input_with_label.html' with label="PARTS TO REPLACED" name="parts" id="parts" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True  %}
+                        </div>
+                        <div class="mt-2 col-lg-12">
+                            {% include 'components/inputs/input_with_label.html' with label="DESCRIPTION" name="description" id="description" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" required=True %}
+                        </div> 
+                        <div class="col-xl-12 mt-2"> 
+                            {% include 'components/inputs/input_with_label.html' with label="QUANTITY" name="quantity" number_validation="number" id="quantity" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=profile.user.first_name  %}
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CLOSE' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='ADDED' type="submit" class='bg-primaryColor text-white rounded-md ' %}
+                </div>
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    
+    $('#form-add-parts').on('submit', async function(e){
+        e.preventDefault();
+        const id = makeid(6) 
+
+        $('#body_empty').hide()
+        $('#table_service').append(`
+            <tr id="${id}" class="parts-item bg-white border-b"> 
+                <td scope="row" class="px-6 py-4 font-normal text-black whitespace-nowrap ">
+                    ${$('#parts').val()}
+                    <input type="hidden" name="parts" value="${$('#parts').val()}" />
+                </td>
+                <td scope="row" class="px-6 py-4 font-normal text-black  ">
+                    ${$('#description').val()}
+                    <input type="hidden" name="description" value="${$('#description').val()}" />
+                </td>
+                <td scope="row" class="px-6 py-4 font-normal text-black  ">
+                    ${$('#quantity').val()}
+                    <input type="hidden" name="quantity" value="${$('#quantity').val()}" />
+                </td> 
+                <td scope="row" class="px-6 py-4 font-normal text-black  ">
+                    <div style="
+                        display: flex;
+                        align-items:center;
+                        justify-content:center;
+                    ">  <div data-val="${id}" class="btn-remove-service cursor-pointer" style="color: white;background: #FF6262;padding: 8px 10px;border-radius: 5px;text-align:center;margin-right: 7px;">
+                            <i class="fal fa-trash-alt"></i>
+                        </div> 
+                    </div>
+                </td>
+            </tr> 
+        `)
+        $("#modal_rounded").modal('hide');
+        return false
+    })
+</script> 

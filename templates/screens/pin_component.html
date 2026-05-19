@@ -1,0 +1,314 @@
+<style>
+   
+    .pin-btn {
+        display: flex;
+        justify-content: center; 
+        align-items: center;
+        width: 50px;
+        height: 50px;
+        background-color: white; 
+        -webkit-box-shadow: 2px 3px 33px -9px rgba(0,0,0,0.75);
+        -moz-box-shadow: 2px 3px 33px -9px rgba(0,0,0,0.75);
+        box-shadow: 2px 3px 33px -9px rgba(0,0,0,0.75);
+        margin-left: 30px;
+        cursor: pointer;
+    }
+    .pin-non {
+        
+        width: 50px;
+        height: 50px;
+        margin-left: 20px; 
+    }
+    .pin-container{
+        background-color:white; 
+        -webkit-box-shadow: 0px 1px 35px -15px rgba(0,0,0,0.75);
+        -moz-box-shadow: 0px 1px 35px -15px rgba(0,0,0,0.75);
+        box-shadow: 0px 1px 35px -15px rgba(0,0,0,0.75);
+        border-radius: 8px; 
+    }
+
+    .pin-circle{
+        border-radius: 100%; 
+        border: 1px solid gray;
+        padding: 10px;
+        margin-left: 10px;
+    }
+    .pin-circle.active{
+        background-color: #1bc5bd;
+    }
+    .pin-btn.ok{
+        background-color: #1bc5bd;
+        color: white;
+    }
+    .input-code{
+        border-bottom: 2px solid pink;
+    }
+    .input-text-code{
+        border: none;
+        font-size: 30px;
+        text-align: center;
+        width: 50px;
+    }
+    .input-text-code:focus{
+        outline: none;
+    }
+</style>
+<div class="justify-content-center align-items-center"  
+style="position:absolute; background-color:#ffffffc4; width:100%; height: 100%;z-index: 100;display: flex;">
+    <div class="pin-container" style="padding: 20px 40px;">
+        <span class="text-center qq">
+            We have sent you <b>One Time Password</b> to your email
+        </span>
+       <div class="text-center">
+         <b class="text-primary">Please Enter OTP</b> <br>
+            <span id="time">00:00</span> 
+       </div>
+        <div class="row justify-content-center mt40 mb20" style="margin: 40px 0 20px 0;">
+          <!-- <textarea class="form-control" style="font-size:40px; white-space: normal;
+    text-align: justify;
+    -moz-text-align-last: center; /* Firefox 12+ */
+    text-align-last: center;" id="code_text" rows="1" cols="5"></textarea> -->
+            <div class="col-3 input-container">
+                <div class="input-code code-1">
+                    <input type="text" name="code-1" data-number="1" class="input-text-code"/>
+                </div>
+            </div>
+            <div class="col-3 input-container">
+                <div class="input-code code-2">
+                    <input type="text" name="code-2" data-number="2" class="input-text-code"/>
+                </div>
+            </div>
+            <div class="col-3 input-container">
+                <div class="input-code code-3">
+                    <input type="text" name="code-3" data-number="3" class="input-text-code"/>
+                </div>
+            </div>
+            <div class="col-3 input-container">
+                <div class="input-code code-4">
+                    <input type="text" name="code-4" data-number="4" class="input-text-code"/>
+                </div>
+            </div>
+        </div>
+         
+        
+
+        <div class="row mt25 text-center align-items-center justify-content-center">
+            <div class="col-6">
+                <!-- <a href="#" id="resend_otp" class="">Resend OTP</a> -->
+                <button type="button" id="resend_otp" class="btn btn-light-primary font-weight-bold close-modal w-100">Resend OTP</button>
+               
+            </div>
+             <div class="col-6 align-items-end"> 
+                <button class="btn btn-primary font-weight-bold w-100" id="verify-otp">Verify OTP</button>
+            </div>
+            <a href="{% url 'main:logout' %}" style="align-self:flex-end; text-align: center;margin-top: 30px;">Re-login</a>
+        </div>
+        
+       
+    </div>
+</div>
+<script>
+    let pin = '';
+    
+    $('#verify-otp').on('click', function() {
+        var formData = new FormData(); 
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        formData.append('code', pin);
+        $.ajax({
+            url:'{% url "main:otp_code_request" %}',
+            data: formData,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            success: function(response){
+                console.log(response)
+                if(response.success){
+                    location.reload()
+                } else {
+                    Swal.fire("Error", response.message, "error")
+                    pin = '';
+                    updatePinIndicator()
+                }
+                
+            }
+        })
+    })
+
+    
+    $('.input-text-code').on('input', function() {
+        let value = $(this).val();
+        let number_input = parseInt($(this).data('number'))
+         
+         
+        if(value.length != 0){
+            if(value.length < 5){
+                if(value.length > 1){
+                    for(let i=0;i<value.length;i++){
+                        $('input[name=code-'+ (i+1) +']').val(value.charAt(i)) 
+                    } 
+                } 
+                if(number_input != 4){
+                    $('input[name=code-'+ (number_input+1) +']').focus()
+                }
+            } else {
+                $(this).val('')
+            }
+        } else {
+            if(number_input != 1){
+                $('input[name=code-'+ (number_input-1) +']').focus()
+            }
+        }
+        pin = ''
+        for(let i=0;i<4;i++){ 
+            pin += $('input[name=code-'+ (i+1) +']').val().toString()
+        } 
+       
+        // let pin_length = pin.length;
+        // if(pin_length <= 4){
+        //     let value = $(this).val();
+            
+        //     alert(value)
+        //     if(pin_length < 4){
+        //         pin = pin + "" + value;
+        //     } 
+        //     pin_length = pin.length; 
+        //     if(pin_length < 4 ) {
+        //         updatePinIndicator()
+        //     }  
+             
+            
+        // } 
+    })
+
+    $('#code_text').on('input', function(){
+       pin = $(this).val() 
+
+       let pin_length = pin.length;
+        if(pin_length <= 4){
+             
+            pin_length = pin.length; 
+            if(pin_length == 4 ) {
+                
+                var formData = new FormData(); 
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                formData.append('code', pin);
+                $.ajax({
+                    url:'{% url "main:otp_code_request" %}',
+                    data: formData,
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
+                    success: function(response){
+                        console.log(response)
+                        if(response.success){
+                            location.reload()
+                        } else {
+                            Swal.fire("Error", response.message, "error")
+                            pin = '';
+                            updatePinIndicator()
+                        }
+                       
+                    }
+                })
+            }  
+             
+            updatePinIndicator()
+        } 
+    })
+    function updatePinIndicator() { 
+        const pin_length = pin.length; 
+        $('.pin-circle').removeClass('active');
+        $('#code_text').val(pin)
+        if(pin_length >= 1)
+            $('#pin-1').addClass('active')
+        if(pin_length >= 2)
+            $('#pin-2').addClass('active')
+        if(pin_length >= 3)
+            $('#pin-3').addClass('active')
+        if(pin_length >= 4)
+            $('#pin-4').addClass('active')
+    }
+    $('[data-switch=true]').on('switchChange.bootstrapSwitch', function() {
+        if (!$(this).is(':checked')) {
+            $(this).parent().parent().parent().parent().find('.item-text').eq(0).hide(500);
+        } else {
+            $(this).parent().parent().parent().parent().find('.item-text').eq(0).show(500);
+        }
+        
+    });
+
+    jQuery(document).ready(function() { 
+
+        $('#resend_otp').on('click', function() {
+            var formData = new FormData(); 
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            $.ajax({
+                url:'{% url "main:otp_code_resend_request" %}',
+                data: formData,
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                success: function(response){
+                    console.log(response)
+                    if(response.success){
+                        otp_time = new Date()
+                        otp_time.setMinutes(otp_time.getMinutes()+5)
+                        timer = setInterval(function() {
+                            
+                            timeBetweenDates(otp_time);
+                        }, 1000);
+                        swal.fire({
+                            text: "OTP successfully submitted",
+                            icon: "success"
+                        })
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error")
+                        pin = '';
+                        updatePinIndicator()
+                    }
+                    
+                }
+            })
+        })
+
+
+        var timer;
+        var otp_time = new Date() //  var otp_time = new Date("{{request.session.otp_time}}")
+        otp_time.setMinutes(otp_time.getMinutes()+5)
+
+        timer = setInterval(function() {
+        
+            timeBetweenDates(otp_time);
+        }, 1000);
+
+        function timeBetweenDates(dateEnter) {
+            var now = new Date();
+        
+            var difference = dateEnter.getTime() - now.getTime();
+            //console.log("{{request.session.otp_time}}", moment(dateEnter).format('LLL'), moment(now).format('LLL'))
+            console.log(dateEnter.getTime(), now.getTime(), difference)
+            if (difference <= 0) {
+
+                // Timer done
+                clearInterval(timer);
+            
+            } else {
+                
+                var seconds = Math.floor(difference / 1000);
+                var minutes = Math.floor(seconds / 60);
+                var hours = Math.floor(minutes / 60);
+                var days = Math.floor(hours / 24);
+
+                hours %= 24;
+                minutes %= 60;
+                seconds %= 60;
+                console.log(minutes+':'+seconds)
+                $("#time").html(minutes+':'+seconds); 
+            }
+        }
+       
+        setTimeout(() => {
+            $('body').css('overflow', 'hidden')
+        }, 100);
+    });
+</script>

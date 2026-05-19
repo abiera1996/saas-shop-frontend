@@ -1,0 +1,716 @@
+{% load custom_filters %}
+<style>
+    span.select2-container{
+        z-index: 1000000 !important;
+    }
+</style>
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Export Filter
+        </h5>
+        <label class="text-xs">
+            Please select filters to export the file.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+{% if data.type == 'srf' or data.type == 'srf_repair' or data.type == 'srf_complete' %}
+    <div class="modal-body p-0"> 
+        <div class="row"> 
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Branch" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+                
+                </div>
+            </div>
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                    {% url "vehicle:vehicle_search" as vehicle_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Request Unit" name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+                
+                </div>
+            </div>
+            {% if data.type != 'srf_repair' and data.type != 'srf_complete' %}
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="SRF Status" name="status_filter" id="status_filter" options=filter_items labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" %}
+            </div>
+            {% endif %}
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Approve Date From" name="approve_date_from" id="approve_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div> 
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Approve Date To" name="approve_date_to" id="approve_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div>
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Actual Repair Date From" name="actual_repair_date_from" id="actual_repair_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div> 
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Actual Repair Date To" name="actual_repair_date_to" id="actual_repair_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div>
+            <div class="export-cont w-full">
+                
+            </div>
+        </div>
+        <div class="mt-4 grid place-items-center">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+    </div>  
+
+    <script>
+        $('#export-btn').off('click')
+        $('#export-btn').on('click', function(){
+            exportFile()
+        })
+
+        function exportFile() {
+            var branch_filter = $("#branch_filter").val() || ""; 
+            var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+            var approve_date_from = $("input[name=approve_date_from]").val() || ""; 
+            var approve_date_to = $("input[name=approve_date_to]").val() || ""; 
+            var actual_repair_date_from = $("input[name=actual_repair_date_from]").val() || ""; 
+            var actual_repair_date_to = $("input[name=actual_repair_date_to]").val() || ""; 
+            var type = $("#type").val() || ""; 
+            {% if data.type == 'srf_repair' or data.type == 'srf_complete' %}
+                var status_filter = 'complete'
+                var repair_status_filter = 'done'
+            {% else %}
+                var status_filter = $('#status_filter').val() || "";  
+                var repair_status_filter = ''
+            {% endif %}
+
+            if(approve_date_to != "" && approve_date_from != ""){
+                // Check if the date range exceeds 2 years
+                const daysDifference = (new Date(approve_date_to) - new Date(approve_date_from)) / (1000 * 60 * 60 * 24);
+                console.log(daysDifference)
+                if (daysDifference > 730) { 
+                    Swal.fire({
+                        icon: 'info',
+                        title:  'Info',
+                        text: "Date range cannot exceed 2 years.",
+                    })
+                    return
+                }
+            }
+
+            if(actual_repair_date_to != "" && actual_repair_date_from != ""){
+                // Check if the date range exceeds 2 years
+                const daysDifference = (new Date(actual_repair_date_to) - new Date(actual_repair_date_from)) / (1000 * 60 * 60 * 24);
+                console.log(daysDifference)
+                if (daysDifference > 730) { 
+                    Swal.fire({
+                        icon: 'info',
+                        title:  'Info',
+                        text: "Date range cannot exceed 2 years.",
+                    })
+                    return
+                }
+            }
+
+            var query_params = urlParameterize({
+                "branch": branch_filter,
+                "requesting_unit": requesting_unit,
+                "approve_date_from": approve_date_from,
+                "approve_date_to": approve_date_to,
+                "actual_repair_date_from": actual_repair_date_from,
+                "actual_repair_date_to": actual_repair_date_to,
+                "status": status_filter,
+                "repair_status": repair_status_filter,
+                "type": type,
+                "title": "{{data.title}}"
+            });
+            location.href = '{% url "vehicle:export_srf" %}?' + query_params
+        }
+    </script> 
+{% elif data.type == 'srf_kpi' %}
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Approve Date From" name="approve_date_from" id="approve_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+        </div> 
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Approve Date To" name="approve_date_to" id="approve_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+        </div>
+        <div class="export-cont w-full">
+            
+        </div>
+    </div>
+    <div class="mt-4 grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    function exportFile() {
+        var branch_filter = $("#branch_filter").val() || ""; 
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var approve_date_from = $("input[name=approve_date_from]").val() || ""; 
+        var approve_date_to = $("input[name=approve_date_to]").val() || ""; 
+        var type = $("#type").val() || "";  
+
+        if(approve_date_to != "" && approve_date_from != ""){
+            // Check if the date range exceeds 2 years
+            const daysDifference = (new Date(approve_date_to) - new Date(approve_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 730) { 
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 2 years.",
+                })
+                return
+            }
+        }
+
+        var query_params = urlParameterize({
+                "branch": branch_filter,
+            "requesting_unit": requesting_unit,
+            "approve_date_from": approve_date_from,
+            "approve_date_to": approve_date_to,
+            "status": "complete",
+            "repair_status_with_vehicle_registration": "true",
+            "type": type
+        });
+        $('#export-btn-label').html('Exporting please wait & close this modal after downloading....')
+        location.href = '{% url "vehicle:export_srf_kpi" %}?' + query_params
+    }
+</script> 
+
+{% elif data.type == 'vdf' %}
+    <div class="modal-body p-0">
+    
+        <div class="row">
+            
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Branch" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+                
+                </div>
+            </div>
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                    {% url 'vehicle:provider_search' as provider_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="Service Provider" name="provider_filter" id="provider_filter" url=provider_search placeholder="Search Provider" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+                
+                </div>
+            </div>
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="VDF Status" name="status_filter" id="status_filter" options=filter_items_vdf labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" %}
+            </div> 
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Covered Period From" name="covered_date_from" id="covered_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div>
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Covered Period To" name="covered_date_to" id="covered_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div>
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Prepared Date From" name="date_from" id="date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div> 
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Prepared Date To" name="date_to" id="date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+            </div>
+            <div class="export-cont w-full">
+                
+            </div>
+        </div>
+        <div class="mt-4 grid place-items-center">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+    </div>  
+
+    <script>
+        $('#export-btn').off('click')
+        $('#export-btn').on('click', function(){
+            exportFile()
+        })
+
+        function exportFile() {
+            var branch_filter = $("#branch_filter").val() || ""; 
+            var provider = $("#provider_filter").val() || ""; 
+            var prepared_date_from = $("input[name=date_from]").val() || ""; 
+            var prepared_date_to = $("input[name=date_to]").val() || ""; 
+            var covered_date_from = $("input[name=covered_date_from]").val() || ""; 
+            var covered_date_to = $("input[name=covered_date_to]").val() || ""; 
+            var status_filter = $('#status_filter').val() || "";  
+            var type = $("#type").val() || "";  
+            if(prepared_date_to != "" && prepared_date_from != ""){
+                // Check if the date range exceeds 2 years
+                const daysDifference = (new Date(prepared_date_to) - new Date(prepared_date_from)) / (1000 * 60 * 60 * 24);
+                console.log(daysDifference)
+                if (daysDifference > 730) { 
+                    Swal.fire({
+                        icon: 'info',
+                        title:  'Info',
+                        text: "Date range cannot exceed 2 years.",
+                    })
+                    return
+                }
+            }
+            
+            var query_params = urlParameterize({
+                "branch": branch_filter,
+                "prepared_date_from": prepared_date_from,
+                "prepared_date_to": prepared_date_to,
+                "covered_date_from": covered_date_from,
+                "covered_date_to": covered_date_to,
+                "status": status_filter,
+                "provider": provider,
+                "type": type
+            });
+            
+            location.href = '{% url "vehicle:export_vdf" %}?' + query_params
+        }
+    </script> 
+{% elif data.type == 'gas' or data.type == 'billing' %}
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Vehicle" name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Month" name="filter_month" id="filter_month" options=months_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" %}
+
+        </div>
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Year" name="filter_year" id="filter_year" options=years_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" %}
+
+        </div> 
+        <div class="export-cont w-full">
+                
+        </div>
+    </div>
+    <div class="mt-4 grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+    
+    
+    function exportFile() {
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var filter_month = $("select[name=filter_month]").val() || ""; 
+        var filter_year = $("select[name=filter_year]").val() || "";  
+        var type = $("#type").val() || "";  
+        var query_params = urlParameterize({
+            "vehicle": requesting_unit,
+            "month": filter_month,
+            "year":filter_year,
+            "type": type
+        });
+        {% if data.type == 'gas' %}
+        location.href = '{% url "gas:export_gas" %}?' + query_params
+        {% endif %}
+        {% if data.type == 'billing' %}
+        location.href = '{% url "billing:export_billing" %}?' + query_params
+        {% endif %}
+        
+    }
+</script> 
+
+{% elif data.type == 'insurance' or data.type == 'insurance_status'  %}
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch / dept" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate no." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% include 'components/inputs/input_with_label.html' with label="Insurance company" placeholder="Enter insurance company" name="insurance_company" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=params.year_model  %}
+            </div>
+        </div> 
+        
+
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                STATUS
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="insurance_status" name="insurance_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="active"  {% if params.insurance_status == 'active' %}selected{% endif %}>
+                            Active
+                        </option> 
+                        <option value="expired" {% if params.insurance_status == 'expired' %}selected{% endif %}>
+                            Expired
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div>
+        {% if data.type == 'insurance_status'  %}
+            
+        {% else %}
+            <div class="mt-2 col-xl-12">
+                <div class="text-black text-left self-start text-sm mb-2">
+                    Type
+                </div>
+                <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                    <div class="flex items-stretch justify-center flex-1">
+                        <select id="insurance_type" name="insurance_type" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                            <option value="">
+                                Please select type
+                            </option>
+                            <option value="Comprehensive"  {% if params.insurance_status == 'active' %}selected{% endif %}>
+                                Comprehensive
+                            </option> 
+                            <option value="CTPL" {% if params.insurance_status == 'expired' %}selected{% endif %}>
+                                CTPL
+                            </option>  
+                        </select> 
+                    </div> 
+                </div> 
+            </div>
+        {% endif %}
+        
+        <div class="col-xl-12 mt-2">
+            {% with  params.covered_date_to|date:"m-d-Y" as date_to %}
+            {% with  params.covered_date_from|date:"m-d-Y" as date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Expiry date of insurance" id="daterange" name="daterange" fromName="expiry_date_from" toName="expiry_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=covered_value_date valueFrom=date_from valueTo=date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        
+        <div class="col-lg-12 mt-2"> 
+            
+        </div>
+        <div class="export-cont w-full">
+                
+        </div>
+    </div>
+    <div class="mt-4 grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+
+<script>
+    var expiry_date_to = '{{ params.expiry_date_to|date:"m-d-Y" }}'
+    var expiry_date_from = '{{ params.expiry_date_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        expiry_date_to = endDate
+        expiry_date_from = startDate
+        if(expiry_date_to != "" && expiry_date_from != ""){
+            expiry_date_to = expiry_date_to.format('MM-DD-YYYY')
+            expiry_date_from = expiry_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(expiry_date_to) - new Date(expiry_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    
+    function exportFile() {
+        var requesting_unit = $("#requesting_unit_filter").val() || "";   
+        // var type = $("#type").val() || "";  
+        var insurance_company = $("input[name=insurance_company]").val() || ""; 
+        var insurance_status = $("#insurance_status").val() || "";
+        
+        {% if data.type == 'insurance_status'  %}
+            var insurance_type = "{{data.insurance_type}}"
+        {% else %}
+            var insurance_type = $("#insurance_type").val() || ""; 
+        {% endif %}
+        var branch_filter = $("#branch_filter").val() || ""; 
+        var query_params = urlParameterize({
+            "branch": branch_filter,
+            "vehicle": requesting_unit,
+            "insurance_expiry_date_from": expiry_date_from,
+            "insurance_expiry_date_to": expiry_date_to,
+            // "type": type,
+            "type": insurance_type,
+            "insurance_status": insurance_status,
+            "insurance_company": insurance_company,
+            "status": "approved",
+            "export_insurance_file": "{{data.type}}", 
+            {% if data.type == 'insurance_status'  %} 
+            {% else %}
+                "with_insurance": "true",
+            {% endif %}
+            
+        }); 
+        location.href = '{% url "insurance:export_insurance" %}?' + query_params 
+        
+        
+    }
+</script> 
+{% elif data.type == 'insurance_claims'  %}
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate no." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>  
+        <div class="col-xl-12 mt-2">
+            {% with  params.covered_date_to|date:"m-d-Y" as date_to %}
+                {% with  params.covered_date_from|date:"m-d-Y" as date_from %}
+                    {% include 'components/inputs/input_with_label.html' with label="Date filed by WE" id="daterange" name="daterange" fromName="date_filed_we_from" toName="date_filed_we_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=covered_value_date valueFrom=date_from valueTo=date_to %} 
+                {% endwith %} 
+            {% endwith %}
+        </div> 
+
+        <div class="col-xl-12 mt-2">
+            {% with  params.covered_date_to|date:"m-d-Y" as date_to %}
+            {% with  params.covered_date_from|date:"m-d-Y" as date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Date paid by insurance company" id="daterange2" name="daterange" fromName="date_paid_by_insurance_company_from" toName="date_paid_by_insurance_company_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=covered_value_date valueFrom=date_from valueTo=date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                STATUS
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="insurance_status" name="insurance_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="Pending"  {% if params.insurance_status == 'active' %}selected{% endif %}>
+                            Pending
+                        </option> 
+                        <option value="Collected" {% if params.insurance_status == 'expired' %}selected{% endif %}>
+                            Collected
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Type of claim
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="insurance_type" name="insurance_type" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select type
+                        </option>
+                        <option value="">
+                            All
+                        </option>
+                        <option value="Comprehensive"  {% if params.insurance_status == 'active' %}selected{% endif %}>
+                            Comprehensive
+                        </option> 
+                        <option value="CTPL" {% if params.insurance_status == 'expired' %}selected{% endif %}>
+                            CTPL
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div> 
+        
+
+        
+        <div class="col-lg-12 mt-2"> 
+            
+        </div>
+        <div class="export-cont w-full">
+                
+        </div>
+    </div>
+    <div class="mt-4 grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+
+<script>
+    var date_filed_we_to = '{{ params.date_filed_we_to|date:"m-d-Y" }}'
+    var date_filed_we_from = '{{ params.date_filed_we_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        date_filed_we_to = endDate
+        date_filed_we_from = startDate
+        if(date_filed_we_to != "" && date_filed_we_from != ""){
+            date_filed_we_to = date_filed_we_to.format('MM-DD-YYYY')
+            date_filed_we_from = date_filed_we_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(date_filed_we_to) - new Date(date_filed_we_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    var date_paid_by_insurance_company_to = '{{ params.date_paid_by_insurance_company_to|date:"m-d-Y" }}'
+    var date_paid_by_insurance_company_from = '{{ params.date_paid_by_insurance_company_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange2(startDate, endDate){ 
+        date_paid_by_insurance_company_to = endDate
+        date_paid_by_insurance_company_from = startDate
+        if(date_paid_by_insurance_company_to != "" && date_paid_by_insurance_company_from != ""){
+            date_paid_by_insurance_company_to = date_paid_by_insurance_company_to.format('MM-DD-YYYY')
+            date_paid_by_insurance_company_from = date_paid_by_insurance_company_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(date_paid_by_insurance_company_to) - new Date(date_paid_by_insurance_company_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    
+    function exportFile() {
+        var requesting_unit = $("#requesting_unit_filter").val() || "";   
+        // var type = $("#type").val() || "";  
+        var insurance_company = $("input[name=insurance_company]").val() || ""; 
+        var insurance_status = $("#insurance_status").val() || "";
+         
+        var insurance_type = $("#insurance_type").val() || ""; 
+        
+        var branch_filter = $("#branch_filter").val() || ""; 
+        var query_params = urlParameterize({
+            "branch": branch_filter,
+            "vehicle": requesting_unit, 
+            "date_filed_we_from": date_filed_we_from,
+            "date_filed_we_to": date_filed_we_to,
+            "date_paid_by_insurance_company_from": date_paid_by_insurance_company_from,
+            "date_paid_by_insurance_company_to": date_paid_by_insurance_company_to,
+            // "type": type,
+            "type": insurance_type,  
+            "status": insurance_status
+            
+        }); 
+        location.href = '{% url "insurance:export_insurance_claims" %}?' + query_params 
+        
+        
+    }
+</script> 
+{% elif data.type == 'provider' or data.type == 'supplier' %}
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Effectivity Date" name="effectivity_date" id="effectivity_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" %}
+        </div>
+        <div class="export-cont w-full">
+                
+        </div>
+    </div>
+    <div class="mt-4 grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    
+    function exportFile() {
+        var branch_filter = $("#branch_filter").val() || ""; 
+        var effectivity_date = $("input[name=effectivity_date]").val() || "";  
+
+        var query_params = urlParameterize({
+            "branch": branch_filter,
+            "effectivity_date": effectivity_date
+        }); 
+        {% if data.type == 'provider' %}
+            location.href = '{% url "vehicle:export_provider" %}?' + query_params 
+        {% elif data.type == 'supplier' %}
+            location.href = '{% url "vehicle:export_supplier" %}?' + query_params 
+        {% endif %}
+        
+    }
+</script> 
+{% endif %}
+
+
+<script>
+    $('.export-cont').html(`
+    <div class="text-black text-sm mb-2">
+                    Export Type
+                </div>
+                <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                    <div class="flex items-stretch justify-center flex-1">
+                        <select id="type" name="type" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;">
+                            <option value="excel">
+                                Excel
+                            </option>
+                        
+                            <option value="pdf">
+                                PDF
+                            </option>  
+                        </select> 
+                    </div> 
+                </div> 
+    `)
+</script>

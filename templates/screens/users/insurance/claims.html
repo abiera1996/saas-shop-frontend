@@ -1,0 +1,113 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Insurance claims
+        </div>
+        <div class="text-black text-[10px]">
+            Insurance claims > List
+        </div>
+    </div>
+    <div class="CRNSRNC col-xl-9 flex justify-end">
+        <div class="mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'insurance:modal_insurance_claims' as modal_insurance_claims %} 
+            {% include 'components/buttons/btn_regular.html' with link=modal_insurance_claims isModal=True title='Create Insurance claims' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>  
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                
+                    <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'main:export_filter_modal' as export_filter_modal %}
+                        {% with export_filter_modal|addstr:'?type=insurance_claims' as export_srf_filter_modal %}
+                            {% include 'components/buttons/btn_border.html' with title='Export' isModal=True link=export_srf_filter_modal class='w-full rounded-md' icon="fal fa-file-export" %}
+                        {% endwith %}  
+                    </div> 
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+
+    let branch_type = ''
+
+    $(document).ready(function(e){ 
+        loadData();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "branch_type": branch_type, 
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'insurance:table_insurance_claims' %}?"+query_params,
+        })
+    } 
+ 
+
+    
+    $('.filter_item').click(function() {
+        const value = $(this).data('value')
+        if(value != ''){
+            if(value.includes('sort_')){
+                // let sort_column = value.replace('sort_', '')
+                // console.log(sort_column, sort, sort.includes(sort_column))
+                // if(sort.includes(sort_column))
+                // {
+                //     if(sort.includes('-')){
+                //         sort = sort.replace('-','')
+                //     } else{
+                //         sort = '-' + sort
+                //     }
+                // } else {
+                //     sort = '-' + sort_column
+                // }
+            } else {
+                branch_type = value
+            } 
+            setTimeout(() => {
+                loadData()
+            }, 400);
+        } 
+    })
+</script>
+{% endblock %}

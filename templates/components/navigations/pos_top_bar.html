@@ -1,0 +1,23 @@
+<div class="bg-white w-full px-8 py-3 flex"> 
+    <div class="text-white w-[10%] sm:w-1/5 lg:hidden flex items-center">
+        <button id="toggleSidebarBtn">
+        <i class="fal fa-bars text-lg"></i>
+        </button>
+    </div>
+    <div class="text-blue-500 w-1/2 hidden lg:block">
+        <div class="text-2xl font-dmsans-medium">
+            Point of Sale
+        </div>
+        <div class="text-xs font-dmsans-regular">
+            Easethetics POS
+        </div>
+    </div>
+
+    <div class="flex justify-end items-center w-[90%] sm:w-4/5 lg:w-1/2 ">
+        {% comment %} <div class="hidden sm:flex"> 
+            {% include 'components/buttons/btn_icon.html' with icon='far fa-envelope' badge=21 class='ml-6' %}
+            {% include 'components/buttons/btn_icon.html' with icon='far fa-bell' badge=0 class='ml-6' %}
+        </div>  {% endcomment %}
+        {% include 'components/others/pos_menu.html' with class='ml-6' %}
+    </div>
+</div>

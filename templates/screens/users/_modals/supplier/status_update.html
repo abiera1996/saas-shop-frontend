@@ -1,0 +1,61 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Reject Accredited Supplier Request
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data"  
+            action="{% url 'vehicle:update_supplier_status' %}" 
+        >
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <input type="hidden" name="id" value="{{details.pk}}">
+                <input type="hidden" name="status" value="rejected">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Comments" name="comments" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" value=profile.user.first_name  %}
+                </div>
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='REJECT REQUEST' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                
+                </div>
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    ) 
+</script> 

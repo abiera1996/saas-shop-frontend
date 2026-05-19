@@ -1,0 +1,20 @@
+{% comment %}
+    Variables
+    - title:string
+    - isActive:bool
+    - icon:string
+    - url:string
+{% endcomment %}
+
+
+<a href="{{url}}" class="nav-item {% if isActive %}active{% endif %}" title="{{title}}">
+    <div class="flex flex-column justify-center items-center nav-item-container 
+                {% if request.session.user_type == 'user_2' %}
+                    text-black
+                {% endif %}">  
+        <div class="w-[38px] h-[38px] grid place-items-center">
+            {% include icon %}
+        </div> 
+        <span class="side-label font-poppins-regular text-sm">{{title}}</span>
+    </div> 
+</a>

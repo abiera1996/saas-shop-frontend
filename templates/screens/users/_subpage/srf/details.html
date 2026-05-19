@@ -1,0 +1,419 @@
+{% load custom_filters %}
+{% load custom_tags %} 
+{% include 'screens/users/_subpage/srf/form.html' %}
+{% comment %}
+<form  id="form-details"  
+{% if id %}
+    action="{% url 'vehicle:update_srf' id %}"
+{% else %}
+    action="{% url 'vehicle:request_srf' %}"
+{% endif %} 
+    >
+    <div class="col-xl-12 bg-white p-8 ">  
+        <div class="flex">
+            <div class="flex-1">
+                <div  class="text-2xl font-semibold">
+                    Service Request Maintenance Report Form
+                </div>
+                <div class="text-xs text-black">
+                    Complete the needed information.
+                </div>
+            </div> 
+            <div >
+                {% if details.status != 'pending' and  'reject' not in details.status %}
+                    {% url 'main:export_pdf_modal' as export_pdf_modal %}
+                    {% with export_pdf_modal|addstr:'?type=srf_form&id='|addstr:details.pk as new_export_pdf_modal %}
+                        {% include 'components/buttons/btn_regular.html' with title='Generate Form' isModal=True modalSize="modal-lg" link=new_export_pdf_modal size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+
+                    {% endwith %}  
+                {% endif %}
+                
+            </div>
+        </div> 
+            <div class="col-12">
+                <div class="mt-2">
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="BRANCH" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch_2" classBorder="border-gray-400" required=True %}
+                </div>
+            </div>  
+        
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="row mt-2">
+                    <div class="mt-2 col-lg-12">
+                        {% if id %}
+                            {% include 'components/inputs/input_with_label.html' with label="SRF no." name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.srf_no attribute="readonly" %} 
+                        {% else %}
+                            {% get_current_srf as get_current_srf %}
+                            {% include 'components/inputs/input_with_label.html' with label="SRF no." name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=get_current_srf attribute="readonly" %} 
+                        {% endif %}
+                    </div>
+                    
+                </div> 
+                <div class="row mt-2">
+                    <div class="mt-2 col-lg-6">
+                        {% if id %} 
+                            {% include 'components/inputs/input_with_label.html' with label="Request Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.requested_date|date:"m-d-Y" attribute="readonly" %}
+                        {% else %}
+                            {% now "m-d-Y" as date_now %}
+                            {% include 'components/inputs/input_with_label.html' with label="Request Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=date_now attribute="readonly" %}
+                        {% endif %}
+                    </div>
+                    <div class="mt-2 col-lg-6">
+                        {% if id %}
+                            {% if details.prepare_by %}
+                                {% with details.prepare_by.first_name|addstr:details.prepare_by.last_name as name_authenticate %}
+                                    {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                                {% endwith %} 
+                            {% else %}
+                                {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="Unknown" attribute="readonly" %} 
+                            {% endif %}
+                        {% else %}
+                            {% with request.user.first_name|addstr:request.user.last_name as name_authenticate %}
+                                {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-12 mt-4 border-[1px] rounded-lg border-gray-300 p-4"> 
+                <div class="font-semibold">
+                    Vehicle Information
+                </div>
+                <div class="text-black">
+                    Fill out your details.
+                </div>
+                <div class="row mt-4">
+                    <div class="col-xl-4">
+                        <div class="mt-2">  
+                                {% include 'components/inputs/input_with_label.html' with label="Request Unit" placeholder="Please select vehicle" name="requesting_unit" id="requesting_unit" labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=profile.country %}
+                    
+                        </div>
+                    </div>
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Plate No" name="plate_no" id="plate_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="CS No" name="conduction_sticker_no" id="conduction_sticker_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Make/Series" name="make_series" id="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Year Model" name="year_model" id="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Type of breakdown" name="vehicle_status" id="vehicle_status" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div>   
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Odometer" name="odometer" id="odometer" labelClass='text-black text-sm' class='my-1' number_validation='number' type="text" classBorder="border-gray-400" required=True value=details.odometer  %}
+                        
+                    </div>
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Driver’s name" name="driver_name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.driver_name %}
+                    </div>
+                    <div class="col-lg-6 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Start date of breakdown" name="start_breakdown" id="start_breakdown" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=details.start_breakdown required=True   %}
+                    </div> 
+                    <div class="col-lg-6 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Target date to repair" name="repair_date" id="repair_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" required=True value=details.repair_date  %}
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="font-bold text-2xl">
+                    Repair Details
+                </div>
+                <div class="text-black">
+                    Complete the needed information.
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2 ">
+            <div class="mt-2 col-xl-5">
+                <div class="row mt-2">
+                    <div class="mt-2 col-lg-12"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Date of Previous Repair " name="previous_repair_date" labelClass='text-black text-sm' class='my-1' id="previous_repair_date" type="text" classBorder="border-gray-400" value=details.previous_repair_date|date:"m-d-Y" attribute="readonly"  %}
+                    </div>
+                    <div class="mt-2 col-lg-12">
+                        {% include 'components/inputs/input_with_label.html' with label="Previous repair classification" name="previous_repair_classification" id="previous_repair_classification" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True attribute="disabled"  %}
+                    </div>
+                    <div class="mt-2 col-lg-12">
+                        {% include 'components/inputs/input_with_label.html' with label="1-yr repair cost" name="one_y_repair_cost" number_validation="money" id="one_y_repair_cost" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.one_y_repair_cost attribute="readonly"  %}
+                        
+                    </div>
+                </div>  
+            </div>
+            <div class="col-xl-7 mt-2 "> 
+                <div class="w-full">
+                    <div class="bg-white  rounded-md  w-full h-full">
+                        <div class="relative overflow-x-auto   sm:rounded-lg  ">
+                            <table class="w-full text-sm text-left text-black">
+                                <thead class="text-xs text-white bg-primaryColor">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">
+                                            <div class="flex items-center"> 
+                                                Parts
+                                            </div> 
+                                        </th> 
+                                        <th scope="col" class="px-6 py-3">
+                                            <div class="flex items-center"> 
+                                                Description
+                                            </div> 
+                                        </th> 
+                                        <th scope="col" class="px-6 py-3">
+                                            <div class="flex items-center"> 
+                                                Quantity
+                                            </div> 
+                                        </th>   
+                                    </tr>
+                                </thead>
+                                <tbody id="table_service"> 
+                                    <tr id="body_empty">
+                                        <td class="py-6" colspan="5">
+                                            {% include 'components/others/empty_list.html' with icon="bx bxs-wrench" message="No Parts To Replace" %}
+                                        </td>
+                                    </tr> 
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> 
+                    <!-- <div class="flex justify-end mt-2">
+                        {% url 'vehicle:replace_parts' as replace_parts %}
+                        {% include 'components/buttons/btn_regular.html' with title='ADD PARTS TO REPLACED' isModal=True link=replace_parts size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Current repair classification" name="repair_classification" id="repair_classification" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True required=True value=profile.user.first_name  %}
+                        
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Specific type of repair" name="specific_repair_classification" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.specific_repair_classification %}
+            </div>
+        </div> 
+
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Complaint / Observation / Reason (e.g. due to accident) " name="reason" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.reason  %}
+                
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Parts to be replaced" name="parts_to_replace" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.parts_to_replace %}
+            </div>
+        </div> 
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Accreditation no. of supplier" name="accreditation_no_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute='list="supplier-list"' value=details.accreditation_no_supplier  %}
+                <datalist id="supplier-list">
+                    {% for data in supplier %}
+                        <option value="{{data.accreditation_no}}">
+                    {% endfor %} 
+                </datalist>
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Accredited supplier name " name="accredited_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.accredited_supplier %}
+            </div>
+        </div> 
+        <div class="row mt-2"> 
+            <div class="mt-2 col-lg-12">
+                {% include 'components/inputs/input_with_label.html' with label="Un-accredited supplier name" name="unaccredited_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.unaccredited_supplier %}
+            </div>
+        </div> 
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Total requested amount " name="total_request_amount" number_validation="money" id="total_request_amount" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.total_request_amount  %}
+                
+            </div>
+            {% if details.supporting_document %}
+            <div class="mt-2 col-lg-6 flex flex-col justify-center"> 
+                <div class="text-black text-sm mb-2">
+                    Supporting document
+                </div>
+                <a href="{{details.supporting_document.url}}"> Click here to view/download</a>    
+            </div>
+            {% endif %}
+        </div>  
+        <div class="flex justify-end items-end py-4"> 
+                {% if details.status == 'pending' %}
+                    {% include 'components/buttons/btn_regular.html' with title='UPDATE VDF' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                
+                {% endif %}
+            </div>
+    </div>
+</form>  
+ 
+<script>  
+    API.formRequest(
+         '#form-details',
+         extended_data={},
+         processData=() => {},
+         checkValidation=(form_data) => { 
+             return true
+         },
+         callback=(response)=>{
+             console.log(response)
+             if (response.status != 400) {
+                 Swal.fire({
+                     icon: [200,201].includes(response.status)?'success':'error',
+                     title:  'Message', 
+                     text: response.message || response.data?.message, 
+                 }).then(()=>{
+                     if([200,201].includes(response.status)){ 
+                         {% if id %}
+                         location.reload()
+                         {% else %}
+                         location.href = "{% url 'user:srf' %}"
+                         {% endif %}
+                     } 
+                 })
+             } 
+         },
+         isMultiForm=true
+     )
+ </script>
+ 
+ <script>
+     var branches_of_selected_clinic = [] 
+     
+     {% if id %}
+         var is_edit = true;
+         var is_loaded_branch = false;
+         var is_loaded_default = false
+
+        {% if replace_parts_obj %} 
+            $('#body_empty').hide()
+            {% for replace_part in replace_parts_obj %} 
+                $('#table_service').append(`
+                    <tr class="parts-item bg-white border-b"> 
+                        <td scope="row" class="px-6 py-4 font-normal text-black whitespace-nowrap ">
+                            {{replace_part.part}}
+                            <input type="hidden" name="parts" value="{{replace_part.part}}" />
+                        </td>
+                        <td scope="row" class="px-6 py-4 font-normal text-black  ">
+                            {{replace_part.description}}
+                            <input type="hidden" name="description" value="{{replace_part.description}}" />
+                        </td>
+                        <td scope="row" class="px-6 py-4 font-normal text-black  ">
+                            {{replace_part.quantity}}
+                            <input type="hidden" name="quantity" value="{{replace_part.quantity}}" />
+                        </td> 
+                    </tr> 
+                `)
+            {% endfor %}
+        {% endif %}
+        
+     {% endif %}
+ 
+ 
+     $("#previous_repair_classification").select2({
+        theme: "bootstrap-5",
+        placeholder: "Select current repair classification",
+        multiple: true 
+    });
+
+
+    $('#requesting_unit').on('change', function() {
+        const request_unit = $(this).val(); 
+        
+        $.ajax({
+            url: `/vehicle/ajax/vehicle-details/${request_unit}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                if(response){
+                    $('input[name="plate_no"]').val(response.plate_no)
+                    $('input[name="conduction_sticker_no"]').val(response.conduction_sticker_no)
+                    $('input[name="make_series"]').val(response.make_series)
+                    $('input[name="year_model"]').val(response.year_model)
+                    if(['short-term breakdown', 'permanent breakdown'].includes(response.vehicle_status)){
+                        $('input[name="vehicle_status"]').val(response.vehicle_status)
+                    } else {
+                        $('input[name="vehicle_status"]').val("None")
+                    } 
+                }
+            }
+        })
+    })
+ 
+        $('#branch_2').on('change', function() {
+            const branch_id = $(this).val(); 
+            $('#requesting_unit').html(`<option value="">Please select vehicle</option>`);
+            var query_params = urlParameterize({
+                "paginated": "false",
+                "branch": branch_id
+            });
+            
+            $.ajax({
+                url: '{% url "vehicle:vehicle_search" %}?' + query_params,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response){
+                    if(response){   
+                        let requesting_unit = "{{details.requesting_unit.pk}}";
+                        response.data.map((val, idx) => {
+                            $('#requesting_unit').append(`<option value="${val.id}" ${requesting_unit == val.id?'selected': ''}>${val.text}</option>`);
+                            
+                        })
+                        $('#requesting_unit').change()
+                    }
+                }
+            })
+        }) 
+
+        $("#requesting_unit").select2({
+            theme: "bootstrap-5",
+            placeholder: "Please select vehicle"
+        }); 
+    
+    $.ajax({
+        url: '{% url "vehicle:repair_search" %}',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response){
+            if(response){   
+                let repairs = [] 
+                response.data.map((val) => { 
+                    repairs.push(
+                        {id: val.id, text: val.text}
+                    )
+                })  
+                console.log(repairs) 
+                $('#previous_repair_classification').select2('destroy').empty().select2({data: repairs});  
+                $('#repair_classification').select2('destroy').empty().select2({data: repairs});  
+                setTimeout(() => {
+                    $('#repair_classification').val([
+                        {% for data_repair in details.repair_classification.all %}
+                            "{{data_repair.pk}}",
+                        {% endfor %}
+                    ]).change();  
+                    $('#previous_repair_classification').val([
+                        {% for data_repair in details.previous_repair_classification.all %}
+                            "{{data_repair.pk}}",
+                        {% endfor %}
+                    ]).change();
+                }, 500);
+            }
+        }
+    }) 
+
+    $("#repair_classification").select2({
+        theme: "bootstrap-5",
+        placeholder: "Select current repair classification",
+        multiple: true 
+    }); 
+ </script>
+ 
+ <script>
+     {% if id %}
+         $('#branch_2').html(`
+             <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+         `).trigger('change')  
+     {% endif %}
+ </script> 
+
+ {% endcomment %}

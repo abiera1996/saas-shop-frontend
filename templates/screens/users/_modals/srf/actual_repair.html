@@ -1,0 +1,91 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Service Request
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data"  
+            action="{% url 'vehicle:update_srf_status' %}" 
+        >
+        <div class="bg-white py-3 px-4">
+            <input type="hidden" name="id" value="{{details.pk}}">
+            <input type="hidden" name="status" value="tag-repair-done">
+            <div class="row">
+                <div class="col-xl-12">
+                    {% if display_image %}
+                    <div class="mt-2">
+                        <div class="text-black text-xs mt-3 mb-2">
+                            Upload File
+                        </div>  
+                        <input type="file" name="repair_image" class="mb-2">
+                        <input type="file" name="repair_image" class="mb-2">
+                        <input type="file" name="repair_image" class="mb-2">
+                        <input type="file" name="repair_image" class="mb-2">
+                        <input type="file" name="repair_image" class="mb-2">
+                    </div>
+                     
+                    {% endif %} 
+                    <div class="col-xl-12 mt-3"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Actual repair date" name="actual_repair_date" id="actual_repair_date" labelClass='text-black text-sm' class='my-1' type="date" required=True classBorder="border-gray-400" value=details.repair_date  %}
+                    </div> 
+                </div> 
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% if details.parts_return_for_junk %}
+                {% include 'components/inputs/input_with_label.html' with label="Parts returned / for junk" name="parts_return_for_junk" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.parts_return_for_junk %}
+                {% else %}
+                {% include 'components/inputs/input_with_label.html' with label="Parts returned / for junk" name="parts_return_for_junk" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value="N/A" %}
+                {% endif %}
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% if details.parts_return_for_junk %}
+                {% include 'components/inputs/input_with_label.html' with label="Serial no. of new battery / tires" name="serial_no_new_battery" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.serial_no_new_battery %}
+                {% else %}
+                {% include 'components/inputs/input_with_label.html' with label="Serial no. of new battery / tires" name="serial_no_new_battery" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value="N/A" %}
+                {% endif %}
+                
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='COMPLETE' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                
+                </div>
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    ) 
+</script> 

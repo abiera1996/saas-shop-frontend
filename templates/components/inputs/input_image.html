@@ -1,0 +1,39 @@
+{% comment %}
+    Variables
+    - imageId:string 
+    - btnId:string 
+    - name:string   
+
+{% endcomment %}
+
+<div class="flex items-center">
+    <div class="w-[170px] h-[170px] mt-3">
+        <img src="/static/image/ph_image-square-thin.png" id="{{imageId}}" class="object-contain w-full h-full"/>
+        <input type="file" name="{{name}}" accept="image/*" id="{{name}}" class="hidden">
+    </div>
+    <div class="ml-2">
+        {% include 'components/buttons/btn_regular.html' with id=btnId title='Choose Image' icon="fas fa-images" class='bg-primaryColor text-white rounded ' %} 
+    </div>
+    <script>
+        $(document).on('click', '#{{btnId}}', function(e){
+            $('#{{name}}').click()
+        })
+        $('#{{name}}').change(function(event) {
+            if (typeof event.target.files[0] !== 'undefined') {
+                var path = URL.createObjectURL(event.target.files[0]); 
+
+                if(this.files.length != 0){
+                    fileThis = this.files[0]
+                    var fileType = fileThis["type"];
+                    var validImageTypes = ["image/gif", "image/jpeg", "image/png", "image/jpg"];
+
+                    if ($.inArray(fileType, validImageTypes) < 0) {
+                        Swal.fire("Wait!", "The file type is invalid!", "error")
+                    } else { 
+                        $('#{{imageId}}').attr('src', path);
+                    }
+                }
+            } 
+        });
+    </script>
+</div>

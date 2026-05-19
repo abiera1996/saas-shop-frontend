@@ -1,0 +1,104 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            {% if id %}Update{% else %}Onboard {% endif%} accredited supplier
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-branch" 
+        {% if id %}
+            {% if details.status != 'approved' or is_effective_date  %}
+            action="{% url 'vehicle:update_supplier' id %}"
+            {% endif %}
+                
+        {% else %}
+            action="{% url 'vehicle:create_supplier' %}"
+        {% endif %}
+        >
+        <div class="bg-white py-3 px-4">
+            {% if not is_effective_date %}
+            <div class="row mt-2">
+                <div class="col-12">
+                        {% url 'branch:branch_search' as branch_search %}
+                        {% include 'components/inputs/input_with_label.html' with label="BRANCH" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch_2" classBorder="border-gray-400" required=True modalParent=True disabled=is_readonly %}
+                </div>  
+            </div>
+            <div class="row">
+                <div class="mt-2 col-lg-12">
+                    {% get_current_supplier as get_current_supplier %}
+                    {% if id %}
+                        {% include 'components/inputs/input_with_label.html' with label="Accreditation no." name="test" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.accreditation_no readonly=True  %}
+                    {% else %}
+                        {% include 'components/inputs/input_with_label.html' with label="Accreditation no." name="test" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=get_current_supplier readonly=True  %}
+                    {% endif %}
+                </div>  
+                
+            </div> 
+            <div class="row">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Name of accredited supplier" name="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.name required=True readonly=is_readonly %}
+                </div>
+            </div> 
+            {% endif %}
+            <div class="row">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Effectivity Date" name="effectivity_date" id="effectivity_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" required=True value=details.effectivity_date   %}
+                </div>
+            </div>  
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                    {% if details.status != 'approved' or is_effective_date %}
+                    {% include 'components/buttons/btn_regular.html' with title='UPDATE SUPPLIER' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                        
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='CREATE SUPPLIER' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-branch',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+    {% if id %}
+        $('#branch_2').html(`
+            <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+        `).trigger('change')  
+    {% endif %}
+</script> 

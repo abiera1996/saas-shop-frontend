@@ -1,0 +1,73 @@
+{% load custom_filters %}
+<div class="col-xl-12 bg-white ">  
+    <div class="row">
+        <div class="col-xl-6 font-bold items-center flex text-primaryColor">
+            Note: Please export or download excel file to view the complete data.
+        </div>
+        <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+            <div class="flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+            </div> 
+            <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                {% url 'main:filter_modal' as filter_modal %} 
+                {% with filter_modal|addstr:'?type=provider' as filter_modal_provider %}
+                    {% include 'components/buttons/btn_border.html' with title='Filter and Export' id="filter-modal" isModal=True link=filter_modal_provider icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                {% endwith %}  
+            </div> 
+        </div> 
+    </div>
+    <div class="row">
+        <div class="col-xl-12 flex "> 
+            <div id="container_branch" class="VWSRVCPRVDR bg-white rounded-md w-full permission-container">
+            </div>
+        </div>
+    </div>  
+</div>
+
+<script>
+    function initial_modal_filter(params_modal_filter = {}){ 
+        params_modal_filter['type'] = "provider" 
+        var query_params_modal_filter = urlParameterize(params_modal_filter);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params_modal_filter}`)  
+        return query_params_modal_filter
+    }
+    initial_modal_filter()
+
+    function loadTable(params){ 
+        params["upload_status"] = "approved" 
+        var query_params = initial_modal_filter(params)
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_provider' %}?"+query_params,
+        })
+    }
+</script>
+
+<script>  
+
+    $(document).ready(function(e){
+        loadProvider();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadProvider();
+    }));
+
+    function loadProvider(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "upload_status": "approved"
+        });
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_provider' %}?"+query_params,
+        })
+    } 
+   
+</script>

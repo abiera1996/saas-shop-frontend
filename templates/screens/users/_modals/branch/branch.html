@@ -1,0 +1,85 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Onboard Branch / Dept
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-branch" 
+        {% if id %}
+            action="#"
+        {% else %}
+            action="{% url 'branch:create_branch' %}"
+        {% endif %}
+        >
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Branch / Dept. Name" name="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.name  %}
+                </div> 
+            </div>
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Branch / Dept. Code (Max Length 3)" name="branch_code" labelClass='text-black text-sm' class='my-1' type="text" attribute='maxlength="3"' classBorder="border-gray-400" required=True value=details.branch_code  %}
+                </div>  
+                <div class="mt-2 col-lg-12"> 
+                    <div class="flex items-center mb-4">
+                        <input id="default-checkbox" name="is_manila" value="is_manila" type="checkbox" 
+                        {% if details.is_manila %}
+                        checked
+                        {% endif %}
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="default-checkbox" class="ml-2 text-md font-medium text-gray-900 ">
+                            Is Manila?
+                        </label>
+                    </div> 
+                </div>  
+            </div> 
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='ONBOARD BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-branch',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+</script> 

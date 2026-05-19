@@ -1,0 +1,22 @@
+{% comment %}
+    Variables
+    - id:string 
+    - modalSize:string modal-xl
+    - title
+    - modalBody
+
+{% endcomment %}
+
+<div class="modal fade" id="{{id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog {{modalSize}}">
+        <div class="modal-content">
+            <div class="modal-header bg-primaryColor text-white">
+                <h5 class="modal-title text-xl" id="staticBackdropLabel">{{title}}</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+            </div>
+            <div class="modal-body p-0">
+                {% include modalBody %}
+            </div>
+        </div>
+    </div>
+</div>

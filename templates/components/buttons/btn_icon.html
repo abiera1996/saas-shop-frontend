@@ -1,0 +1,16 @@
+{% comment %}
+    Variables
+    - id
+    - class:string
+    - icon:string
+    - badge:int
+    - attr
+    
+{% endcomment %}
+
+<div id="{{id}}" class="{{class}} bg-[#9FCBFF] rounded-full w-[35px] h-[35px] grid place-items-center relative cursor-pointer " {{attr}}>
+    {% if badge %}
+        {% include 'components/badges/badge.html' with class='absolute top-[-6px] right-[-6px] bg-[#FF6262] text-white' badge=badge roundClass='rounded-full' %} 
+    {% endif %}
+    <i class="{{icon}}"></i>
+</div>

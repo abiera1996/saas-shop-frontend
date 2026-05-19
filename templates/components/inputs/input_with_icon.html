@@ -1,0 +1,24 @@
+{% comment %}
+    Variables
+    - id:string
+    - class:string
+    - name:string
+    - type:string
+    - placeholder:string
+    - icon
+    - classContainer
+    - width pass if custom width % or fix(px)
+{% endcomment %} 
+
+<div class="w-full">
+    <div class="flex w-full border-1 border-primaryColor text-sm {{classContainer}} ">
+        {% if icon %}
+            <div class='grid place-items-center px-3'>
+                <i class="{{icon}}"></i>
+            </div>
+        {% endif %}
+        <div class='flex items-stretch justify-center  {% if width %} w-[{{width}}] {%else%}w-[70%] {%endif%}  font-dmsans-regular'>
+            <input id="{{id}}" name="{{name}}" class='{{class}} w-full focus:outline-0 border-0 bg-transparent' type="{{type}}" placeholder="{{placeholder}}" /> 
+        </div>
+    </div> 
+</div>

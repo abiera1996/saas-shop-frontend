@@ -1,0 +1,46 @@
+{% comment %}
+    Variables
+    - items:array [{"imageUrl": "/static/image/test/test1.jpg", "redirect": "https://facebook.com", "alt": ""}]
+{% endcomment %}
+
+<style> 
+    .custom-carousel-indicator {
+        height: 8px !important;
+        width: 8px !important;
+        border-radius: 100%;
+        border-top: none !important; 
+        border-bottom: none !important;
+        border: 3px solid #E6E7E8 !important;
+        background: #fafafa; 
+        opacity: 1 !important;
+    }
+    
+    .custom-carousel-indicator.active {
+        border: 3px solid #e1efff !important;
+        background: #0265dc;
+    }
+    .carousel-indicators {
+        position: relative;
+        padding-top: 20px;
+    }
+</style>
+
+<div id="carouselExampleInterval" class="carousel slide carousel-fade w-full h-[300px] mt-9" data-bs-ride="carousel">
+    <div class="carousel-inner h-[90%]">
+        {% for item in items %}
+            <div class="carousel-item 
+                {% if forloop.first %}active{% endif %}
+            h-full" data-bs-interval="3000">
+                <a href="{{item.redirect}}">
+                    <img src="{{item.imageUrl}}" class="d-block w-100 h-full object-contain" alt="{{item.alt}}">
+                </a>
+            </div>
+        {% endfor %} 
+    </div>
+    <div class="carousel-indicators h-[10%]">
+        {% for item in items %}
+            <button type="button" data-bs-target="#carouselExampleInterval" data-bs-slide-to="{{ forloop.counter0 }}" 
+            class="custom-carousel-indicator {% if forloop.first %}active{% endif %}"></button>
+        {% endfor %}  
+    </div> 
+</div> 

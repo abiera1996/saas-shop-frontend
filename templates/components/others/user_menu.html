@@ -1,0 +1,79 @@
+{% comment %}
+    Variables
+    - id
+    - class:string 
+
+    # the details may get in request.session or request.user
+    
+{% endcomment %}
+
+{% load custom_filters %}
+<div id="{{id}}" data-dropdown-toggle="dropdown-menu" class="{{class}} flex text-black cursor-pointer relative">
+    <div>
+        {% comment %}
+        <img src="{{request.user.profile.image|placeholder_image:request.user.profile.gender}}" class="rounded-full w-[50px] h-[50px] object-cover border-5 border-[#6AA4EA]">
+        {% endcomment %}
+    </div>
+    <div class="ml-[16px] mr-7 leading-4 grid place-content-center">
+        <div class="font-dmsans-medium truncate">
+            {% if request.user.profile.role.role_code == 'CLNCBRNCH_1' %}
+                {{request.user.profile.branch.clinic.name}} - {{request.user.profile.branch.name}}
+            {% else %}
+                {% if request.user.first_name %}
+                {{request.user.first_name}} {{request.user.last_name}}
+                {% else %}
+                Name not set
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="text-sm font-dmsans-medium capitalize">
+            {{request.user.profile.user_role.name}}
+        </div>
+    </div>
+    <div class="nav-drop-icon h-full grid place-items-center " style="right:-8px !important;">
+        <i class="fas fa-caret-right"></i>
+    </div>
+</div>
+
+<div id="dropdown-menu" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+    <div class="px-4 py-3 text-sm text-gray-900 ">
+        <div class="truncate">
+            {% if request.user.profile.role.role_code == 'CLNCBRNCH_1' %}
+                {{request.user.profile.branch.clinic.name}} - {{request.user.profile.branch.name}}
+            {% else %}
+                {% if request.user.first_name %}
+                {{request.user.first_name}} {{request.user.last_name}}
+                {% else %}
+                Name not set
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="font-medium truncate">{{request.user.email}}</div>
+      </div>
+    <ul class="py-2 text-sm text-gray-700 " aria-labelledby="dropdownDefaultButton">
+      <li>
+        <a href="/" class="block px-4 py-2 hover:bg-gray-100 ">Dashboard</a>
+      </li>
+      {% if 'VWSR' not in request.user.profile.get_user_without_permission %}
+      <li>
+        <a href="{% url 'user:system_user' %}" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+      </li> 
+      {% elif 'VWSRRL' not in request.user.profile.get_user_without_permission %}
+      <li>
+        <a href="{% url 'user:user_role' %}" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+      </li>
+      {% elif 'VWDTLGS' not in request.user.profile.get_user_without_permission %}
+      <li>
+        <a href="{% url 'user:audit_log' %}" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+      </li>
+      {% else %}
+      <li>
+        <a href="{% url 'user:change_password' %}" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+      </li>
+      {% endif %}
+      <li>
+        <a href="{% url 'main:logout' %}" class="block px-4 py-2 hover:bg-gray-100">Sign out</a>
+      </li>
+    </ul>
+</div>
+

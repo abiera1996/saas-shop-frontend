@@ -1,0 +1,2190 @@
+{% load custom_filters %}
+<style>
+    span.select2-container{
+        z-index: 1000000 !important;
+    }
+</style>
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Filter Options
+        </h5>
+        <label class="text-xs">
+            Please select filters.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+{% if data.type == 'vehicle' %}
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Assigned to" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="mt-2 col-lg-6">
+            {% include 'components/inputs/input_with_label.html' with label="MAKE/SERIES" placeholder="Enter Make/Series" name="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=params.make_series  %}
+        </div> 
+        <div class="mt-2 col-xl-6">
+            {% include 'components/inputs/input_with_label.html' with label="YEAR MODEL" placeholder="Enter Year Model" name="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=params.year_model  %}
+            
+        </div> 
+        <div class="mt-2 col-lg-6">
+            {% include 'components/inputs/input_with_label.html' with label="CATEGORY" id="category" name="category" options=category_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=params.category %}
+        </div>  
+        <div class="mt-2 col-lg-6">
+            {% include 'components/inputs/input_with_label.html' with label="VEHICLE STATUS" id="vehicle_status" name="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.vehicle_status %}
+        </div>   
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Expiry Date From" name="insurance_expiry_date_from" id="insurance_expiry_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.insurance_expiry_date_from %}
+        </div>
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Expiry Date To" name="insurance_expiry_date_to" id="insurance_expiry_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.insurance_expiry_date_to %}
+        </div>
+        <div class="export-cont w-full">
+            
+        </div>
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        <div style="margin-right: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+        </div>
+        {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        var branch = $("#branch_filter").val() || ""; 
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var make_series = $("input[name=make_series]").val() || ""; 
+        var year_model = $("input[name=year_model]").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var vehicle_status = $("#vehicle_status").val() || "";  
+        var insurance_expiry_date_from = $("input[name=insurance_expiry_date_from]").val() || ""; 
+        var insurance_expiry_date_to = $("input[name=insurance_expiry_date_to]").val() || ""; 
+
+        const query_params = {
+            "branch": branch,
+            "requesting_unit": requesting_unit,
+            "make_series": make_series,
+            "year_model": year_model,
+            "category": category,
+            "vehicle_status": vehicle_status,
+            "insurance_expiry_date_from": insurance_expiry_date_from,
+            "insurance_expiry_date_to": insurance_expiry_date_to
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() {
+        var branch = $("#branch_filter").val() || ""; 
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var make_series = $("input[name=make_series]").val() || ""; 
+        var year_model = $("input[name=year_model]").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var vehicle_status = $("#vehicle_status").val() || "";  
+        var insurance_expiry_date_from = $("input[name=insurance_expiry_date_from]").val() || ""; 
+        var insurance_expiry_date_to = $("input[name=insurance_expiry_date_to]").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "branch":branch,
+            "requesting_unit": requesting_unit,
+            "make_series": make_series,
+            "year_model": year_model,
+            "category": category,
+            "vehicle_status": vehicle_status,
+            "insurance_expiry_date_from": insurance_expiry_date_from,
+            "insurance_expiry_date_to": insurance_expiry_date_to
+        });
+        location.href = '{% url "vehicle:export_vehicle" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    }
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+{% elif data.type == 'srf' %}
+
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Requesting Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Vehicle to Repair" name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            </div> 
+        </div>
+        {% if not params.defined_status %}
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="SRF Status" name="status" id="status" options=filter_items labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.status %}
+            </div>
+        {% endif %}
+        {% comment %}
+        {% if not params.defined_repair_status %}
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Actual repair status" name="repair_status" id="repair_status" options=repair_status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.repair_status %}
+            </div>
+        {% endif %}
+        {% endcomment %}
+        
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Start Breakdown From" name="start_break_date_from" id="start_break_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.start_break_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Start Breakdown To" name="start_break_date_to" id="start_break_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.start_break_date_to %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Prepared From" name="prepare_date_from" id="prepare_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.prepare_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Prepared To" name="prepare_date_to" id="prepare_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.prepare_date_to %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date of Actual Repair From" name="actual_repair_date_from" id="actual_repair_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.actual_repair_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date of Actual Repair To" name="actual_repair_date_to" id="actual_repair_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.actual_repair_date_to %}
+        </div>
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        {% if params.defined_status %}
+            var status = "{{params.status}}";
+        {% else %}
+            var status = $("#status").val() || ""; 
+        {% endif %} 
+
+        {% if params.defined_repair_status %}
+            var repair_status = "{{params.repair_status}}";
+        {% else %}
+            var repair_status = $("#repair_status").val() || "";  
+        {% endif %} 
+        
+        var exclude_repair_status = ''
+        {% if params.exclude_repair_status %}
+            var exclude_repair_status = "{{params.exclude_repair_status}}";
+        {% endif %} 
+
+        var repair_classification = ''
+        {% if params.repair_classification %}
+            repair_classification = "{{params.repair_classification}}";
+        {% endif %}
+
+        var start_break_date_from = $("input[name=start_break_date_from]").val() || ""; 
+        var start_break_date_to = $("input[name=start_break_date_to]").val() || ""; 
+        var prepare_date_from = $("input[name=prepare_date_from]").val() || ""; 
+        var prepare_date_to = $("input[name=prepare_date_to]").val() || ""; 
+        var actual_repair_date_from = $("input[name=actual_repair_date_from]").val() || ""; 
+        var actual_repair_date_to = $("input[name=actual_repair_date_to]").val() || ""; 
+         
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "branch": branch,
+            "status": status,
+            "repair_status": repair_status,
+            "repair_status_with_vehicle_registration": "{{params.repair_status_with_vehicle_registration}}",
+            "start_break_date_from": start_break_date_from,
+            "start_break_date_to": start_break_date_to,
+            "prepare_date_from": prepare_date_from,
+            "prepare_date_to": prepare_date_to,
+            "actual_repair_date_from": actual_repair_date_from,
+            "actual_repair_date_to": actual_repair_date_to,
+            "exclude_repair_status": exclude_repair_status,
+            "repair_classification": repair_classification
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() {
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        {% if params.defined_status %}
+            var status = "{{params.status}}";
+        {% else %}
+            var status = $("#status").val() || ""; 
+        {% endif %} 
+
+        {% if params.defined_repair_status %}
+            var repair_status = "{{params.repair_status}}";
+        {% else %}
+            var repair_status = $("#repair_status").val() || "";  
+        {% endif %} 
+
+        var exclude_repair_status = ''
+        {% if params.exclude_repair_status %}
+            exclude_repair_status = "{{params.exclude_repair_status}}";
+        {% endif %}
+
+        var repair_classification = ''
+        {% if params.repair_classification %}
+            repair_classification = "{{params.repair_classification}}";
+        {% endif %}
+
+        var start_break_date_from = $("input[name=start_break_date_from]").val() || ""; 
+        var start_break_date_to = $("input[name=start_break_date_to]").val() || ""; 
+        var prepare_date_from = $("input[name=prepare_date_from]").val() || ""; 
+        var prepare_date_to = $("input[name=prepare_date_to]").val() || ""; 
+        var actual_repair_date_from = $("input[name=actual_repair_date_from]").val() || ""; 
+        var actual_repair_date_to = $("input[name=actual_repair_date_to]").val() || ""; 
+
+
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "branch": branch,
+            "status": status,
+            "repair_status": repair_status,
+            "start_break_date_from": start_break_date_from,
+            "start_break_date_to": start_break_date_to,
+            "prepare_date_from": prepare_date_from,
+            "prepare_date_to": prepare_date_to,
+            "actual_repair_date_from": actual_repair_date_from,
+            "actual_repair_date_to": actual_repair_date_to,
+            "title": "{{params.title}}",
+            "exclude_repair_status": exclude_repair_status,
+            "repair_classification": repair_classification
+        });
+        location.href = '{% url "vehicle:export_srf" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    }
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+{% elif data.type == 'vdf' %}
+
+<div class="modal-body p-0"> 
+    <div class="row"> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Requesting Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'vehicle:provider_search' as provider_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Service Provider" name="service_provider" id="service_provider" url=provider_search placeholder="Search service provider" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        {% if not params.defined_status %}
+            <div class="col-lg-12 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Status" name="status" id="status" options=filter_items_vdf labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.status %}
+            </div>
+        {% endif %} 
+        
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Reason of Rental" name="reason_for_rental" id="reason_for_rental" options=reason_for_rental_list labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.reason_for_rental %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Covered Period From" name="covered_date_from" id="covered_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.covered_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Covered Period To" name="covered_date_to" id="covered_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.covered_date_to %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Prepared From" name="prepared_date_from" id="prepared_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.prepared_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Prepared To" name="prepared_date_to" id="prepared_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.prepared_date_to %}
+        </div> 
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        var service_provider = $("#service_provider").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var reason_for_rental = $("#reason_for_rental").val() || ""; 
+        {% if params.defined_status %}
+            var status = "{{params.status}}";
+        {% else %}
+            var status = $("#status").val() || ""; 
+        {% endif %}  
+        
+
+        var covered_date_from = $("input[name=covered_date_from]").val() || ""; 
+        var covered_date_to = $("input[name=covered_date_to]").val() || ""; 
+        var prepared_date_from = $("input[name=prepared_date_from]").val() || ""; 
+        var prepared_date_to = $("input[name=prepared_date_to]").val() || "";  
+
+        const query_params = {
+            "service_provider": service_provider,
+            "branch": branch,
+            "status": status,
+            "reason_for_rental": reason_for_rental,
+            "covered_date_from": covered_date_from,
+            "covered_date_to": covered_date_to,
+            "prepared_date_from": prepared_date_from,
+            "prepared_date_to": prepared_date_to
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() {
+        
+        var service_provider = $("#service_provider").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var reason_for_rental = $("#reason_for_rental").val() || ""; 
+        {% if params.defined_status %}
+            var status = "{{params.status}}";
+        {% else %}
+            var status = $("#status").val() || ""; 
+        {% endif %}  
+
+        var exclude_status = ''
+        {% if params.exclude_status %}
+            exclude_status = "{{params.exclude_status}}";
+        {% endif %}   
+
+        var covered_date_from = $("input[name=covered_date_from]").val() || ""; 
+        var covered_date_to = $("input[name=covered_date_to]").val() || ""; 
+        var prepared_date_from = $("input[name=prepared_date_from]").val() || ""; 
+        var prepared_date_to = $("input[name=prepared_date_to]").val() || "";  
+        var query_params = urlParameterize({
+            "service_provider": service_provider,
+            "branch": branch,
+            "status": status,
+            "reason_for_rental": reason_for_rental,
+            "covered_date_from": covered_date_from,
+            "covered_date_to": covered_date_to,
+            "prepared_date_from": prepared_date_from,
+            "prepared_date_to": prepared_date_to,
+            "title": "{{params.title}}",
+            "exclude_status": exclude_status
+        }); 
+        location.href = '{% url "vehicle:export_vdf" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    }
+ 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+    
+    {% if params.service_provider %} 
+        $('#service_provider').html(`
+            <option value="{{service_provider.pk}}" selected>
+                {{service_provider.name}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+{% elif data.type == 'vdf_kpi' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Tfleet Approval From" name="tfleetmanager_date_from" id="tfleetmanager_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.tfleetmanager_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Tfleet Approval To" name="tfleetmanager_date_to" id="tfleetmanager_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.tfleetmanager_date_to %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Group Head Approval From" name="grouphead_date_from" id="grouphead_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.grouphead_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Group Head Approval To" name="grouphead_date_to" id="grouphead_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.grouphead_date_to %}
+        </div> 
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+
+        var tfleetmanager_date_to = $("input[name=tfleetmanager_date_to]").val() || ""; 
+        var tfleetmanager_date_from = $("input[name=tfleetmanager_date_from]").val() || ""; 
+        var grouphead_date_from = $("input[name=grouphead_date_from]").val() || ""; 
+        var grouphead_date_to = $("input[name=grouphead_date_to]").val() || "";  
+
+        const query_params = {
+            "tfleetmanager_date_to": tfleetmanager_date_to,
+            "tfleetmanager_date_from": tfleetmanager_date_from,
+            "grouphead_date_from": grouphead_date_from,
+            "grouphead_date_to": grouphead_date_to
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+
+        var tfleetmanager_date_to = $("input[name=tfleetmanager_date_to]").val() || ""; 
+        var tfleetmanager_date_from = $("input[name=tfleetmanager_date_from]").val() || ""; 
+        var grouphead_date_from = $("input[name=grouphead_date_from]").val() || ""; 
+        var grouphead_date_to = $("input[name=grouphead_date_to]").val() || "";  
+        var query_params = urlParameterize({
+            "tfleetmanager_date_to": tfleetmanager_date_to,
+            "tfleetmanager_date_from": tfleetmanager_date_from,
+            "grouphead_date_from": grouphead_date_from,
+            "grouphead_date_to": grouphead_date_to
+        }); 
+        location.href = '{% url "vehicle:export_vdf_kpi" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    } 
+</script> 
+
+{% elif data.type == 'provider' or data.type == 'supplier' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="col-lg-12 mt-2"> 
+            {% if data.type == 'provider' %}
+            {% include 'components/inputs/input_with_label.html' with label="Name of accredited provider" name="name" id="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=params.name %}
+            {% elif data.type == 'supplier' %}
+            {% include 'components/inputs/input_with_label.html' with label="Name of accredited supplier" name="name" id="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=params.name %}
+            {% endif %}
+            
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                STATUS
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="my_status" name="my_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="active"  {% if params.my_status == 'active' %}selected{% endif %}>
+                            Active
+                        </option> 
+                        <option value="inactive" {% if params.my_status == 'inactive' %}selected{% endif %}>
+                            Inactive
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Effectivity Date From" name="effective_date_from" id="effective_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.effective_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Effectivity Date To" name="effective_date_to" id="effective_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.effective_date_to %}
+        </div> 
+        
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+
+        var effective_date_to = $("input[name=effective_date_to]").val() || ""; 
+        var effective_date_from = $("input[name=effective_date_from]").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var my_status = $("#my_status").val() || ""; 
+
+
+        const query_params = {
+            "effective_date_to": effective_date_to,
+            "effective_date_from": effective_date_from,
+            "name": name, 
+            "branch": branch,
+            "my_status": my_status
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+
+        var effective_date_to = $("input[name=effective_date_to]").val() || ""; 
+        var effective_date_from = $("input[name=effective_date_from]").val() || ""; 
+        var my_status = $("#my_status").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "effective_date_to": effective_date_to,
+            "effective_date_from": effective_date_from,
+            "name": name, 
+            "branch": branch, 
+            "my_status": my_status,
+            "upload_status": "approved" 
+        }); 
+
+        {% if data.type == 'provider' %}
+        location.href = '{% url "vehicle:export_provider" %}?' + query_params
+        {% else %}
+        location.href = '{% url "vehicle:export_supplier" %}?' + query_params
+        {% endif %}
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+
+{% elif data.type == 'batch' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+       
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                STATUS
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="status" name="status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="pending" {% if params.status == 'pending' %}selected{% endif %} >
+                            Pending
+                        </option> 
+                        <option value="approved" {% if params.status == 'approved' %}selected{% endif %}>
+                            Approved
+                        </option>  
+                        <option value="rejected" {% if params.status == 'rejected' %}selected{% endif %} >
+                            Rejected
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Uploaded Date From" name="uploaded_date_from" id="uploaded_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.uploaded_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Uploaded Date To" name="uploaded_date_to" id="uploaded_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.uploaded_date_to %}
+        </div>
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+
+        var uploaded_date_to = $("input[name=uploaded_date_to]").val() || ""; 
+        var uploaded_date_from = $("input[name=uploaded_date_from]").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+
+
+        const query_params = {
+            "uploaded_date_to": uploaded_date_to,
+            "uploaded_date_from": uploaded_date_from,
+            "name": name, 
+            "branch": branch,
+            "status": status
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    }) 
+</script> 
+{% elif data.type == 'gas' or data.type == 'gas_history' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate/CS No." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <input type="hidden" name="status" id="status" value="{{params.status}}">
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Covered Date From" name="covered_date_from" id="covered_date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.covered_date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Covered Date To" name="covered_date_to" id="covered_date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.covered_date_to %}
+        </div> 
+        
+    </div>
+    
+    <input type="hidden" name="current_month" id="current_month" value="{{params.current_month}}">
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var covered_date_to = $("input[name=covered_date_to]").val() || ""; 
+        var covered_date_from = $("input[name=covered_date_from]").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+
+
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "name": name, 
+            "branch": branch,
+            "status": status
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var covered_date_to = $("input[name=covered_date_to]").val() || ""; 
+        var covered_date_from = $("input[name=covered_date_from]").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "name": name, 
+            "branch": branch, 
+            "status": status,
+            "current_month": $('#current_month').val() || "",
+            "gas_type": "{{data.type}}"
+        }); 
+ 
+        location.href = '{% url "gas:export_gas" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+{% elif data.type == 'budget' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Requesting Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate/CS No." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Category
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="category" name="category" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select category 
+                        </option>
+                        <option value="2 wheels"  {% if params.category == '2 wheels' %}selected{% endif %}>
+                            2 wheels
+                        </option> 
+                        <option value="3 wheels"  {% if params.category == '3 wheels' %}selected{% endif %}>
+                            3 wheels
+                        </option> 
+                        <option value="4 wheels" {% if params.category == '4 wheels' %}selected{% endif %}>
+                            4 wheels
+                        </option> 
+                        <option value="6 wheels"  {% if params.category == '6 wheels' %}selected{% endif %}>
+                            6 wheels
+                        </option> 
+                        <option value="10 wheels"  {% if params.category == '10 wheels' %}selected{% endif %}>
+                            10 wheels
+                        </option>  
+                    </select>  
+                </div> 
+            </div> 
+        </div> 
+        <div class="col-lg-12 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Year" name="filter_year" id="filter_year" options=years_option labelClass='text-black text-sm' class='my-1' value=params.year type="dropdown" classBorder="border-gray-400" %}
+
+        </div>  
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var category = $("#category").val() || ""; 
+        
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var year = $("#filter_year").val() || ""; 
+
+
+        const query_params = {
+            "requesting_unit": requesting_unit, 
+            "name": name, 
+            "category": category,
+            "branch": branch,
+            "year": year
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || ""; 
+        var category = $("#category").val() || ""; 
+        
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var year = $("#filter_year").val() || ""; 
+
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit, 
+            "name": name, 
+            "category": category,
+            "branch": branch,
+            "year": year
+        }); 
+
+        location.href = '{% url "vehicle:export_budget" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+{% elif data.type == 'billing' or data.type == 'billing_history' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">   
+           
+        <div class="col-xl-12 mt-2">
+            {% with  params.covered_date_to|date:"m-d-Y" as date_to %}
+            {% with  params.covered_date_from|date:"m-d-Y" as date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Covered Date Range" id="daterange" name="daterange" fromName="covered_date_from" toName="covered_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=covered_value_date valueFrom=date_from valueTo=date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate/CS No." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Category
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="category" name="category" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select category 
+                        </option>
+                        <option value="2 wheels"  {% if params.category == '2 wheels' %}selected{% endif %}>
+                            2 wheels
+                        </option> 
+                        <option value="3 wheels"  {% if params.category == '3 wheels' %}selected{% endif %}>
+                            3 wheels
+                        </option> 
+                        <option value="4 wheels" {% if params.category == '4 wheels' %}selected{% endif %}>
+                            4 wheels
+                        </option> 
+                        <option value="6 wheels"  {% if params.category == '6 wheels' %}selected{% endif %}>
+                            6 wheels
+                        </option> 
+                        <option value="10 wheels"  {% if params.category == '10 wheels' %}selected{% endif %}>
+                            10 wheels
+                        </option>  
+                    </select>  
+                </div> 
+            </div> 
+        </div>
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Type of lease
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="lease_type" name="lease_type" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select Type of lease 
+                        </option>
+                        <option value="dry"  {% if params.lease_type == 'dry' %}selected{% endif %}>
+                            dry
+                        </option> 
+                        <option value="wet" {% if params.lease_type == 'wet' %}selected{% endif %}>
+                            wet
+                        </option>  
+                    </select>  
+
+                </div> 
+            </div> 
+        </div>
+        <input type="hidden" name="status" id="status" value="{{params.status}}">
+        <input type="hidden" name="current_month" id="current_month" value="{{params.current_month}}">
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    var covered_date_to = '{{ params.covered_date_to|date:"m-d-Y" }}'
+    var covered_date_from = '{{ params.covered_date_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        covered_date_to = endDate
+        covered_date_from = startDate
+        if(covered_date_to != "" && covered_date_from != ""){
+            covered_date_to = covered_date_to.format('MM-DD-YYYY')
+            covered_date_from = covered_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(covered_date_to) - new Date(covered_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+
+
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "name": name, 
+            "branch": branch,
+            "status": status,
+            "category": category,
+            "lease_type": lease_type,
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var status = $("#status").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "name": name, 
+            "branch": branch, 
+            "status": status,
+            "category": category,
+            "lease_type": lease_type,
+            "current_month": $('#current_month').val() || "",
+            "billing_type": "{{data.type}}"
+        }); 
+ 
+        location.href = '{% url "billing:export_billing" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+
+
+
+{% elif data.type == 'dispose1' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">    
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Status
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="status" name="status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status 
+                        </option>
+                        <option value="pending"  {% if params.status == 'pending' %}selected{% endif %}>
+                            Draft
+                        </option> 
+                        <option value="for Tfleet manager approval"  {% if params.status == 'for Tfleet manager approval' %}selected{% endif %}>
+                            Queued to Tfleet manager
+                        </option> 
+                        <option value="for Purchasing manager approval"  {% if params.status == 'for Purchasing manager approval' %}selected{% endif %}>
+                            Queued to Purchasing manager
+                        </option> 
+                        <option value="approved"  {% if params.status == 'approved' %}selected{% endif %}>
+                            For actual disposal
+                        </option> 
+                        <option value="rejected by branch manager,rejected by Tfleet manager,rejected by Purchasing manager"  {% if params.status == 'rejected by branch manager,rejected by Tfleet manager,rejected by Purchasing manager' %}selected{% endif %}>
+                            Rejected
+                        </option> 
+                    </select>   
+                </div> 
+            </div> 
+        </div>
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Requesting unit" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="mt-2 col-xl-12">
+            {% include 'components/inputs/input_with_label.html' with label="YEAR MODEL" placeholder="Enter Year Model" name="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=params.year_model  %}
+            
+        </div> 
+        <div class="mt-2 col-xl-12">
+            {% include 'components/inputs/input_with_label.html' with label="Potential buyer" placeholder="Enter potential buyer" name="potential_buyer" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=params.potential_buyer  %}
+            
+        </div>  
+        
+        <input type="hidden" name="exclude" id="exclude" value="{{params.exclude}}">
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    var covered_date_to = '{{ params.covered_date_to|date:"m-d-Y" }}'
+    var covered_date_from = '{{ params.covered_date_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        covered_date_to = endDate
+        covered_date_from = startDate
+        if(covered_date_to != "" && covered_date_from != ""){
+            covered_date_to = covered_date_to.format('MM-DD-YYYY')
+            covered_date_from = covered_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(covered_date_to) - new Date(covered_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var potential_buyer = $("input[name=potential_buyer]").val() || ""; 
+        var year_model = $("input[name=year_model]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+
+
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "potential_buyer": potential_buyer, 
+            "branch": branch,
+            "status": status,
+            "year_model": year_model, 
+            "exclude": $("#exclude").val() || ""
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var status = $("#status").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+        var potential_buyer = $("input[name=potential_buyer]").val() || ""; 
+        var year_model = $("input[name=year_model]").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "covered_date_to": covered_date_to,
+            "covered_date_from": covered_date_from,
+            "potential_buyer": potential_buyer, 
+            "branch": branch,
+            "status": status,
+            "year_model": year_model, 
+            "exclude": $("#exclude").val() || ""
+        }); 
+ 
+        location.href = '{% url "vehicle:export_dispose" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+
+{% elif data.type == 'dispose2' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">   
+        <div class="col-lg-12 mt-2">
+            {% with  params.approval_date_to|date:"m-d-Y" as date_to %}
+                {% with  params.approval_date_from|date:"m-d-Y" as date_from %}
+                    {% include 'components/inputs/input_with_label.html' with label="Approval Date Range" id="daterange" name="daterange" fromName="approval_date_from" toName="approval_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=approval_value_date valueFrom=date_from valueTo=date_to %} 
+                {% endwith %} 
+            {% endwith %}
+        </div> 
+        <div class="col-lg-12 mt-2"> 
+            {% with  params.actual_repair_date_to|date:"m-d-Y" as date_to %}
+                {% with  params.actual_repair_date_from|date:"m-d-Y" as date_from %}
+                    {% include 'components/inputs/input_with_label.html' with label="Actual Disposal Date Range" id="daterange2" name="daterange2" fromName="actual_repair_date_from" toName="actual_repair_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=actual_repair_value_date valueFrom=date_from valueTo=date_to %} 
+                {% endwith %} 
+            {% endwith %}
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Requesting unit" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>  
+        <div class="mt-2 col-xl-12">
+            {% include 'components/inputs/input_with_label.html' with label="YEAR MODEL" placeholder="Enter Year Model" name="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=params.year_model  %}
+            
+        </div> 
+        <input type="hidden" name="status" id="status" value="{{params.status}}">
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    var approval_date_to = '{{ params.approval_date_to|date:"m-d-Y" }}'
+    var approval_date_from = '{{ params.approval_date_from|date:"m-d-Y" }}'
+
+    var actual_repair_date_to = '{{ params.actual_repair_date_to|date:"m-d-Y" }}'
+    var actual_repair_date_from = '{{ params.actual_repair_date_from|date:"m-d-Y" }}'
+
+    
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        approval_date_to = endDate
+        approval_date_from = startDate
+        if(approval_date_to != "" && approval_date_from != ""){
+            approval_date_to = approval_date_to.format('MM-DD-YYYY')
+            approval_date_from = approval_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(approval_date_to) - new Date(approval_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    function onDateRangeChange_daterange2(startDate, endDate){ 
+        actual_repair_date_to = endDate
+        actual_repair_date_from = startDate
+        if(actual_repair_date_to != "" && actual_repair_date_from != ""){
+            actual_repair_date_to = actual_repair_date_to.format('MM-DD-YYYY')
+            actual_repair_date_from = actual_repair_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(actual_repair_date_to) - new Date(actual_repair_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange2()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var year_model = $("input[name=year_model]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+
+
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "approval_date_to": approval_date_to,
+            "approval_date_from": approval_date_from,
+            "actual_repair_date_to": actual_repair_date_to,
+            "actual_repair_date_from": actual_repair_date_from,
+            "year_model": year_model, 
+            "branch": branch,
+            "status": status,
+            "category": category,
+            "lease_type": lease_type,
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var status = $("#status").val() || ""; 
+        var year_model = $("input[name=year_model]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var category = $("#category").val() || ""; 
+        var lease_type = $("#lease_type").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "approval_date_to": approval_date_to,
+            "approval_date_from": approval_date_from,
+            "actual_repair_date_to": actual_repair_date_to,
+            "actual_repair_date_from": actual_repair_date_from,
+            "year_model": year_model, 
+            "branch": branch, 
+            "status": status,
+            "category": category,
+            "lease_type": lease_type,
+            "dispose_type": "history"
+        }); 
+ 
+        location.href = '{% url "vehicle:export_dispose" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+{% elif data.type == 'user' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">  
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch/Dept" name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'user:user_role_search' as user_role_search %}
+                {% include 'components/inputs/input_with_label.html' with label="User Role" name="user_role" id="user_role" url=user_role_search placeholder="Search User Role" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                STATUS
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="status" name="status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="active" {% if params.status == 'active' %}selected{% endif %} >
+                            Active
+                        </option> 
+                        <option value="inactive" {% if params.status == 'inactive' %}selected{% endif %}>
+                            Deactivated
+                        </option>   
+                    </select> 
+                </div> 
+            </div> 
+        </div> 
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Created From" name="date_from" id="date_from" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.date_from %}
+        </div>
+        <div class="col-lg-6 mt-2"> 
+            {% include 'components/inputs/input_with_label.html' with label="Date Created To" name="date_to" id="date_to" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=params.date_to %}
+        </div>
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+
+        var date_to = $("input[name=date_to]").val() || ""; 
+        var date_from = $("input[name=date_from]").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var user_role = $("#user_role").val() || ""; 
+
+        const query_params = {
+            "date_to": date_to,
+            "date_from": date_from,
+            "status": status,
+            "branch": branch,
+            "user_role":user_role
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    }) 
+
+    function exportFile() {
+        
+        var date_to = $("input[name=date_to]").val() || ""; 
+        var date_from = $("input[name=date_from]").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var user_role = $("#user_role").val() || ""; 
+
+        var query_params = urlParameterize({
+            "date_to": date_to,
+            "date_from": date_from,
+            "status": status,
+            "branch": branch,
+            "user_role":user_role
+        });
+        location.href = '{% url "user:user_export" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    }
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+    {% if params.user_role %}
+    $('#user_role').html(`
+            <option value="{{user_role.pk}}" selected>
+                {{user_role.name}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+{% elif data.type == 'activity' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">   
+        <div class="col-xl-12 mt-2">
+            {% with  params.activity_date_to|date:"m-d-Y" as date_to %}
+            {% with  params.activity_date_from|date:"m-d-Y" as date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Activity Date Range" id="daterange" name="daterange" fromName="activity_date_from" toName="activity_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=activity_value_date valueFrom=date_from valueTo=date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'user:user_search' as user_search %}
+                {% include 'components/inputs/input_with_label.html' with label="User Details" name="user" id="user" url=user_search placeholder="Search User" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'user:user_role_search' as user_role_search %}
+                {% include 'components/inputs/input_with_label.html' with label="User Role" name="user_role" id="user_role" url=user_role_search placeholder="Search User Role" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div>
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Module Accessed
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="module" name="module" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select module
+                        </option>
+                        <option value="Login" {% if params.module == 'Login' %}selected{% endif %} >
+                            Login
+                        </option> 
+                        <option value="SRF creation" {% if params.module == 'SRF creation' %}selected{% endif %} >
+                            SRF creation
+                        </option> 
+                        <option value="VDF creation" {% if params.module == 'VDF creation' %}selected{% endif %} >
+                            VDF creation
+                        </option> 
+                        <option value="Vehicle disposal creation" {% if params.module == 'Vehicle disposal creation' %}selected{% endif %} >
+                            Vehicle disposal creation
+                        </option> 
+                        <option value="Branch / dept" {% if params.module == 'Branch / dept' %}selected{% endif %} >
+                            Branch / dept
+                        </option> 
+                        <option value="Masterlist of vehicles" {% if params.module == 'Masterlist of vehicles' %}selected{% endif %} >
+                            Masterlist of vehicles
+                        </option> 
+                        <option value="Service request maintenance form" {% if params.module == 'Service request maintenance form' %}selected{% endif %} >
+                            Service request maintenance form
+                        </option> 
+                        <option value="Vehicle dispatch form" {% if params.module == 'Vehicle dispatch form' %}selected{% endif %} >
+                            Vehicle dispatch form
+                        </option> 
+                        <option value="Disposal of vehicles" {% if params.module == 'Disposal of vehicles' %}selected{% endif %} >
+                            Disposal of vehicles
+                        </option> 
+                        <option value="Gasoline consumption monitoring" {% if params.module == 'Gasoline consumption monitoring' %}selected{% endif %} >
+                            Gasoline consumption monitoring
+                        </option> 
+                        <option value="Tfleet vehicle rental billing" {% if params.module == 'Tfleet vehicle rental billing' %}selected{% endif %} >
+                            Tfleet vehicle rental billing
+                        </option> 
+                        <option value="Insurance monitoring" {% if params.module == 'Insurance monitoring' %}selected{% endif %} >
+                            Insurance monitoring
+                        </option> 
+                        <option value="Vehicle registration monitoring" {% if params.module == 'Vehicle registration monitoring' %}selected{% endif %} >
+                            Vehicle registration monitoring
+                        </option> 
+                        <option value="Masterlist of 3rd party providers" {% if params.module == 'Masterlist of 3rd party providers' %}selected{% endif %} >
+                            Masterlist of 3rd party providers
+                        </option> 
+                        <option value="Masterlist of repairs accredited suppliers" {% if params.module == 'Masterlist of repairs accredited suppliers' %}selected{% endif %} >
+                            Masterlist of repairs accredited suppliers
+                        </option> 
+                        <option value="Users" {% if params.module == 'Users' %}selected{% endif %} >
+                            Users
+                        </option> 
+                        <option value="User role" {% if params.module == 'User role' %}selected{% endif %} >
+                            User role
+                        </option> 
+                    </select> 
+                </div> 
+            </div> 
+        </div>
+        <style>
+            span.select2-container{
+                width: 100% !important;
+            }
+        </style>
+        <!-- <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Activity
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="activity" name="activity" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value=""> 
+                        </option>
+                        <option value="Locking / unlocking" {% if params.activity == 'Locking / unlocking' %}selected{% endif %} >
+                            Locking / unlocking
+                        </option> 
+                        <option value="Uploading and re-uploading of files" {% if params.activity == 'Uploading and re-uploading of files' %}selected{% endif %} >
+                            Uploading and re-uploading of files
+                        </option> 
+                        <option value="Approval / rejection" {% if params.activity == 'Approval / rejection' %}selected{% endif %} >
+                            Approval / rejection
+                        </option> 
+                        <option value="Adding branch /dept" {% if params.activity == 'Adding branch /dept' %}selected{% endif %} >
+                            Adding branch /dept
+                        </option> 
+                        <option value="Deactivating sub-branch / sub/dept" {% if params.activity == 'Deactivating sub-branch / sub/dept' %}selected{% endif %} >
+                            Deactivating sub-branch / sub/dept
+                        </option> 
+                        <option value="Adding sub-branch / sub/dept" {% if params.activity == 'Adding sub-branch / sub/dept' %}selected{% endif %} >
+                            Adding sub-branch / sub/dept
+                        </option> 
+                        <option value="Deactivating branch /dept" {% if params.activity == 'Deactivating branch /dept' %}selected{% endif %} >
+                            Deactivating branch /dept
+                        </option> 
+                        <option value="Updating of remarks" {% if params.activity == 'Updating of remarks' %}selected{% endif %} >
+                            Updating of remarks
+                        </option> 
+                        <option value="Updating of insurance claim details" {% if params.activity == 'Updating of insurance claim details' %}selected{% endif %} >
+                            Updating of insurance claim details
+                        </option> 
+                        <option value="Logging in" {% if params.activity == 'Logging in' %}selected{% endif %} >
+                            Logging in
+                        </option> 
+                        <option value="Changing of password by users" {% if params.activity == 'Changing of password by users' %}selected{% endif %} >
+                            Changing of password by users
+                        </option> 
+                        <option value="Logging out" {% if params.activity == 'Logging out' %}selected{% endif %} >
+                            Logging out
+                        </option> 
+                        <option value="Activating / de-activating users" {% if params.activity == 'Activating / de-activating users' %}selected{% endif %} >
+                            Activating / de-activating users
+                        </option> 
+                        <option value="Updating users" {% if params.activity == 'Updating users' %}selected{% endif %} >
+                            Updating users
+                        </option> 
+                        <option value="Creating user role" {% if params.activity == 'Creating user role' %}selected{% endif %} >
+                            Creating user role
+                        </option> 
+                        <option value="Activating / de-activating user role" {% if params.activity == 'Activating / de-activating user role' %}selected{% endif %} >
+                            Activating / de-activating user role
+                        </option> 
+                        <option value="Updating user role" {% if params.activity == 'Updating user role' %}selected{% endif %} >
+                            Updating user role
+                        </option> 
+                        <option value="Creating / importing users" {% if params.activity == 'Creating / importing users' %}selected{% endif %} >
+                            Creating / importing users
+                        </option> 
+                        <option value="On-boarding / importing vehicles" {% if params.activity == 'On-boarding / importing vehicles' %}selected{% endif %} >
+                            On-boarding / importing vehicles
+                        </option> 
+                        <option value="Updating vehicle status" {% if params.activity == 'Updating vehicle status' %}selected{% endif %} >
+                            Updating vehicle status
+                        </option> 
+                        <option value="Re-assigning vehicles to branch / dept" {% if params.activity == 'Re-assigning vehicles to branch / dept' %}selected{% endif %} >
+                            Re-assigning vehicles to branch / dept
+                        </option> 
+                        <option value="Updating vehicle basic information" {% if params.activity == 'Updating vehicle basic information' %}selected{% endif %} >
+                            Updating vehicle basic information
+                        </option> 
+                        <option value="Submitting for approval" {% if params.activity == 'Submitting for approval' %}selected{% endif %} >
+                            Submitting for approval
+                        </option> 
+                        <option value="Saving as draft" {% if params.activity == 'Saving as draft' %}selected{% endif %} >
+                            Saving as draft
+                        </option> 
+                        <option value="Editing mode of payment and supplier in the SRF" {% if params.activity == 'Editing mode of payment and supplier in the SRF' %}selected{% endif %} >
+                            Editing mode of payment and supplier in the SRF
+                        </option> 
+                        <option value="Endorsement / Approval / rejection of SRF" {% if params.activity == 'Endorsement / Approval / rejection of SRF' %}selected{% endif %} >
+                            Endorsement / Approval / rejection of SRF
+                        </option> 
+                        <option value="Inputting data for actual repair" {% if params.activity == 'Inputting data for actual repair' %}selected{% endif %} >
+                            Inputting data for actual repair
+                        </option> 
+                        <option value="Endorsement / Approval / rejection of VDF" {% if params.activity == 'Endorsement / Approval / rejection of VDF' %}selected{% endif %} >
+                            Endorsement / Approval / rejection of VDF
+                        </option> 
+                        <option value="Updating status and remarks" {% if params.activity == 'Updating status and remarks' %}selected{% endif %} >
+                            Updating status and remarks
+                        </option> 
+                        <option value="Updating MDS route" {% if params.activity == 'Updating MDS route' %}selected{% endif %} >
+                            Updating MDS route
+                        </option> 
+                        <option value="Updating status, remarks, and effectivity date" {% if params.activity == 'Updating status, remarks, and effectivity date' %}selected{% endif %} >
+                            Updating status, remarks, and effectivity date
+                        </option> 
+                        <option value="Updating remarks" {% if params.activity == 'Updating remarks' %}selected{% endif %} >
+                            Updating remarks
+                        </option> 
+                        <option value="Endorsement / Approval / rejection Updating actual disposal details" {% if params.activity == 'Endorsement / Approval / rejection Updating actual disposal details' %}selected{% endif %} >
+                            Endorsement / Approval / rejection Updating actual disposal details
+                        </option> 
+                        <option value="Uploading and approval of budget" {% if params.activity == 'Uploading and approval of budget' %}selected{% endif %} >
+                            Uploading and approval of budget
+                        </option>   
+                    </select>
+                </div>
+            </div>
+        </div>   -->
+        
+    </div>
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    $("#activity").select2({
+        theme: "bootstrap-5",
+        placeholder: "Please select activity",
+        allowClear:true,
+    });
+
+    var activity_date_to = '{{ params.activity_date_to|date:"m-d-Y" }}'
+    var activity_date_from = '{{ params.activity_date_from|date:"m-d-Y" }}'
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        activity_date_to = endDate
+        activity_date_from = startDate
+        if(activity_date_to != "" && activity_date_from != ""){
+            activity_date_to = activity_date_to.format('MM-DD-YYYY')
+            activity_date_from = activity_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(activity_date_to) - new Date(activity_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+ 
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){ 
+        var user = $("#user").val() || ""; 
+        var module = $("#module").val() || ""; 
+        var user_role = $("#user_role").val() || ""; 
+        var activity = $("#activity").val() || ""; 
+
+        const query_params = { 
+            "user": user,
+            "module": module,
+            "activity_date_to": activity_date_to,
+            "activity_date_from": activity_date_from,
+            "user_role": user_role,
+            "activity": activity
+        };
+
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    }) 
+
+    function exportFile() {
+        var user = $("#user").val() || ""; 
+        var module = $("#module").val() || ""; 
+        var user_role = $("#user_role").val() || ""; 
+        var activity = $("#activity").val() || ""; 
+ 
+        var query_params = urlParameterize({ 
+            "user": user,
+            "module": module,
+            "activity_date_to": activity_date_to,
+            "activity_date_from": activity_date_from,
+            "user_role": user_role,
+            "activity": activity
+        });
+        location.href = '{% url "user:activity_export" %}?' + query_params
+        $("#modal_rounded").modal('hide');
+    }
+
+    {% if params.user %} 
+        $('#user').html(`
+            <option value="{{user.pk}}" selected>
+                {{user.first_name}} {{user.last_name}}
+            </option>
+        `).trigger('change') 
+       
+    {% endif %}
+    {% if params.user_role %}
+    $('#user_role').html(`
+            <option value="{{user_role.pk}}" selected>
+                {{user_role.name}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+{% elif data.type == 'vehicle_registration' or data.type == 'vehicle_registration_history' %}
+
+<div class="modal-body p-0"> 
+    <div class="row">   
+           
+        <div class="col-xl-12 mt-2">
+            {% with  params.latest_renewal_date_to|date:"m-d-Y" as latest_renewal_date_to %}
+            {% with  params.latest_renewal_date_from|date:"m-d-Y" as latest_renewal_date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Latest Renewal Date Range" id="daterange" name="daterange" fromName="latest_renewal_date_from" toName="latest_renewal_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=latest_renewal_value_date valueFrom=latest_renewal_date_from valueTo=latest_renewal_date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        <div class="col-xl-12 mt-2">
+            {% with  params.next_renewal_date_to|date:"m-d-Y" as next_renewal_date_to %}
+            {% with  params.next_renewal_date_from|date:"m-d-Y" as next_renewal_date_from %}
+                {% include 'components/inputs/input_with_label.html' with label="Next Renewal Date Range" id="daterange2" name="daterange2" fromName="next_renewal_date_from" toName="next_renewal_date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" value=next_renewal_value_date valueFrom=next_renewal_date_from valueTo=next_renewal_date_to %} 
+            {% endwith %} 
+        {% endwith %}
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Branch / Dept." name="branch_filter" id="branch_filter" url=branch_search placeholder="Search Branch" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="col-xl-12">
+            <div class="mt-2">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Plate/CS No." name="requesting_unit_filter" id="requesting_unit_filter" url=vehicle_search placeholder="Search Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+            
+            </div>
+        </div> 
+        <div class="mt-2 col-xl-12">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Category
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="category" name="category" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select category 
+                        </option>
+                        <option value="2 wheels"  {% if params.category == '2 wheels' %}selected{% endif %}>
+                            2 wheels
+                        </option> 
+                        <option value="3 wheels"  {% if params.category == '3 wheels' %}selected{% endif %}>
+                            3 wheels
+                        </option> 
+                        <option value="4 wheels" {% if params.category == '4 wheels' %}selected{% endif %}>
+                            4 wheels
+                        </option> 
+                        <option value="6 wheels"  {% if params.category == '6 wheels' %}selected{% endif %}>
+                            6 wheels
+                        </option> 
+                        <option value="10 wheels"  {% if params.category == '10 wheels' %}selected{% endif %}>
+                            10 wheels
+                        </option>  
+                    </select>  
+                </div> 
+            </div> 
+        </div>
+        
+        <div class="mt-2 col-xl-6">
+            {% include 'components/inputs/input_with_label.html' with label="Vehicle Status" id="vehicle_status" name="vehicle_status" options=status_option labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" value=params.vehicle_status %}
+        </div>  
+        <div class="mt-2 col-xl-6">
+            <div class="text-black text-left self-start text-sm mb-2">
+                Registration Status
+            </div>
+            <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                <div class="flex items-stretch justify-center flex-1">
+                    <select id="registration_status" name="registration_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                        <option value="">
+                            Please select status
+                        </option>
+                        <option value="active"  {% if params.registration_status == 'active' %}selected{% endif %}>
+                            Active
+                        </option> 
+                        <option value="expired" {% if params.registration_status == 'expired' %}selected{% endif %}>
+                            Expired
+                        </option>  
+                    </select> 
+                </div> 
+            </div> 
+        </div> 
+    <div class="mt-4 flex justify-center items-center">
+        
+        {% include 'components/buttons/btn_regular.html' with title='FILTER' id="filter-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md' %} 
+    
+        {% if data.no_export != 'true' %}
+        <div style="margin-left: 15px;">
+            {% include 'components/buttons/btn_regular.html' with title='EXPORT' id="export-btn" type="button" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>
+        {% endif %}
+    </div>
+</div>  
+<script>
+    var latest_renewal_date_to = '{{ params.latest_renewal_date_to|date:"m-d-Y" }}'
+    var latest_renewal_date_from = '{{ params.latest_renewal_date_from|date:"m-d-Y" }}'
+    
+    function onDateRangeChange_daterange(startDate, endDate){ 
+        latest_renewal_date_to = endDate
+        latest_renewal_date_from = startDate
+        if(latest_renewal_date_to != "" && latest_renewal_date_from != ""){
+            latest_renewal_date_to = latest_renewal_date_to.format('MM-DD-YYYY')
+            latest_renewal_date_from = latest_renewal_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(latest_renewal_date_to) - new Date(latest_renewal_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    var next_renewal_date_to = '{{ params.next_renewal_date_to|date:"m-d-Y" }}'
+    var next_renewal_date_from = '{{ params.next_renewal_date_from|date:"m-d-Y" }}'
+
+    function onDateRangeChange_daterange2(startDate, endDate){ 
+        next_renewal_date_to = endDate
+        next_renewal_date_from = startDate
+        if(next_renewal_date_to != "" && next_renewal_date_from != ""){
+            next_renewal_date_to = next_renewal_date_to.format('MM-DD-YYYY')
+            next_renewal_date_from = next_renewal_date_from.format('MM-DD-YYYY')
+            // Check if the date range exceeds 90 days
+            const daysDifference = (new Date(next_renewal_date_to) - new Date(next_renewal_date_from)) / (1000 * 60 * 60 * 24);
+            console.log(daysDifference)
+            if (daysDifference > 90) { 
+                cleardaterange2()
+                Swal.fire({
+                    icon: 'info',
+                    title:  'Info',
+                    text: "Date range cannot exceed 90 days.",
+                })
+                return
+            }
+        }  
+    }
+
+    $('#export-btn').off('click')
+    $('#export-btn').on('click', function(){
+        exportFile()
+    })
+
+    $('#filter-btn').off('click')
+    $('#filter-btn').on('click', function(){
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var status = $("#status").val() || ""; 
+        var category = $("#category").val() || "";  
+        var registration_status = $("#registration_status").val() || ""; 
+        var vehicle_status = $("#vehicle_status").val() || ""; 
+
+        const query_params = {
+            "requesting_unit": requesting_unit,
+            "latest_renewal_date_to": latest_renewal_date_to,
+            "latest_renewal_date_from": latest_renewal_date_from,
+            "next_renewal_date_to": next_renewal_date_to,
+            "next_renewal_date_from": next_renewal_date_from,
+            "registration_status": registration_status,
+            "name": name, 
+            "branch": branch,
+            "status": status,
+            "category": category, 
+            "vehicle_status": vehicle_status
+        }; 
+        loadTable(query_params)
+        $("#modal_rounded").modal('hide');
+    })
+
+    function exportFile() { 
+        
+        var requesting_unit = $("#requesting_unit_filter").val() || "";  
+        var status = $("#status").val() || ""; 
+        var name = $("input[name=name]").val() || ""; 
+        var branch = $("#branch_filter").val() || ""; 
+        var category = $("#category").val() || "";  
+        var registration_status = $("#registration_status").val() || ""; 
+        var vehicle_status = $("#vehicle_status").val() || ""; 
+        var query_params = urlParameterize({
+            "requesting_unit": requesting_unit,
+            "latest_renewal_date_to": latest_renewal_date_to,
+            "latest_renewal_date_from": latest_renewal_date_from,
+            "next_renewal_date_to": next_renewal_date_to,
+            "next_renewal_date_from": next_renewal_date_from,
+            "registration_status": registration_status,
+            "title": "{{params.title}}", 
+            "branch": branch, 
+            "status": status,
+            "category": category,
+            "vehicle_status": vehicle_status, 
+            "with_registration": "{{params.with_registration}}"
+        }); 
+ 
+        location.href = '{% url "vehicle_registration:export_registration" %}?' + query_params 
+        $("#modal_rounded").modal('hide');
+    } 
+
+    {% if params.branch %} 
+        $('#branch_filter').html(`
+            <option value="{{branch.pk}}" selected>
+                {{branch.branch_code}}
+            </option>
+        `).trigger('change') 
+    {% endif %}
+
+    {% if params.requesting_unit %} 
+        $('#requesting_unit_filter').html(`
+            <option value="{{vehicle.pk}}" selected>
+                {{vehicle.make_series}} - 
+                {% if vehicle.plate_no %}
+                    {{vehicle.plate_no}}
+                {% else %}
+                    {{vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+        `).trigger('change') 
+    {% endif %}
+</script> 
+
+
+
+
+{% endif %}

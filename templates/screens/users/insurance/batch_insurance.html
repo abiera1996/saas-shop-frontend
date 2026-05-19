@@ -1,0 +1,115 @@
+{% extends 'base/user_base.html' %}
+{% block breadcrumb %} 
+
+<div class="bg-white w-full px-8 py-4 flex">
+    <div class="pr-9"> 
+        {% include 'components/buttons/btn_back.html' %}
+    </div> 
+    <div class="flex-1">
+        <div class="font-bold text-xl">
+            Insurance Monitoring
+        </div>
+        <div class="text-blackxt-[10px]">
+            Insurance Monitoring > Insurance Data
+        </div>
+    </div>
+</div> 
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6 flex items-center">
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit items-center font-bold">
+                        Batch: {{params.batch_number}}
+                    </div>
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"></div>
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <!-- <div class="VWMPLY mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_dropdown.html' with title='Filter and Export' classItem="filter_item" icon="fal fa-filter mx-1" items=filter_items  class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                    </div> 
+                    <div class="VWMPLY mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'vehicle:export_vehicle' as export_vehicle %}
+                        {% include 'components/buttons/btn_border.html' with title='Export All'  link=export_vehicle class='w-full rounded-md' icon="fal fa-file-export" %}
+                    </div>  -->
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+
+    let branch_type = ''
+
+    $(document).ready(function(e){ 
+        loadData();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "branch_type": branch_type,
+            "batch_id": "{{batch_id}}",
+            "with_insurance": "true"
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'insurance:table_insurance_uploaded' %}?"+query_params,
+        })
+    } 
+
+  
+    
+    $('.filter_item').click(function() {
+        const value = $(this).data('value')
+        if(value != ''){
+            if(value.includes('sort_')){
+                // let sort_column = value.replace('sort_', '')
+                // console.log(sort_column, sort, sort.includes(sort_column))
+                // if(sort.includes(sort_column))
+                // {
+                //     if(sort.includes('-')){
+                //         sort = sort.replace('-','')
+                //     } else{
+                //         sort = '-' + sort
+                //     }
+                // } else {
+                //     sort = '-' + sort_column
+                // }
+            } else {
+                branch_type = value
+            } 
+            setTimeout(() => {
+                loadData()
+            }, 400);
+        } 
+    })
+</script>
+{% endblock %}

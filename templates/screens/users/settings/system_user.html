@@ -1,0 +1,103 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %}  
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-dmsans-medium text-xl">
+            Users
+        </div>
+        <div class="text-blackpx]">
+            Settings > Users
+        </div>
+    </div>
+    <div class="DDDTSR col-xl-9 flex justify-end">
+        <div class="mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'user:add_system_user' as add_system_user %} 
+            {% include 'components/buttons/btn_regular.html' with title='Create User' link=add_system_user class='bg-primaryColor text-white rounded-md ' icon='fal fa-plus' size='lg' %} 
+        </div> 
+        <div class="ml-0 lg:ml-2 mt-2 lg:mt-[0] w-full lg:w-fit">
+            {% url 'user:user_import' as user_import %} 
+            {% include 'components/buttons/btn_border.html' with link=user_import title='Import Users' class='w-full rounded-md' icon="fal fa-file-export" %}
+        </div> 
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <!-- <div class="VWMPLY mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_dropdown.html' with title='Filters' classItem="filter_item" icon="fal fa-filter mx-1" items=filter_items  class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                    </div>  -->
+                    <div class="  mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'main:filter_modal' as filter_modal %} 
+                        {% with filter_modal|addstr:'?type=user' as filter_modal_vehicle %}
+                            {% include 'components/buttons/btn_border.html' with title='Filters' id="filter-modal" isModal=True link=filter_modal_vehicle icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                        {% endwith %}   
+                    </div> 
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+{% endblock %}
+
+{% block scripts %} 
+<script>
+
+$(document).ready(function(e){ 
+        loadData();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadTable(params){
+
+        params['type'] = "user" 
+        console.log(params)
+        var query_params = urlParameterize(params);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params}`) 
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'user:table_users' %}?"+query_params,
+        })
+    }
+
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit 
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'user:table_users' %}?"+query_params,
+        })
+    } 
+ 
+</script>
+{% endblock %}

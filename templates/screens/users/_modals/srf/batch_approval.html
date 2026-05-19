@@ -1,0 +1,116 @@
+{% load custom_filters %}
+<style>
+    span.select2-container{
+        z-index: 1000000 !important;
+    }
+</style>
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            List of For Approval 
+        </h5>
+        <label class="text-xs">
+            Preview the details and list
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div> 
+<div class="modal-body p-0">
+    <div class="row">
+        <div class="col-xl-6">
+            
+        </div>
+        <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4">  
+            <div class=" mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                {% include 'components/buttons/btn_regular.html' with title='Approve Selected Item' id="approve_selected" icon="fal fa-check" class='bg-primaryColor text-white rounded-md ' %} 
+            </div>   
+        </div> 
+    </div>
+    <div class="row">
+        <div class="col-xl-12 flex p-0"> 
+            <div id="container_data" class="bg-white rounded-md w-full permission-container">
+            </div>
+        </div>
+    </div> 
+</div>
+
+<script> 
+    loadData();    
+    
+    $(document).ready(function(e){
+        loadBranch();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadData() {
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10; 
+        var filter_repair_status = $("input[name=filter_repair_status]").val() || ""; 
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit, 
+            "is_user_for_approval": true,
+            "exclude_status": 'approved,rejected',
+            "repair_status": filter_repair_status
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'vehicle:table_srf_for_approval' %}?"+query_params,
+        }) 
+    } 
+    
+    $(document).on('click', '#approve_selected', function(e) {
+        const approve_table_id = 'table_srf_for_approval'
+        if($(`.${approve_table_id}_checkbox:checked`).length == 0) return
+        let ids = []
+        $(`.${approve_table_id}_checkbox:checked`).each(function () {
+            var value = (this.checked ? $(this).val() : "");
+            ids.push(value)
+        });
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Approve selected item in the table.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                let reason = ''; 
+                reason = await commentDetails(); 
+                if(reason == undefined){
+                    reason = ''
+                } 
+
+                API.makePostRequest(
+                    "{% url 'vehicle:bulk_approve_srf' %}",
+                    {
+                        reason: reason,
+                        status:"approved",
+                        ids:ids
+                    },
+                    processData=() => {},
+                    callback=(response)=>{
+                        
+                        Swal.fire({
+                            icon: [200,201].includes(response.status)?'success':'error',
+                            title:  'Information',
+                            text: response.message || response.data?.message,
+                        }).then(()=>{
+                            if([200,201].includes(response.status)){  
+                                location.reload() 
+                            } 
+                        })
+
+                    }
+                )  
+            }
+        }) 
+    }) 
+</script>

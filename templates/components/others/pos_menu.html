@@ -1,0 +1,19 @@
+{% comment %}
+    Variables
+    - id
+    - class:string 
+
+    # the details may get in request.session or request.user
+    
+{% endcomment %}
+
+
+<div id="{{id}}" class="{{class}} flex text-white cursor-pointer relative">
+    <div>
+        <img src="/static/image/profile.JPG" class="rounded-full w-[50px] h-[50px] object-cover border-5 border-[#6AA4EA]">
+    </div>
+    <div class="ml-[16px] mr-7 text-blue-500 leading-4 grid place-content-center">
+        <div class="font-dmsans-medium">Dhaibert Jay Abiera</div>
+        <div class="text-sm font-dmsans-medium">Admin</div>
+    </div>
+</div>

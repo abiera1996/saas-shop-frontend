@@ -1,0 +1,23 @@
+{% comment %}
+    Variables
+    - id:string
+    - class:string
+    - name:string
+    - type:string
+    - placeholder:string 
+    - label
+    - labelWidth
+
+{% endcomment %}
+ 
+    <div class="w-full flex items-end">
+        <label class="mr-3" style="width: {% if labelWidth %}{{labelWidth}}{% else %}100px{% endif %};">
+            {{label}}
+        </label>
+        <div class='border-b-primaryColor flex w-full border-b-1  text-sm border-b'>
+        
+            <div class='flex items-stretch justify-center w-[70%] pl-[10px]'>
+                <input id="{{id}}" name="{{name}}" class='{{class}} w-full focus:outline-none border-0' type="{{type}}" placeholder="{{placeholder}}" /> 
+            </div> 
+        </div> 
+    </div> 

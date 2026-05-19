@@ -1,0 +1,83 @@
+{% load custom_filters %}
+<div class="col-xl-12  bg-white p-8 ">  
+    <div class="flex">
+        <div class="flex-1">
+            <div  class="text-2xl font-semibold">
+                Actual repair vs. budget
+            </div>
+            <div class="text-xs text-black">
+                Actual repair vs. budget  > List
+            </div>
+        </div> 
+        <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+              {% url 'vehicle:export_budget' as export_filter_modal %}
+            {% with export_filter_modal|addstr:'?requesting_unit='|addstr:id as export_srf_filter_modal %}
+                {% include 'components/buttons/btn_border.html' with title='Export' link=export_srf_filter_modal class='w-full rounded-md' icon="fal fa-file-export" %}
+            {% endwith %}  
+        </div>  
+    </div>
+    <div class="row mt-4"> 
+        <div id="container_branch" class="bg-white rounded-md w-full permission-container">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(e){
+        loadTable();   
+    }) 
+ 
+    function loadTable(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10;
+        var filter_status = $("input[name=filter_status]").val() || ""; 
+        var filter_repair_status = $("input[name=filter_repair_status]").val() || ""; 
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "requesting_unit": "{{id}}"
+        });
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_budget' %}?"+query_params,
+        })
+    } 
+
+    $(document).on('click', '.update-document', function(e){ 
+        const url = $(this).data('href'); 
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "To delete this document?",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                API.makePostRequest(
+                    url,
+                    { },
+                    processData=() => {},
+                    callback=(response)=>{
+                        if ([200,201].includes(response.status)){
+                            $(`div[data-tab=others]`).find('.tab-item').eq(0).addClass('active')
+                            $('#tab-container').loadSubpage({url: $(`div[data-tab=others]`).attr('data-url')}) 
+                        } else {
+                            Swal.fire({
+                                icon: [200,201].includes(response.status)?'success':'error',
+                                title:  'Information',
+                                text: response.message || response.data?.message,
+                            })
+                        }
+                        
+
+                    }
+                ) 
+            }
+        })
+        
+    })
+</script>

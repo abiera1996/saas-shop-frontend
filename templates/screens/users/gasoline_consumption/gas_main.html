@@ -1,0 +1,120 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Latest Monthly Gasoline Consumption Report
+        </div>
+        <div class="text-black text-[10px]">
+            Latest Monthly Gasoline Consumption Report > List
+        </div>
+    </div>
+    <div class="CRTGSLNCNSMPTN col-xl-9 flex justify-end"> 
+        <div class="ml-0 lg:ml-2 mt-2 lg:mt-[0] w-full lg:w-fit">
+            {% url 'user:gasoline_import' as gasoline_import %}  
+            {% include 'components/buttons/btn_regular.html' with link=gasoline_import title='Import Batch Gasoline Consumption' type="link"  class='bg-primaryColor text-white rounded-md ' %}
+        </div> 
+    </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+    span.select2-container {
+        z-index:1!important;
+    }
+
+    /* Sroll bar */ 
+    #tab-custom::-webkit-scrollbar-track
+    {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        background-color: #F5F5F5;
+    }
+
+    #tab-custom::-webkit-scrollbar
+    {
+        width: 4px;
+        background-color: #F5F5F5;
+    }
+
+    #tab-custom::-webkit-scrollbar-thumb
+    {
+        width: 1px;
+        background-color: #aed1ff; 
+    } 
+    #tab-custom::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
+
+        .tab-item.active{ 
+            color:black;
+            background-color: white;
+        }
+        .tab-item{
+            background-color: #2f6cbb;
+            color: white
+        }
+/* END  */
+</style>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12 "> 
+                <div class="mt-4">
+                    <div id="tab-custom" class="flex overflow-x-auto">
+                        <div>
+                            <div data-url="{% url 'gas:batch_gas' %}" data-tab="batch" class="tab-nav cursor-pointer ">
+                                <div class="tab-item p-3 mr-2 w-max">
+                                    Batch Uploaded
+                                </div>
+                            </div>
+                        </div>
+                        <div class="LLRGS">
+                            <div data-url="{% url 'gas:gas_list' %}" data-tab="list" class="tab-nav  cursor-pointer ">
+                                <div class="tab-item  p-3 mr-2 w-max">
+                                    Latest Monthly Consumption Report
+                                </div> 
+                            </div>
+                        </div> 
+                    </div>
+                    <div id="tab-container" class="w-full ">
+                    </div> 
+                </div>  
+            
+        </div> 
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+
+    if(window.location.hash) {
+        var hash = window.location.hash.substring(1); //Puts hash in variable, and removes the # character
+        $('#tab-container').loadSubpage({url: $(`div[data-tab=${hash}]`).attr('data-url')}) 
+        $(`div[data-tab=${hash}]`).find('.tab-item').eq(0).addClass('active')
+    } else { 
+        $(`div[data-tab=batch]`).find('.tab-item').eq(0).addClass('active')
+        $('#tab-container').loadSubpage({url: $(`div[data-tab=batch]`).attr('data-url')})  
+    }
+    
+    $('.tab-nav').click(function() {
+        $('.tab-item').removeClass('active')
+        const url = $(this).data('url');
+        window.location.hash = $(this).data('tab'); 
+        $(this).find('.tab-item').eq(0).addClass('active')
+        $('#tab-container').loadSubpage({url: url})
+    })   
+     
+</script> 
+
+{% endblock %}

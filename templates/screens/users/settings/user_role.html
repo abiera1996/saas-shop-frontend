@@ -1,0 +1,94 @@
+{% extends 'base/user_base.html' %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            User Role
+        </div>
+        <div class="text-black text-[10px]">
+            Settings > User Role
+        </div>
+    </div>
+    <div class="col-xl-9 flex justify-end">
+        <div class="DDDTSRRL mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'user:add_user_role' as add_user_role %} 
+            {% include 'components/buttons/btn_regular.html' with link=add_user_role title='Add User Role' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+        </div> 
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <!-- <div class="w-full row px-3 ">
+                <div class="col-lg-6 flex items-center">
+                    <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_dropdown.html' with title='Filter and Export' icon="fal fa-filter mx-1" items=filter_items  class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                    </div>
+                    <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                </div>
+                <div class="col-lg-6 flex justify-end">
+                    <div class="mt-[13px] lg:mt-[0] w-full lg:w-fit">
+                        {% url 'inventory_management:modal_add_supplier' as modal_add_supplier %}
+                        {% include 'components/buttons/btn_regular.html' with link=modal_add_supplier isModal=True title='Add Supplier' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+                    </div> 
+                </div>
+            </div> -->
+            <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <div class=" mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'user:role_export' as role_export %} 
+                        {% include 'components/buttons/btn_regular.html' with title='Export' link=role_export size="md" class='bg-primaryColor text-white rounded-md ' %} 
+                    </div>  
+                </div> 
+            </div>  
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="user_role" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+    $(document).ready(function(e){
+        loadUserRole();  
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadUserRole();
+    }));
+
+    function loadUserRole(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#user_role [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit
+        });
+        
+        $('#user_role').loadSubpage({
+            url: "{% url 'user:table_user_role' %}?"+query_params,
+        })
+    } 
+</script>
+{% endblock %}

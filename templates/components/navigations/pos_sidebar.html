@@ -1,0 +1,172 @@
+{% comment %}
+    Variables
+    - headLogo:string 
+    - navigations:array [{"title": "", "isActive"=False, "icon":"", "url":"", "subItems": [{"url": "", "name":""}]}]
+    - advertisements:array [{"imageUrl": "/static/image/test/test1.jpg", "redirect": "https://facebook.com", "alt": ""}]
+{% endcomment %} 
+<style > 
+    .fold-nav-sub-item-style {
+        position: fixed;
+        background: #fafafa;
+        right: -172px;
+        display: flex;
+        flex-direction: column;
+        width: 161px;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        --tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+        filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+        align-items: flex-start; 
+    }  
+    .nav-sub-item {   
+        margin-top: 10px;
+        margin-left: 68px;
+        cursor: pointer;
+        display: none;
+    } 
+
+    .nav-item{
+        padding: 0 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        margin-top: 1.5rem/* 24px */;
+    } 
+    .nav-item-container {
+        padding: 5px 7px; 
+        color: #838383;
+    }
+    
+    .nav-item.active.active {
+        background-color: #074691;
+    }
+    
+    .back-icon:hover{
+        background-color: #074691;
+        cursor: pointer;
+    }
+    .nav-item .with-color-stroke{
+        stroke: white !important;
+    }
+
+    .nav-item:hover{
+        color:#0265DC;
+        background-color: #074691;
+    } 
+    .nav-item:hover .with-color-stroke {
+        stroke: #0265DC
+    }
+    .nav-item:hover .with-color-fill {
+        background-color: #074691;
+    }
+    .side-label{
+        font-size: 10px;
+        color: white;
+    }
+
+    #side-bar {
+        transition: width 0.3s ease-out, transform 0.3s ease-out;
+        transform: translateX(0);
+        width:100px;
+        background-color: #2f6cbb;
+        color: white;
+        overflow: hidden;
+    }
+
+    @media (max-width: 1023px) {
+    #side-bar { 
+        transform: translateX(-100%) ;
+        transition: transform 0.3s ease-out;
+    }
+    }
+    .show-left {
+        transform: translateX(0) !important;
+        transition: transform 0.3s ease-out !important;
+    } 
+
+    .fold-sidebar {
+        transition: width 0.3s ease-out !important;
+        width: 5rem !important;
+    } 
+
+    .nav-drop-icon{
+        position: absolute;
+        right: 1.5rem/* 24px */;
+    }  
+
+</style>
+
+<div id="side-bar" class="h-full bg-[#0265DC] w-[100%%] md:w-[45%] sm:w-[45%] lg:w-[385px] lg:relative fixed z-20 drop-shadow-md">
+    <a href="{% url 'user:point_of_sale' %}" class="w-full h-[80px] flex justify-center items-center back-icon">
+        <img src="/static/image/icons/pos_back.png" class="object-contain w-full h-[40px] f"/>
+    </a>
+    
+    <div id="navigation-container" class="flex flex-column">
+        {% for navigation in navigations %}
+            {% if navigation.isDivider %}
+                <div class="border-1 border-gray-200 my-6 w-full mb-2"></div>
+            {% else %}
+                {% include 'components/navigations/pos_navigation_item.html' with title=navigation.title isActive=navigation.isActive icon=navigation.icon url=navigation.url %}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>  
+    var subItemNavigation;
+    const sideBar = document.getElementById('side-bar');
+    
+    const toggleSubNavigation = (subItem) => {
+        if(subItem==null) return;
+        if(sideBar.classList.contains('fold-sidebar')){
+            subItem.addClass('fold-nav-sub-item-style'); 
+        } else {
+            subItem.removeClass('fold-nav-sub-item-style');
+        }
+    }
+
+    $('.nav-item').click(function() {
+        subItemNavigation = $(this).find('.nav-sub-item').eq(0)  
+        const nav_drop_icon =  $(this).find('.nav-item-container').eq(0)
+                                        .find('.nav-drop-icon').eq(0); 
+        toggleSubNavigation(subItemNavigation)
+        subItemNavigation.toggle();
+
+        if(nav_drop_icon.html() == undefined) return;
+        if(nav_drop_icon.html().toString().includes('fa-caret-right'))
+            nav_drop_icon.html('<i class="fas fa-caret-down"></i>');
+        else
+            nav_drop_icon.html('<i class="fas fa-caret-right"></i>'); 
+
+    })  
+
+    $(document).on('click', function(event){ 
+        let targetElement =  event.target; 
+        
+        while(true){  
+            if(targetElement == null) return; 
+            if(targetElement.id == 'side-bar'){  // user click in sidebar view
+                break;
+            } else if(targetElement.id == 'toggleSidebarBtn'){
+                if(window.screen.width <= 1024){ // tablet and mobile view
+                sideBar.classList.toggle('show-left');
+                } else { // desktop view
+                $('.side-label').toggle()
+                sideBar.classList.toggle('fold-sidebar');
+                $('.nav-details').toggle()
+                $('#navigation-container').toggleClass('items-center');
+                toggleSubNavigation(subItemNavigation)
+                }
+                break;
+            } else if(targetElement.tagName == 'BODY' && window.screen.width <= 1024){ 
+                // user click outside sidebar view in mobile view
+                sideBar.classList.remove('show-left');
+                break;
+            } else {
+                targetElement = targetElement.parentElement
+            } 
+        } 
+    });
+</script>

@@ -1,0 +1,164 @@
+{% load custom_filters %}
+<style>
+    span.select2-container{
+        z-index: 1000000 !important;
+    }
+</style>
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            List of 
+            {% if params.type == 'active_vehicle' %}
+                Active Vehicles
+            {% elif params.type == 'short_term_vehicle' %}
+                Short-term Breakdown Vehicles
+            {% elif params.type == 'long_term_vehicle' %}
+                Long-term Breakdown Vehicles
+            {% elif params.type == 'disposal_vehicle' %}
+                For Disposal Vehicle 
+            {% elif params.type == 'srf_pending_approval' %}
+                SRF for Pending Approval
+            {% elif params.type == 'srf_pending_actual' %}
+                SRF for Pending Actual Repair
+            {% elif params.type == 'vdf_pending_approval' %}
+                VDF for Pending Approval
+            {% elif params.type == 'expired_insurance' %}
+                Expired Insurance
+            {% elif params.type == 'pending_insurance_cliams' %}
+                Pending Insurance claims
+            {% elif params.type == 'expired_registration' %}
+                Expired Vehicle Registration
+            {% endif %}
+        </h5>
+        <label class="text-xs">
+            Preview the details and list
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div> 
+<div class="modal-body p-0">
+    <div class="row">
+        <div class="col-xl-12 flex p-0"> 
+            <div id="container_data" class="bg-white rounded-md w-full permission-container">
+            </div>
+        </div>
+    </div> 
+</div>
+
+<script> 
+    loadData();    
+  
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        {% if params.type == 'active_vehicle' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "vehicle_status": "active"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_vehicle_dashboard' %}?"+query_params,
+            })
+        {% elif params.type == 'short_term_vehicle' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "vehicle_status": "short-term breakdown"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_vehicle_dashboard' %}?"+query_params,
+            })
+        {% elif params.type == 'long_term_vehicle' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "vehicle_status": "permanent breakdown"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_vehicle_dashboard' %}?"+query_params,
+            })
+        {% elif params.type == 'disposal_vehicle' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "vehicle_status": "for disposal"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_vehicle_dashboard' %}?"+query_params,
+            })
+        {% elif params.type == 'srf_pending_approval' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "status": "pending for approval",
+                "is_user_active_list": "true"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_srf_dashboard' %}?"+query_params,
+            })
+        {% elif params.type == 'srf_pending_actual' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "status": 'complete',
+                "repair_status": 'pending'
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_srf_dashboard' %}?"+query_params,
+            }) 
+        {% elif params.type == 'vdf_pending_approval' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "status": "pending for approval",
+                "is_user_active_list": "true"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle:table_vdf_dashboard' %}?"+query_params,
+            }) 
+        {% elif params.type == 'expired_registration' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit, 
+                "with_registration": "true",
+                "registration_status": "expired"
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'vehicle_registration:table_vehicle_registration_dashboard' %}?"+query_params,
+            }) 
+        {% elif params.type == 'expired_insurance' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "type": "Comprehensive",
+                "insurance_status": 'expired'
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'insurance:table_insurance_dashboard' %}?"+query_params,
+            }) 
+        {% elif params.type == 'pending_insurance_cliams' %}
+            var query_params = urlParameterize({
+                "search": filter_search,
+                "limit": filter_limit,
+                "status": 'Pending'
+            });
+            
+            $('#container_data').loadSubpage({
+                url: "{% url 'insurance:table_insurance_claims_dashboard' %}?"+query_params,
+            }) 
+        {% endif %}
+        
+    } 
+</script>

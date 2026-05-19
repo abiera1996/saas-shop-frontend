@@ -1,0 +1,172 @@
+{% comment %}
+    Variables
+    - headLogo:string 
+    - navigations:array [{"title": "", "isActive"=False, "icon":"", "url":"", "subItems": [{"url": "", "name":""}]}]
+    - advertisements:array [{"imageUrl": "/static/image/test/test1.jpg", "redirect": "https://facebook.com", "alt": ""}]
+{% endcomment %} 
+<style > 
+    .fold-nav-sub-item-style {
+        position: fixed;
+        background: #fafafa;
+        right: -172px;
+        display: flex;
+        flex-direction: column;
+        width: 161px;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        --tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+        filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+        align-items: flex-start; 
+    }  
+    .nav-sub-item {   
+        margin-top: 10px;
+        margin-left: 68px;
+        cursor: pointer;
+        display: none;
+    } 
+
+    .nav-item{
+        padding: 0 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        margin-top: 1.5rem/* 24px */;
+    } 
+    .nav-item-container {
+        padding: 5px 7px; 
+        color: black;
+    }
+    
+    .nav-item.active {
+        border-left-width: 5px;
+        border-left-color: #0265DC;
+    }
+    
+    .nav-item.active .nav-item-container {
+        color: white !important; 
+        border-radius: 10px;
+        background: #0265DC;
+    }
+    
+    .nav-item.active .with-color-stroke{
+        stroke: white !important;
+    }
+
+    .nav-item.active .with-color-fill{
+        fill: white !important;
+    }
+
+    .nav-item:hover{
+        color:#0265DC
+    } 
+    .nav-item:hover .with-color-stroke {
+        stroke: #0265DC
+    }
+    .nav-item:hover .with-color-fill {
+        fill: #0265DC;
+    }
+
+    #side-bar {
+        transition: width 0.3s ease-out, transform 0.3s ease-out;
+        transform: translateX(0);
+    }
+
+    @media (max-width: 1023px) {
+    #side-bar { 
+        transform: translateX(-100%) ;
+        transition: transform 0.3s ease-out;
+    }
+    }
+    .show-left {
+        transform: translateX(0) !important;
+        transition: transform 0.3s ease-out !important;
+    } 
+
+    .fold-sidebar {
+        transition: width 0.3s ease-out !important;
+        width: 5rem !important;
+    } 
+
+    .nav-drop-icon{
+        position: absolute;
+        right: 1.5rem/* 24px */;
+    }  
+
+</style>
+
+<div id="side-bar" class="h-full bg-[#FFFFFF] w-[85%] md:w-[45%] sm:w-[45%] lg:w-[385px] lg:relative fixed z-20 drop-shadow-md">
+    {% include headLogo %}
+    <div id="navigation-container" class="flex flex-column overflow-y-auto h-[80dvh] pb-6">
+        {% for navigation in navigations %}
+            {% if navigation.isDivider %}
+                <div class="border-1 border-gray-200 my-6 w-full mb-2"></div>
+            {% else %}
+                {% include 'components/navigations/navigation_item.html' with title=navigation.title isActive=navigation.isActive icon=navigation.icon url=navigation.url subItems=navigation.subItems %}
+            {% endif %}
+        {% endfor %} 
+
+        {% if advertisements %}
+            {% include 'components/others/carousel.html' with items=advertisements %} 
+        {% endif %}
+        
+    </div>
+</div>
+
+<script>  
+    var subItemNavigation;
+    const sideBar = document.getElementById('side-bar');
+    
+    const toggleSubNavigation = (subItem) => {
+        if(subItem==null) return;
+        if(sideBar.classList.contains('fold-sidebar')){
+            subItem.addClass('fold-nav-sub-item-style'); 
+        } else {
+            subItem.removeClass('fold-nav-sub-item-style');
+        }
+    }
+
+    $('.nav-item').click(function() {
+        subItemNavigation = $(this).find('.nav-sub-item').eq(0)  
+        const nav_drop_icon =  $(this).find('.nav-item-container').eq(0)
+                                        .find('.nav-drop-icon').eq(0); 
+        toggleSubNavigation(subItemNavigation)
+        subItemNavigation.toggle();
+
+        if(nav_drop_icon.html() == undefined) return;
+        if(nav_drop_icon.html().toString().includes('fa-caret-right'))
+            nav_drop_icon.html('<i class="fas fa-caret-down"></i>');
+        else
+            nav_drop_icon.html('<i class="fas fa-caret-right"></i>'); 
+
+    })  
+
+    $(document).on('click', function(event){ 
+        let targetElement =  event.target; 
+        
+        while(true){  
+            if(targetElement == null) return; 
+            if(targetElement.id == 'side-bar'){  // user click in sidebar view
+                break;
+            } else if(targetElement.id == 'toggleSidebarBtn'){
+                if(window.screen.width <= 1024){ // tablet and mobile view
+                sideBar.classList.toggle('show-left');
+                } else { // desktop view
+                $('.side-label').toggle()
+                sideBar.classList.toggle('fold-sidebar');
+                $('.nav-details').toggle()
+                $('#navigation-container').toggleClass('items-center');
+                toggleSubNavigation(subItemNavigation)
+                }
+                break;
+            } else if(targetElement.tagName == 'BODY' && window.screen.width <= 1024){ 
+                // user click outside sidebar view in mobile view
+                sideBar.classList.remove('show-left');
+                break;
+            } else {
+                targetElement = targetElement.parentElement
+            } 
+        } 
+    });
+</script>

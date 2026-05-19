@@ -1,0 +1,483 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+
+<div class="bg-white w-full px-8 py-4 flex">
+    <div class="pr-9">
+        {% url 'user:system_user' as user %}
+        {% include 'components/buttons/btn_back.html'  %}
+    </div> 
+    <div class="flex-1">
+        <div class="font-bold text-xl">
+            Users
+        </div>
+        <div class="text-black text-[10px]">
+            Settings > Users
+        </div>
+    </div> 
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+    span.select2-container {
+        z-index:1!important;
+    }
+</style>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        
+            <div class="col-xl-12  mt-6 bg-white p-8 ">  
+                <form  id="form-add-user" 
+                    {% if id %}
+                    action="{% url 'user:update_system_user' id %}"
+                    {% else %}
+                    action="{% url 'user:create_system_user' %}"
+                    {% endif %}
+                >
+                    <div class="flex">
+                        <div class="flex-1">
+                            <div  class="text-2xl font-semibold">
+                                User Information
+                            </div>
+                            <div class="text-xs text-black">
+                                Complete the needed information.
+                            </div>
+                        </div> 
+                        <div >
+                            {% if id %}
+                                {% include 'components/buttons/btn_regular.html' with title='UPDATE USER' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                            {% else %}
+                                {% include 'components/buttons/btn_regular.html' with title='CREATE USER' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-xl-6">
+                            <div class="mt-2">
+                                <div class="text-black text-xs mt-3 mb-2">
+                                    PROFILE PICTURE
+                                </div>
+                                {% include 'components/inputs/input_image2.html' with imageId="image2" btnId="btn-image2" name="profile_picture" value=profile.image container_style=2 %}
+                            </div> 
+                            <div class="row mt-2">
+                                <div class="mt-2 col-lg-6">
+                                    {% include 'components/inputs/input_with_label.html' with label="FIRST NAME" id="first_name" name="first_name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=profile.user.first_name  %}
+                                    
+                                </div>
+                                <div class="mt-2 col-lg-6">
+                                    {% include 'components/inputs/input_with_label.html' with label="LAST NAME" id="last_name" name="last_name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=profile.user.last_name %}
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-xl-12">
+                                    <div class="font-bold text-2xl">
+                                        User Auth
+                                    </div>
+                                    <div class="text-black text-[12px]">
+                                        user authentication options
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm">
+                                <div class="flex items-center mb-4">
+                                    <input id="is_auth_otp"  name="is_auth_otp" value="is_auth_otp" type="checkbox" 
+                                    {% if profile.is_auth_otp %}
+                                    checked
+                                    {% endif %}
+                                  
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="is_auth_otp" class="ml-2 text-md font-medium text-gray-900 ">
+                                       Enable OTP authentication
+                                    </label>
+                                </div> 
+                            </div> 
+                        </div>
+                        <div class="col-xl-6">
+                        
+                            <div class="row"> 
+                                <div class="mt-2 col-lg-12">
+                                    {% include 'components/inputs/input_with_label.html' with label="EMAIL" class='my-1' name='email' labelClass='text-black text-sm' type="email" classBorder="border-gray-400" required=True value=profile.user.email %}
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div class="mt-2 col-lg-12">
+                                    {% include 'components/inputs/input_with_label.html' with label="USERNAME" class='my-1' id="username" name='username' labelClass='text-black text-sm' type="text" classBorder="border-gray-400" required=True value=profile.user.username %}
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="mt-2 col-lg-6">
+                                    {% if id %} 
+                                        {% include 'components/inputs/input_with_label.html' with label="DATE ADDED" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=profile.date_created|date:"m-d-Y" attribute="readonly" %}
+                                    {% else %}
+                                        {% now "m-d-Y" as date_now %}
+                                        {% include 'components/inputs/input_with_label.html' with label="DATE ADDED" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=date_now attribute="readonly" %}
+                                    {% endif %}
+                                </div>
+                                <div class="mt-2 col-lg-6">
+                                    {% if id %}
+                                        {% if profile.created_by %}
+                                            {% with profile.created_by.first_name|addstr:profile.created_by.last_name as name_authenticate %}
+                                                {% include 'components/inputs/input_with_label.html' with label="ADDED BY" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                                            {% endwith %} 
+                                        {% else %}
+                                            {% include 'components/inputs/input_with_label.html' with label="ADDED BY" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="Unknown" attribute="readonly" %} 
+                                        {% endif %}
+                                    {% else %}
+                                        {% with request.user.first_name|addstr:request.user.last_name as name_authenticate %}
+                                            {% include 'components/inputs/input_with_label.html' with label="ADDED BY" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                                        {% endwith %}
+                                    {% endif %}
+                                    
+                                    
+                                </div>
+                                <div class="mt-2 col-xl-12">
+                                    <div class="text-black text-left self-start text-sm mb-2">
+                                        STATUS
+                                    </div>
+                                    <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                                        <div class="flex items-stretch justify-center flex-1">
+                                            <select id="status" name="status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                                                <option value="">
+                                                    Please select status
+                                                </option>
+                                                <option selected value="active" {% if profile.status == 'active' %}selected{% endif %} >
+                                                    Active
+                                                </option> 
+                                                <option value="inactive" {% if profile.status == 'inactive' %}selected{% endif %}>
+                                                    Deactivated
+                                                </option>   
+                                            </select> 
+                                        </div> 
+                                    </div> 
+                                </div> 
+                                <div id="deactivate-date" class="col-lg-12 mt-2 hidden">  
+                                    {% include 'components/inputs/input_with_label.html' with label="DATE DEACTIVATE" name="date_deactivate" id="date_deactivate" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" value=profile.date_deactivate   %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mt-2"> 
+                                    {% url 'branch:branch_search' as branch_search %}
+                                    {% include 'components/inputs/input_with_label.html' with label="BRANCH / DEPT" placeholder="Select Branch" url=branch_search name="default_branch" id="default_branch" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True required=True  %}
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                    {% if not profile.user.is_superuser %}
+                        <div class="row mt-4">
+                            <!-- <div class="col-12 text-lg">
+                                Other Details
+                            </div>
+                            {% if request.session.role_code == 'DMN_1' %}
+                                <div class="col-12">
+                                    <div class="mt-2">
+                                        {% url 'branch:branch_search' as branch_search %}
+                                        {% include 'components/inputs/input_with_label.html' with label="BRANCH" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch" classBorder="border-gray-400" required=True %}
+                                    </div>
+                                </div> 
+                            {% endif %} -->
+                            <div class="col-12">
+                                <div class="mt-2"> 
+                                    {% url 'branch:branch_search' as branch_search %}
+                                    {% include 'components/inputs/input_with_label.html' with label="BRANCH / DEPT TO ACCESS" placeholder="Select Branch" url=branch_search name="branches" id="branches" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400 p-1" multiple=True required=True  %}
+                                    <div class="mt-2 col-lg-12"> 
+                                        <div class="flex items-center mb-4">
+                                            <input id="all_branch"  name="all_branch" value="all_branch" type="checkbox" 
+                                            {% if profile.is_all_branch %}
+                                            checked
+                                            {% endif %} 
+                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                            <label for="all_branch" class="ml-2 text-md font-medium text-gray-900 ">
+                                                All Branch / Dept
+                                            </label>
+                                        </div> 
+                                    </div>  
+                                </div>
+                                <div class="mt-2"> 
+                                        {% include 'components/inputs/input_with_label.html' with label="USER ROLE" name="user_role" id="user_role" options=user_roles_list labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=profile.user_role.pk %}
+                                
+                                    {% if id and profile.user_role %}
+                                        <div class="flex justify-start mt-3">
+                                            {% url 'user:user_access' id as user_access %}
+                                            {% include 'components/buttons/btn_regular.html' with title='ADD ACCESS' link=user_access size="xs" class='bg-primaryColor text-white rounded-3xl px-4' %} 
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if not id %}
+                    
+                   {% comment %}
+                    <div class="row mt-4">
+                        <div class="col-xl-12">
+                            <div class="font-bold text-2xl">
+                                User Credentials
+                            </div>
+                            <div class="text-black text-[12px]">
+                                Give user login credentials.
+                            </div>
+                        </div>
+                    </div> 
+                    <div class="row mt-2"> 
+                        <input type="hidden" name="user_id" value="{{profile.user.pk}}">
+                        <div class="mt-2 col-lg-6">
+                            {% if not id %}
+                            {% include 'components/inputs/input_with_label.html' with label="PASSWORD" name="password" id="password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400" required=True   %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="PASSWORD" name="password" id="password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400"  %}
+                            {% endif %}
+                        </div>
+                        <div class="mt-2 col-lg-6">
+                            {% if not id %}
+                            {% include 'components/inputs/input_with_label.html' with label="CONFIRM PASSWORD" id="confirm_password" name="confirm_password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400" required=True   %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="CONFIRM PASSWORD" id="confirm_password" name="confirm_password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400"  %}
+                            {% endif %}
+                            
+                        </div>  
+                    </div>  
+                    {% endcomment %}
+                    {% endif %}
+ 
+                
+                
+                </form>
+                {% if id %}
+                 
+                
+                <div class="row mt-4">
+                    <div class="col-xl-12">
+                        <div class="font-bold text-2xl">
+                            User Credentials
+                        </div>
+                        <div class="text-black text-[12px]">
+                            Give user login credentials.
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <b>
+                        Current Password:
+                    </b> {{profile.current_password}} 
+                </div>
+                <form id="password-form" action="{% url 'user:change_password_user' %}">
+                    <div class="row mt-2"> 
+                        <input type="hidden" name="user_id" value="{{profile.user.pk}}">
+                        <div class="mt-2 col-lg-6">
+                            {% if not id %}
+                            {% include 'components/inputs/input_with_label.html' with label="PASSWORD" name="new_password" id="password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400" required=True   %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="PASSWORD" name="new_password" id="password" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400"  %}
+                            {% endif %}
+                        </div>
+                        <div class="mt-2 col-lg-6">
+                            {% if not id %}
+                            {% include 'components/inputs/input_with_label.html' with label="CONFIRM PASSWORD" id="confirm_password" name="password_confirmation" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400" required=True   %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="CONFIRM PASSWORD" id="confirm_password" name="password_confirmation" labelClass='text-black text-sm' class='my-1' type="password" classBorder="border-gray-400"  %}
+                            {% endif %}
+                            
+                        </div>
+                        <div class="mt-4 flex flex-col md:flex-row justify-center items-center">
+                            <div id="generated-link-text" class="flex-1 text-[#A4A1A8] text-sm"> 
+                            </div>
+                            <div class="flex-1 md:flex-none mt-4 md:mt-0"> 
+                                    {% include 'components/buttons/btn_regular.html' with type="submit" id="proceed-btn" title='Change Password' size="md" class='bg-primaryColor text-white px-4 py-[14px] text-[14px] font-semibold rounded mr-1' %}
+                                
+                            </div>
+                        </div>   
+                    </div> 
+                </form>
+                {% endif %}
+            </div>
+        
+        
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>
+    $("input[name=email]").on("input", debounced(500, function(e){
+        var query_params = urlParameterize({
+            "user": "{{profile.user.pk}}",
+            "email":$("input[name=email]").val()
+        }); 
+        $.ajax({
+            url: '{% url "user:check_email" %}?' + query_params,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                API.setupInputError('email',false) 
+            },
+            error: function (xhr, status, error) {
+                API.setupInputError('email',true, 
+                `Email ${$("input[name=email]").val()} already exist!`) 
+            }
+        })
+    }));
+    
+    $("input[name=username]").on("input", debounced(500, function(e){ 
+        var query_params = urlParameterize({
+            "user": "{{profile.user.pk}}",
+            "username": $("input[name=username]").val()
+        }); 
+        $.ajax({
+            url: '{% url "user:check_username" %}?' + query_params,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                API.setupInputError('username',false) 
+            },
+            error: function (xhr, status, error) { 
+                API.setupInputError('username',true, 
+                `Username ${$("input[name=username]").val()} already exist!`) 
+            }
+        })
+    }));
+</script>
+<script>  
+    {% if profile.status == 'inactive' %}
+    $('#deactivate-date').removeClass('hidden')
+            $('input[name=date_deactivate]').attr('required', true)
+    {% endif %}
+
+    $('#status').change(function() {
+        if($(this).val() == 'inactive'){
+            $('#deactivate-date').removeClass('hidden')
+            $('input[name=date_deactivate]').attr('required', true)
+        } else {
+            $('#deactivate-date').addClass('hidden')
+            $('input[name=date_deactivate]').attr('required', false)
+        }
+    });
+
+    
+
+    $('#all_branch').click(function() {
+        if($(this).is(':checked')) { 
+            $('#branches').attr('required', false)
+        } else {
+            $('#branches').attr('required', true)
+        }
+    })
+
+
+    $('#first_name').on('input', function() {
+        $('#username').val($(this).val().charAt(0) + $('#last_name').val())
+    })
+
+    $('#last_name').on('input', function() {
+        $('#username').val($('#first_name').val().charAt(0) + $(this).val())
+    })
+
+    API.formRequest(
+        '#form-add-user',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => { 
+            return true
+        },
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){ 
+                        {% if id %}
+                        location.reload()
+                        {% else %}
+                        location.href = "{% url 'user:system_user' %}"
+                        {% endif %}
+                    } 
+                })
+            } 
+        },
+        isMultiForm=true
+    )
+
+
+    API.formRequest(
+        '#password-form',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => { 
+            return true
+        },
+        callback=(response)=>{
+            console.log(response)
+            Swal.fire({
+                icon: [200,201].includes(response.status)?'success':'error',
+                title:  'Message', 
+                text: response.message || response.data?.message, 
+            }).then(()=>{
+                if([200,201].includes(response.status)){ 
+                    location.reload()
+                } 
+            })
+            
+        },
+        isMultiForm=true
+    )
+</script>
+
+<script>
+    var branches_of_selected_clinic = [] 
+    
+    {% if id %}
+        var is_edit = true;
+        var is_loaded_branch = false;
+        var is_loaded_default = false
+    {% endif %}
+
+
+    $('#branch').on('change', function() {
+        const branch_id = $(this).val(); 
+        // $('#user_role').html(`<option value="">Please select user role</option>`);
+        // $.ajax({
+        //     url: `/user/ajax/user-role-search?branch=${branch_id}`,
+        //     type: 'GET',
+        //     dataType: 'json',
+        //     success: function(response){
+        //         if(response){  
+        //             console.log(response)
+        //             let user_role = "{{profile.user_role.pk}}";
+        //             response.data.map((val, idx) => {
+        //                 $('#user_role').append(`<option value="${val.id}" ${user_role == val.id?'selected': ''}>${val.text}</option>`);
+        //             })
+        //         }
+        //     }
+        // })
+    }) 
+</script>
+
+<script>
+    {% if id %} 
+        $('#branches').html(`
+                {% for data_repair in profile.userbranch.branches.all %}
+                    "{{data_repair.pk}}",
+                    <option value="{{data_repair.pk}}" selected>{{data_repair.branch_code}}</option>
+                {% endfor %} 
+        `).trigger('change')
+        
+        $('#default_branch').html(`
+                {% for data_repair in profile.userbranch.default_branch.all %}
+                    "{{data_repair.pk}}",
+                    <option value="{{data_repair.pk}}" selected>{{data_repair.branch_code}}</option>
+                {% endfor %} 
+        `).trigger('change')
+        
+    {% endif %}
+</script>
+{% endblock %}

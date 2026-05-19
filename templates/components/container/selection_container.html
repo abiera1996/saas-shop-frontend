@@ -1,0 +1,265 @@
+{% load static %}
+<style>
+    .selection-container-image {
+        background-repeat:no-repeat;
+        background-size: contain;
+        background-position: center center;
+        position: relative;
+        cursor: pointer;
+        display: inline;
+    }
+
+    .w-500px{width: 500px;max-width:500px;}
+    .w-700px{width: 700px;max-width:700px;}
+    .w-420px{width: 420px;max-width:420px;}
+    .w-300px{width: 300px;max-width:300px;}
+    .h-500px{height: 500px;max-height:500px;}
+    .h-300px{height: 300px;max-height:300px;}
+
+    .ml-auto{margin-left: auto}
+    .mr-auto{margin-right: auto}
+
+    .selection-container-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .selected-mark {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .selected-mark-details {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .bg-round-red, .mark-red{
+        background-color: #FF6262;
+        border: 4px solid #FF6262;
+    }
+    .bg-round-blue, .mark-blue{
+        background-color: #2f6cbb;
+        border: 4px solid #0265DC;
+    }
+    .bg-round-green, .mark-green{
+        background-color: #0D9A4E;
+        border: 4px solid #0D9A4E;
+    }
+    .bg-round-yellow, .mark-yellow{
+        background-color: #E9A700;
+        border: 4px solid #E9A700;
+    }
+    .bg-round-erase, .mark-erase{
+        background-color: #cecdcd;
+        border: 4px solid #cecdcd;
+    }
+    .bg-round-dark-blue, .mark-dark-blue{
+        background-color: #3413FF;
+        border: 4px solid #3413FF;
+    }
+    .bg-round-red.active,
+    .bg-round-blue.active,
+    .bg-round-green.active,
+    .bg-round-yellow.active,
+    .bg-round-dark-blue.active,
+    .bg-round-erase.active{
+        border: 4px solid #525151;
+    }
+</style>
+<div class="overflow-auto row">
+    <div class="mt-2 col-lg-12 center-block d-flex justify-content-center ml-auto mr-auto {{ container_class }}">
+        <div id="{{ container_id }}" class="selection-container-image {{ container_class }}" style="background-image: url({{background_image}});">
+            <div class="selection-container-overlay" id="{{ container_overlay_id }}"></div>
+        </div>
+        {% if with_btn %}
+            <div class="d-flex flex-column align-self-center float-right">
+                <button type="button" class="rounded-circle bg-round-red w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="red" onclick="setColor(this, '{{ btn_class }}')"></button>
+                <button type="button" class="rounded-circle bg-round-blue w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="blue" onclick="setColor(this, '{{ btn_class }}')"></button>
+                <button type="button" class="rounded-circle bg-round-green w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="green" onclick="setColor(this, '{{ btn_class }}')"></button>
+                <button type="button" class="rounded-circle bg-round-yellow w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="yellow" onclick="setColor(this, '{{ btn_class }}')"></button>
+                <button type="button" class="rounded-circle bg-round-dark-blue w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="dark-blue" onclick="setColor(this, '{{ btn_class }}')"></button>
+                <button type="button" class="rounded-circle bg-round-erase w-[30px] h-[30px] mb-3 {{ btn_class }}" data-color="transparent" onclick="setColor(this, '{{ btn_class }}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(82, 81, 81, 1);">
+                        <path d="M12.48 3 7.73 7.75 3 12.59a2 2 0 0 0 0 2.82l4.3 4.3A1 1 0 0 0 8 20h12v-2h-7l7.22-7.22a2 2 0 0 0 0-2.83L15.31 3a2 2 0 0 0-2.83 0zM8.41 18l-4-4 4.75-4.84.74-.75 4.95 4.95-4.56 4.56-.07.08z"></path>
+                    </svg>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% if show_markings %}
+    <div class="mt-2 col-lg-12 ">
+        <button type="button" class="btn btn-success bg-success" onclick="showMarkings()">Show Markings</button>
+    </div>
+{% endif %}
+<script>
+
+    class SelectionContainer{{id}}{{ random }}{
+
+        constructor(container, overlay, btnClass, listInput) {
+            this.container = container;
+            this.overlay = overlay;
+            this.btnClass = btnClass;
+            this.marks = [];
+            this.listInput = listInput;
+
+            let arr = document.getElementById(this.listInput).value
+            if (arr){
+                this.startObserving()
+            }
+        }
+        handleResize = (newHeight, newWidth) => {
+            const arrInput = document.getElementById(this.listInput).value;
+            const arr = JSON.parse(arrInput.replace(/'/g, '"'));
+
+            if (arr) {
+                const container = document.getElementById(this.container);
+                const fragment = document.createDocumentFragment();
+
+                for (let i = 0; i < arr.length; i++) {
+                    const { x, y, color } = arr[i];
+                    const xCoord = this.recalculateCoordinates(x, null, newWidth, newHeight);
+                    const yCoord = this.recalculateCoordinates(null, y, newWidth, newHeight);
+
+                    if (color !== null && yCoord !== -1 && xCoord !== -1) {
+                        const mark = document.createElement("div");
+                        const className = "{{ for_viewing }}" ? "selected-mark-details" : "selected-mark";
+
+                        mark.className = className + " mark-" + color;
+                        mark.style.left = xCoord + "px";
+                        mark.style.top = yCoord + "px";
+
+                        fragment.appendChild(mark);
+                        this.marks.push({ color, x: xCoord, y: yCoord, element: mark });
+                    }
+                }
+
+                container.appendChild(fragment);
+            }
+        };
+
+        startObserving() {
+            let sampleDiv = document.getElementById(this.container);
+            this.resizeObserver = new ResizeObserver((entries) => {
+                const entry = entries[0];
+                const newHeight = entry.contentRect.height;
+                const newWidth = entry.contentRect.width;
+                this.handleResize(newHeight, newWidth);
+            });
+            this.resizeObserver.observe(sampleDiv);
+          }
+
+        recalculateCoordinates(originalX=null, originalY=null, newWidth, newHeight) {
+            let divWidth = '{{ old_width }}';
+            let divHeight = '{{old_height}}';
+
+            if (originalX){
+                if (divWidth){
+                    return originalX * newWidth / divWidth;
+                }
+                return (originalX - 3)
+            }else if(originalY){
+                if (divHeight){
+                    return originalY * newHeight / divHeight;
+                }
+                return (originalY - 3)
+            }
+            return null
+        }
+
+        overlayClicked(event){
+            let x = event.offsetX;
+            let y = event.offsetY;
+            let color = this.getCurrentColor();
+
+            if (color === "transparent") {
+                let markToRemove = this.findMarkAtPosition(x, y);
+                if (markToRemove) {
+                    markToRemove.element.parentNode.removeChild(markToRemove.element);
+                    this.marks = this.marks.filter(function(mark) {
+                        return mark.element !== markToRemove.element;
+                    });
+                }
+            } else {
+                let mark = document.createElement("div");
+                mark.className = "selected-mark mark-" + color;
+                mark.style.left = (x - 3) + "px";
+                mark.style.top = (y - 3) + "px";
+
+                if (color !== null){
+                    document.getElementById(this.container).appendChild(mark);
+                    this.marks.push({ color: color, x: x, y: y, element: mark });
+                }
+            }
+            document.getElementById(this.listInput).value = JSON.stringify(this.marks)
+        }
+
+        getCurrentColor(){
+            let buttons = document.getElementsByClassName(this.btnClass);
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].classList.contains("active")) {
+                    return buttons[i].getAttribute('data-color');
+                }
+            }
+            return null;
+        }
+
+        findMarkAtPosition(x, y) {
+            for (let i = this.marks.length - 1; i >= 0; i--) {
+                let mark = this.marks[i];
+                let rect = this.getMarkRect(mark);
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    return mark;
+                }
+            }
+            return null;
+        }
+
+        getMarkRect(mark) {
+            let size = 10; // half of the mark's width/height
+            return {
+                left: mark.x - size,
+                right: mark.x + size,
+                top: mark.y - size,
+                bottom: mark.y + size
+            };
+        }
+
+        getMarkings() {
+            return this.marks
+        }
+    }
+
+    var {{id}} = new SelectionContainer{{id}}{{ random }}(
+        "{{ container_id }}",
+        "{{ container_overlay_id }}",
+        "{{ btn_class }}",
+        "{{ list_id }}"
+    )
+
+    document.getElementById("{{ container_overlay_id }}").addEventListener("click", function (event) {
+        {{id}}.overlayClicked(event)
+    })
+
+    function setColor(element, className) {
+        let buttons = document.getElementsByClassName(className);
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove("active");
+        }
+        element.classList.add("active");
+    }
+
+    function showMarkings() {
+        console.log(document.getElementById("{{ list_id }}").value);
+    }
+</script>

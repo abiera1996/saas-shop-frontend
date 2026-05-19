@@ -1,0 +1,37 @@
+{% comment %}
+    Variables
+    - id
+    - class 
+    - icon
+    - iconBgClass -hex
+    - title
+    - value
+{% endcomment %}
+
+
+<div id="{{id}}" class="{{class}} flex justify-center" style="background-color:{{color}}">
+    <div class="mx-3 ">
+        <div class="bg-[#fff] opacity-90 p-[23px] rounded-xl">
+            <img src="{{icon}}" class="object-contain w-10 h-10"/>
+        </div>
+    </div>
+    <div class=" text-white flex justify-center flex-column" style="margin-left:20px">
+        <div class="font-light text-sm">
+            {{title}}
+        </div>
+        <div class="font-bold text-2xl">
+            {% if changing_value %}
+                <div class="text-md font-bold" id="{{changing_id}}">
+                    <i class="text-white fas fa-spinner fa-spin"></i>
+                </div>
+            {% else %}
+                {{value}}
+            {% endif %}
+            
+        </div>
+        <div style="width:150px; height:3px; border-radius: 5px 5px; background-color:white">
+            <div class="w-[50%]" style="border-radius: 5px 5px; background-color:{{percentageColor}}; height:3px;"></div>
+        </div>
+        
+    </div>
+</div> 

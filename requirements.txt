@@ -1,0 +1,9 @@
+django>=5.0
+requests
+django-tailwind
+django-timezone-field
+django-timezones
+django-environ
+django-browser-reload
+python-dateutil
+pytz

@@ -1,0 +1,33 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Latest Monthly Gasoline Consumption Report
+        </div>
+        <div class="text-black">
+            Latest Monthly Gasoline Consumption Report > Create
+        </div>
+    </div>
+    <div class="col-xl-9 flex justify-end">
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}  
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        {% include 'screens/users/_subpage/gas/gas_form.html' %}
+    </div> 
+</div> 
+
+{% endblock %}
+
+
+{% block scripts %} 
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            {% if id %} 
+                Update 
+            {% else %}
+                Upload
+            {% endif %}
+            Policy
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% url 'user:update_approver' id %}"
+        {% else %}
+            action="{% url 'main:setup_policy_procedure_request' %}"
+        {% endif %}
+        >
+        <div class="bg-white px-4"> 
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    <input type="file" name="repair_image" class="mb-2">
+                </div>   
+            </div> 
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Policies and Procedures" placeholder="Input Policies and Procedures" name="name" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.name required=True  %}
+                </div>   
+            </div>
+            <div class="row mt-2">   
+                <div class="mt-2 col-xl-12">
+                    {% include 'components/inputs/input_with_label.html' with label="Effectivity Date" name="effectivity_date" id="effectivity_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" required=True value=details.effectivity_date   %}
+                </div>   
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE APPROVER' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPLOAD' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div> 
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+
+    {% if id %}
+        $('#user_role').html(`
+            {% for user_role_data in details.user_role.all %} 
+                <option value="{{user_role_data.pk}}" selected>{{user_role_data.name}}</option>
+            {% endfor %} 
+        `).trigger('change')
+
+        $('#can_view_by_user_role').html(`
+            {% for can_view_by_user_role in details.can_view_by_user_role.all %} 
+                <option value="{{can_view_by_user_role.pk}}" selected>{{can_view_by_user_role.name}}</option>
+            {% endfor %} 
+        `).trigger('change')
+    {% endif %}
+</script> 

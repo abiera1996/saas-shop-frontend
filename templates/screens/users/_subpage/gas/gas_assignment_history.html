@@ -1,0 +1,49 @@
+{% load custom_filters %}
+{% load custom_tags %}
+
+<div class="col-xl-12 bg-white p-8 ">  
+    <div class="flex">
+        <div class="flex-1">
+            <div  class="text-2xl font-semibold">
+                Gas Consumption History
+            </div>
+            <div class="text-xs text-black">
+                List of Gas Consumption History
+            </div>
+        </div>  
+        <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+            {% url 'gas:export_gas' as export_filter_modal %}
+            {% with export_filter_modal|addstr:'?requesting_unit='|addstr:id|addstr:'&status=approved' as export_srf_filter_modal %}
+                {% include 'components/buttons/btn_border.html' with title='Export' link=export_srf_filter_modal class='w-full rounded-md' icon="fal fa-file-export" %}
+            {% endwith %}  
+        </div>  
+    </div>  
+    <div class="row mt-4">
+        <div class="col-xl-12 flex p-0"> 
+            <div id="container_branch" class="bg-white rounded-md w-full permission-container">
+            </div>
+        </div>
+    </div>  
+</div>
+
+<script>  
+    $(document).ready(function(e){
+        loadBranch();  
+    }) 
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadBranch();
+    }));
+ 
+    function loadBranch(){ 
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var query_params = urlParameterize({ 
+            "requesting_unit": "{{id}}",
+            "search": filter_search,
+            "status": "approved" 
+        });
+
+        $('#container_branch').loadSubpage({
+            url: "{% url 'gas:table_gas' %}?"+query_params,
+        })
+    }  
+</script>

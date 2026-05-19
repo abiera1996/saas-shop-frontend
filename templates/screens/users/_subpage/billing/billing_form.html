@@ -1,0 +1,319 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<form  id="form-details" 
+{% if id %}
+    
+    {% if details.status != 'approved' %}
+    action="{% url 'billing:update_billing' id %}"
+    {% endif %}
+{% else %}
+    action="{% url 'billing:create_billing' %}"
+{% endif %}
+  >
+    <div class="col-xl-12    bg-white p-8 ">  
+        <div class="flex">
+            <div class="flex-1">
+                <div  class="text-2xl font-semibold">
+                    Latest Monthly Vehicle Rental Billing Report Form
+                </div>
+                <div class="text-xs text-black">
+                    Complete the needed information.
+                </div>
+            </div> 
+            <!-- <div >
+                {% if id %}
+                    {% if details.status != 'approved' %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE BILLING RENTALS' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                    {% endif %}
+                {% else %}
+                    {% include 'components/buttons/btn_regular.html' with title='CREATE BILLING RENTALS' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                {% endif %}
+            </div> -->
+        </div> 
+            <div class="col-12">
+                <div class="mt-2">
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="BRANCH" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch_2" classBorder="border-gray-400" required=True disabled=is_readonly %}
+                </div>
+            </div>  
+        <div class="row mt-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-lg-6">
+                    {% if id %} 
+                        {% include 'components/inputs/input_with_label.html' with label="Uploaded Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.date_created|date:"m-d-Y" attribute="readonly" %}
+                    {% else %}
+                        {% now "m-d-Y" as date_now %}
+                        {% include 'components/inputs/input_with_label.html' with label="Uploaded Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=date_now attribute="readonly" %}
+                    {% endif %}
+                </div>
+                <div class="mt-2 col-lg-6">
+                    {% if id %}
+                        {% if details.created_by %}
+                            {% with details.created_by.first_name|addstr:details.created_by.last_name as name_authenticate %}
+                                {% include 'components/inputs/input_with_label.html' with label="Uploaded by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                            {% endwith %} 
+                        {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="Uploaded by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="Unknown" attribute="readonly" %} 
+                        {% endif %}
+                    {% else %}
+                        {% with request.user.first_name|addstr:request.user.last_name as name_authenticate %}
+                            {% include 'components/inputs/input_with_label.html' with label="Uploaded by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                
+            </div>
+            <div class="col-xl-12">
+                <div class="mt-2">  
+                    {% url "vehicle:vehicle_search" as vehicle_search %} 
+                    {% include 'components/inputs/input_with_label.html' with label="Vehicle" placeholder="Please select vehicle" name="requesting_unit" id="requesting_unit"  url=vehicle_search  allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" required=True disabled=is_readonly %}
+                    
+                </div>
+            </div>
+            <div class="col-xl-12">  
+                
+                <div class="row">
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Plate No" name="plate_no" id="plate_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="CS No" name="conduction_sticker_no" id="conduction_sticker_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Make/Series" name="make_series" id="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Year Model" name="year_model" id="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                </div>
+            </div>
+
+            <div class="mt-2 col-lg-12">
+                {% include 'components/inputs/input_with_label.html' with label="Type of lease" name="lease_type" id="lease_type" options=lease_type_list labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=details.lease_type disabled=is_readonly  %}
+                
+            </div>
+            <div id="wet_fields" class="col-lg-12">
+                <div class="row">
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Driver’s charges " number_validation='decimal' id="driver_charges" name="driver_charges" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.driver_charges required=True readonly=is_readonly %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Driver's OT charges" number_validation='decimal' id="driver_ot_charges" name="driver_ot_charges" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.driver_ot_charges required=True readonly=is_readonly %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Fuel charges " number_validation='decimal' id="fuel_charge" name="fuel_charge" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.fuel_charge required=True readonly=is_readonly %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Other charges " number_validation='decimal' id="other_charge" name="other_charge" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.other_charge required=True readonly=is_readonly %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Km. run " number_validation='decimal' id="km_run" name="km_run" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.km_run required=True readonly=is_readonly %}
+                    </div> 
+                </div>
+            </div>
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Vehicle daily rate" number_validation='decimal' id="daily_rate" name="daily_rate" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.daily_rate required=True readonly=is_readonly %}
+            </div> 
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="No. of days used" number_validation='number' id="no_day_used" name="no_day_used" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.no_day_used required=True readonly=is_readonly %}
+            </div> 
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Vehicle charges" number_validation='decimal' id="vehicle_charges" name="vehicle_charges" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.vehicle_charges  attribute="readonly" required=True %}
+            </div> 
+            
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="Total charges " id="total_charge" name="total_charge" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.total_charge  attribute="readonly" required=True  %}
+            </div>  
+ 
+            <div class="col-lg-6 mt-2"> 
+                {% include 'components/inputs/input_with_label.html' with label="Covered Period" name="cover_date" id="cover_date" labelClass='text-black text-sm' class='my-1' type="date" classBorder="border-gray-400" required=True value=details.cover_date disabled=is_readonly %}
+            </div>
+        </div>  
+    </div>
+</form>
+
+<script>  
+    let wet_fields = $('#wet_fields').html();
+    $('#wet_fields').empty()
+    
+    $('#lease_type').off('change')
+    $('#lease_type').on('change', function() {
+        if($(this).val() == 'wet'){
+            $('#wet_fields').html(wet_fields)
+        } else {
+            $('#wet_fields').empty()
+        }
+    })
+
+    $('#lease_type').on('change', function() {
+        if($(this).val() == 'wet'){
+            $('#wet_fields').html(wet_fields)
+        } else {
+            $('#wet_fields').empty()
+        }
+    })
+    
+    function checkVehicleCharge(){
+        if($('#daily_rate').val() != '' && $('#no_day_used').val() != ''){
+            let vehicle_charges = parseFloat($('#daily_rate').val()) * parseFloat($('#no_day_used').val())
+            $('#vehicle_charges').val(vehicle_charges)
+            checkTotalCharge()
+        }
+        
+    }
+
+    function checkTotalCharge(){
+        let vehicle_charges = $('#vehicle_charges').val() || 0
+        vehicle_charges = parseFloat(vehicle_charges)
+
+        let driver_charges = $('#driver_charges').val() || 0
+        driver_charges = parseFloat(driver_charges)
+
+        let driver_ot_charges = $('#driver_ot_charges').val() || 0
+        driver_ot_charges = parseFloat(driver_ot_charges)
+        
+        let fuel_charge = $('#fuel_charge').val() || 0
+        fuel_charge = parseFloat(fuel_charge)
+
+        let other_charge = $('#other_charge').val() || 0
+        other_charge = parseFloat(other_charge)
+        
+        if($('#vehicle_charges').val() != ''){
+            let total_charges = vehicle_charges + driver_charges + 
+            fuel_charge + other_charge + driver_ot_charges
+            $('#total_charge').val(total_charges)
+        }
+        
+    }
+    
+    {% if id %}
+        checkVehicleCharge()
+    {% endif %}
+
+    $('#daily_rate,#no_day_used').off('input')
+    $('#daily_rate,#no_day_used').on('input',function(){
+        checkVehicleCharge()
+     })
+    
+    $(document).off('input', '#vehicle_charges,#driver_charges,#driver_ot_charges,#fuel_charge,#other_charge')
+    $(document).on('input', '#vehicle_charges,#driver_charges,#driver_ot_charges,#fuel_charge,#other_charge', function(e){
+        checkTotalCharge(); 
+    })
+     
+    setTimeout(() => {
+        $('#break_down').addClass('hidden')
+    }, 500);
+
+    $(document).on('click', '.btn-remove-service', function() {
+        let id = $(this).data('val')
+  
+        $('#'+id).remove() 
+        if($('.parts-item').length < 1){
+            $('#body_empty').show()
+        }
+    })
+
+    API.formRequest(
+        '#form-details',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => { 
+            return true
+        },
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){ 
+                        {% if id %}
+                            location.reload()
+                        {% else %}
+                            location.href = "{% url 'user:billing_rentals' %}"
+                        {% endif %}
+                    } 
+                })
+            } 
+        },
+        isMultiForm=true
+    )
+ </script>
+ 
+ <script>  
+ 
+    // $('#branch_2').on('change', function() {
+    //     const branch_id = $(this).val(); 
+        
+    //     $('#requesting_unit').html(`<option value="">Please select vehicle</option>`); 
+        
+    //     var query_params = urlParameterize({
+    //         "paginated": "false",
+    //         "branch": branch_id
+    //     });
+        
+    //     $.ajax({
+    //         url: '{% url "vehicle:vehicle_search" %}?' + query_params,
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function(response){
+    //             if(response){   
+    //                 let requesting_unit = "{{details.vehicle.pk}}"; 
+    //                 response.data.map((val, idx) => {
+                        
+    //                     $('#requesting_unit').append(`<option value="${val.id}" ${requesting_unit == val.id?'selected': ''}>${val.text}</option>`); 
+    //                 })
+    //                 setTimeout(() => {
+    //                     $('#requesting_unit').change()
+    //                 }, 500);
+    //             }
+    //         }
+    //     })
+    // }) 
+
+    // $("#requesting_unit").select2({
+    //     theme: "bootstrap-5",
+    //     placeholder: "Please select vehicle"
+    // }); 
+ 
+ </script>
+ 
+ <script>
+    $('#requesting_unit').on('change', function() {
+        const request_unit = $(this).val(); 
+        prev_repairs_ids = []
+        $.ajax({
+            url: `/vehicle/ajax/vehicle-details/${request_unit}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                if(response){
+                    $('input[name="plate_no"]').val(response.plate_no)
+                    $('input[name="conduction_sticker_no"]').val(response.conduction_sticker_no)
+                    $('input[name="make_series"]').val(response.make_series)
+                    $('input[name="year_model"]').val(response.year_model) 
+                }
+            }
+        })
+    })
+ 
+
+     {% if id %}
+         $('#branch_2').html(`
+         <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+         `).trigger('change')   
+         $('#requesting_unit').html(`
+         <option value="{{details.vehicle.pk}}" selected>{{details.vehicle.make_series}} -
+            {% if details.vehicle.plate_no %}
+                    {{details.vehicle.plate_no}}
+                {% else %}
+                    {{details.vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+         `).trigger('change')   
+     {% endif %}
+ 
+     
+ </script>

@@ -1,0 +1,431 @@
+{% load custom_filters %}
+{% load custom_tags %}
+<form  id="form-details" 
+{% if id and details.status == 'pending' %}
+    action="{% url 'vehicle:update_disposal' id %}"
+{% else %}
+    action="{% url 'vehicle:request_disposal' %}"
+{% endif %}
+    >
+    <div class="col-xl-12  bg-white p-8 ">  
+        <div class="flex">
+            <div class="flex-1">
+                <div  class="text-2xl font-semibold">
+                    Disposal of Vehicle Form
+                </div>
+                <div class="text-xs text-black">
+                    Complete the needed information.
+                </div>
+            </div>  
+            <div>
+                {% if details.status != 'pending' and  'reject' not in details.status %}
+                    {% url 'main:export_pdf_modal' as export_pdf_modal %}
+                    {% with export_pdf_modal|addstr:'?type=disposal_form&id='|addstr:details.pk as new_export_pdf_modal %}
+                        {% include 'components/buttons/btn_regular.html' with title='Generate Form' isModal=True modalSize="modal-lg" link=new_export_pdf_modal size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+
+                    {% endwith %}  
+                {% endif %}
+                
+            </div>
+        </div> 
+        <br><br>
+        <div class="col-12">
+            <div class="mt-2">
+                {% url 'branch:branch_search' as branch_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Request Unit" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch_2" classBorder="border-gray-400" required=True disabled=is_readonly %}
+            </div>
+        </div>  
+    
+        <div class="row mt-4">
+            <div class="col-xl-12">
+                <div class="row mt-2">
+                    <div class="mt-2 col-lg-12">
+                        {% if id %}
+                            {% include 'components/inputs/input_with_label.html' with label="Disposal Reference no." name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.disposal_no attribute="readonly" %} 
+                        {% else %}
+                            {% get_current_disposal as get_current_disposal %}
+                            {% include 'components/inputs/input_with_label.html' with label="Disposal Reference no." name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=get_current_disposal attribute="readonly" %} 
+                        {% endif %}
+                    </div>
+                    
+                </div> 
+                <div class="row mt-2">
+                    <div class="mt-2 col-lg-6">
+                        {% if id %} 
+                            {% include 'components/inputs/input_with_label.html' with label="Request Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.requested_date|date:"m-d-Y" attribute="readonly" %}
+                        {% else %}
+                            {% now "m-d-Y" as date_now %}
+                            {% include 'components/inputs/input_with_label.html' with label="Request Date" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=date_now attribute="readonly" %}
+                        {% endif %}
+                    </div>
+                    <div class="mt-2 col-lg-6">
+                        {% if id %}
+                            {% if details.prepare_by %}
+                                {% with details.prepare_by.first_name|addstr:details.prepare_by.last_name as name_authenticate %}
+                                    {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                                {% endwith %} 
+                            {% else %}
+                                {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="Unknown" attribute="readonly" %} 
+                            {% endif %}
+                        {% else %}
+                            {% with request.user.first_name|addstr:request.user.last_name as name_authenticate %}
+                                {% include 'components/inputs/input_with_label.html' with label="Prepared by" name="" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=name_authenticate attribute="readonly" %} 
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-12 mt-4 border-[1px] rounded-lg border-gray-300 p-4"> 
+                <div class="font-semibold">
+                    Vehicle Information
+                </div>
+                <div class="text-blackxt-xs">
+                    Fill out your details.
+                </div>
+                <div class="row mt-4">
+                    <div class="col-xl-4">
+                        <div class="mt-2">  
+                                {% include 'components/inputs/input_with_label.html' with label="Vehicle for disposal" placeholder="Please select vehicle" name="vehicle" id="vehicle" labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=profile.country disabled=is_readonly %}
+                            {% comment %}
+                            <div class="flex justify-start mt-3">
+                                {% url 'vehicle:modal_vehicle' as modal_vehicle %}   
+                                {% include 'components/buttons/btn_regular.html' with title='CREATE VEHICLE' link=modal_vehicle id="modal_vehicle" isModal=True size="xs" class='bg-primaryColor text-white rounded-3xl px-4' %} 
+                            </div>
+                            {% endcomment %}
+                        </div>
+                    </div>
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Plate No" name="plate_no" id="plate_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="CS No" name="conduction_sticker_no" id="conduction_sticker_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Make/Series" name="make_series" id="make_series" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div> 
+                    <div class="col-xl-4 mt-2"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Year Model" name="year_model" id="year_model" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute="readonly"   %}
+                    </div>  
+                </div>
+            </div>
+            
+            <div class="col-12"> 
+                <div class="row mt-2"> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Potential buyer" name="potential_buyer" id="potential_buyer" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.potential_buyer readonly=is_readonly %}
+                    </div>
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Bid amount" name="bid_amount" id="bid_amount" number_validation="money" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.bid_amount readonly=is_readonly %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Justification" name="justification" id="justification" rows="1" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" value=details.justification readonly=is_readonly  %}
+                    </div> 
+                    <div class="mt-2 col-lg-6">
+                        {% include 'components/inputs/input_with_label.html' with label="Recommendation" name="recommendation" id="recommendation" options=recommendation_list labelClass='text-black text-sm' class='my-1' type="dropdown" classBorder="border-gray-400" required=True value=recommendation disabled=is_readonly %}
+                        
+                    </div>
+                    
+                    <div class="mt-2 col-lg-6
+                    {% if recommendation != 'Other' %}
+                        hidden
+                    {% endif %}
+                    " id="recommendation_others">
+                        {% if recommendation != 'Other' %}
+                            {% include 'components/inputs/input_with_label.html' with label="Other Recommendation" name="other_recommendation" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" readonly=is_readonly  %}
+                        {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="Other Recommendation" name="other_recommendation" labelClass='text-black text-sm' class='my-1' type="textarea" classBorder="border-gray-400" value=details.recommendation readonly=is_readonly  %}
+                        {% endif %}
+                        
+                        
+                    </div> 
+                    
+                    {% if not is_readonly  %}
+                        <div class="mt-2 col-lg-6 flex flex-col justify-center"> 
+                            <div class="text-black text-sm mb-2">
+                                Upload supporting document
+                            </div> 
+                            <input type="file" name="supporting_document" class="mb-2">
+                            <input type="file" name="supporting_document" class="mb-2">
+                            <input type="file" name="supporting_document" class="mb-2">
+                            <input type="file" name="supporting_document" class="mb-2">
+                            <input type="file" name="supporting_document" class="mb-2">
+                            
+                            
+                        </div> 
+                    {% endif %}  
+                </div> 
+                
+                
+            </div> 
+        </div>  
+        {% if id %}
+        <div class="row mt-4">
+            <div class="col-xl-6">
+                <div class="font-semibold">Supporting documents</div>
+                <ul style="list-style: unset;">
+                    {% for supporting_document in supporting_documents %}
+                        <li>
+                            <a href="{{supporting_document.document.url}}" target="_blank">{{supporting_document.file_name}}</a> 
+                        </li>   
+                        {% empty %} 
+                        <label>No supporting documents uploaded.</label>
+                    {% endfor %}
+                </ul>
+                {% if is_display_approval and request.session.user_role_code == 'PRCHSNGMNGR' %} 
+                <div class="mr-2 mt-4"> 
+                    {% url 'vehicle:disposal_support_update' id as filter_modal %}  
+                    {% include 'components/buttons/btn_regular.html' with title='ATTACHED SUPPORTING DOCUMENT' id='add-support' isModal=True modalSize="modal-md" link=filter_modal  class=' bg-primaryColor text-white rounded-md ' %}
+                    
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-xl-6"> 
+            </div>
+        </div>
+        {% endif %}
+ 
+        {% if is_display_approval %} 
+            {% url 'vehicle:update_disposal_status' as update_disposal_status %}
+            <div class="{{approval_class}} flex justify-end items-end py-4"> 
+                
+                <div class="mr-2"> 
+                    {% with 'data-id="'|addstr:details.pk|addstr:'" data-type="approve" data-status="approved" data-url="'|addstr:update_disposal_status|addstr:'"'|safe as attribute_approve %}
+                        {% include 'components/buttons/btn_regular.html' with title='APPROVE' id='add-item-consumable' type="button"  class='status-btn bg-primaryColor text-white rounded-md ' attribute=attribute_approve %}
+                    {% endwith %}  
+                    
+                    
+                </div>
+                <div class="mr-2">  
+                    
+                    {% with 'data-id="'|addstr:details.pk|addstr:'" data-type="comment" data-status="approved" data-url="'|addstr:update_disposal_status|addstr:'"'|safe as attribute_approve %}
+                        {% include 'components/buttons/btn_regular.html' with title='APPROVE WITH COMMENTS' id='add-item-consumable' type="button"  class='status-btn bg-green-500 text-white rounded-md ' attribute=attribute_approve %}
+                    {% endwith %}  
+                    
+                </div>  
+                <div>  
+                    
+                    {% with 'data-id="'|addstr:details.pk|addstr:'" data-status="reject" data-url="'|addstr:update_disposal_status|addstr:'"'|safe as attribute_reject %}
+                        {% include 'components/buttons/btn_regular.html' with type="button" title='REJECT' class='status-btn bg-[#FF5353] text-white rounded-md ' attribute=attribute_reject  %}
+                    {% endwith %} 
+                    
+                </div> 
+            </div> 
+        {% endif %}
+            <div class="flex justify-end items-end py-4">
+                {% if id %}
+                    {% if details.status == 'pending' and not is_display_approval %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE DISPOSAL VEHICLE' type="submit" size="sm" class='bg-primaryColor text-white rounded-md ' %} 
+                        <a class="NDRSVDF px-3 py-2 ml-2 bg-primaryColor text-white rounded-md  flex items-center justify-center text-sm update-status" data-id="{{details.pk}}" data-status="approved" href="#">  
+                                Endorsed to Tfleet manager
+                        </a> 
+                    {% endif %}
+                {% else %} 
+                    <div class="flex-1">
+                        <div class="font-bold text-primaryColor">
+                            Note: Please review before submitting for approval.
+                        </div>
+                    </div>
+                    <div class=""> 
+                        <div class="flex"> 
+                            <button type="submit" class="px-3 py-2 ml-2 bg-red-500 text-white rounded-md  flex items-center justify-center text-sm update-status" data-id="{{details.pk}}" data-status="approved" href="#">  
+                                <span class="">Save as draft</span> 
+                            </button> 
+                            <button id="for-approval" type="submit" class="px-3 py-2 ml-2 bg-green-500 text-white rounded-md  flex items-center justify-center text-sm update-status" data-id="{{details.pk}}" data-status="approved" href="#">  
+                                <span class="">Submit for approval</span> 
+                            </button>  
+                            <input type="hidden" value="" name="for_approval_status"/>
+                        </div> 
+                    </div> 
+                    
+                
+                {% endif %}
+            </div>
+    </div>
+</form> 
+
+
+
+<script>  
+    $('#for-approval').click(function(){  
+        $('input[name=for_approval_status]').val('for branch manager endorsement');
+    })
+    
+    setTimeout(() => {
+        $('#break_down').addClass('hidden')
+    }, 500);
+
+    $(document).on('click', '.btn-remove-service', function() {
+        let id = $(this).data('val')
+  
+        $('#'+id).remove() 
+        if($('.parts-item').length < 1){
+            $('#body_empty').show()
+        }
+    })
+
+    API.formRequest(
+        '#form-details',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => { return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){ 
+                        {% if id %}
+                        location.reload()
+                        {% else %}
+                        location.href = "{% url 'user:disposal' %}"
+                        {% endif %}
+                    } 
+                })
+            } 
+        },
+        isMultiForm=true
+    )
+ </script>
+ 
+ <script>
+    var prev_repairs_ids = []
+    var branches_of_selected_clinic = [] 
+    
+    {% if id %}
+        var is_edit = true;
+        var is_loaded_branch = false;
+        var is_loaded_default = false
+    {% endif %}
+
+    $('#vehicle').on('change', function() { 
+        const request_unit = $(this).val(); 
+        prev_repairs_ids = []
+        $.ajax({
+            url: `/vehicle/ajax/vehicle-details/${request_unit}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                if(response){
+                    $('input[name="plate_no"]').val(response.plate_no)
+                    $('input[name="conduction_sticker_no"]').val(response.conduction_sticker_no)
+                    $('input[name="make_series"]').val(response.make_series)
+                    $('input[name="year_model"]').val(response.year_model)
+                     
+                }
+            }
+        })
+    })
+
+    $('#branch_2').on('change', function() { 
+        const branch_id = $(this).val(); 
+
+        var query_vehicle_params = urlParameterize({
+            "branch_id": branch_id,
+            "is_srf": true,
+            "branch_name": $('#branch_2').find(":selected").text()
+        });
+        if($('#modal_vehicle').length != 0){
+            let modal_vehicle = $('#modal_vehicle').attr('href'); 
+            $('#modal_vehicle').attr('href', modal_vehicle.split('?')[0] + `?${query_vehicle_params}`)  
+        }
+        
+        $('#vehicle').html(`<option value="">Please select vehicle</option>`); 
+        
+        var query_params = urlParameterize({
+            "paginated": "false",
+            "branch": branch_id
+        });
+        
+        $.ajax({
+            url: '{% url "vehicle:vehicle_search" %}?' + query_params,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                
+                if(response){   
+                    let requesting_unit = "{{details.vehicle.pk}}";  
+                    response.data.map((val, idx) => {
+                        
+                        $('#vehicle').append(`<option value="${val.id}" ${requesting_unit == val.id?'selected': ''}>${val.text}</option>`); 
+                    })
+                    {% if id %}
+                        $('#vehicle').change()
+                    {% endif %}
+                }
+            }
+        }) 
+    }) 
+
+    $("#vehicle").select2({
+        theme: "bootstrap-5",
+        placeholder: "Please select vehicle"
+    });  
+ 
+    $('#recommendation').change(function(){  
+        if('Other' == $(this).val()){ 
+            $('#recommendation_others').removeClass('hidden')
+        } else {
+            $('#recommendation_others').addClass('hidden')
+        } 
+    })
+    
+    {% if details.status == 'pending' %}
+        $(document).on('click', '.update-status', function(e){
+            const status = $(this).data('status');
+            const id = $(this).data('id');
+            let status_label = ''
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "To " + $(this).html(),
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    API.makePostRequest(
+                        "{% url 'vehicle:update_disposal_status' %}",
+                        {
+                            status:status,
+                            id:id
+                        },
+                        processData=() => {},
+                        callback=(response)=>{
+                            if ([200,201].includes(response.status)){
+                                location.reload()
+                            } else {
+                                Swal.fire({
+                                    icon: [200,201].includes(response.status)?'success':'error',
+                                    title:  'Information',
+                                    text: response.message || response.data?.message,
+                                })
+                            }
+                            
+
+                        }
+                    ) 
+                }
+            })
+            
+        })
+    {% endif %}
+ </script>
+ 
+ <script>
+     {% if id %}
+        setTimeout(() => {
+            $('#recommendation').change()
+        }, 700);
+
+        $('#branch_2').html(`
+            <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+        `).trigger('change')  
+     {% endif %}
+
+</script> 

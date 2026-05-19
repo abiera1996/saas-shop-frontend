@@ -1,0 +1,58 @@
+{% comment %}
+    Variables
+    - id:string
+    - class:string
+    - name:string
+    - type:string   (dropdown, date)
+    - classBorder
+    - label
+    - required:bool
+    - labelWidth
+
+{% endcomment %}
+ 
+<div class="w-full"> 
+    <div class='flex w-full text-sm items-center rounded-md'>
+        <div class="mb-2" style="width:{% if labelWidth %}{{labelWidth}}{% else %} 100px{% endif %};">
+            {{label}}
+        </div>
+        <div class='flex items-stretch justify-center flex-1 pl-[10px]'>
+            {% if type == 'dropdown' %}  
+                <select id="{{id}}" name="{{name}}" class='{{class}} w-full focus:outline-none border-0 bg-gray-200' 
+                {% if required %}  
+                    required
+                {% endif %}>
+                    <option>
+                        option 1
+                    </option>
+                    <option>
+                        option 2
+                    </option>
+                </select>
+            {% elif type == 'date' %} 
+                <div class="w-full {{class}} bg-gray-200 px-3 py-[3px]"  data-mdb-format="mm-dd-yyyy"  id="{{id}}" data-mdb-toggle-button="false">  
+                    <input type="text" class=" w-full focus:outline-none border-0 bg-transparent" value="{{value}}" name="{{name}}" data-mdb-toggle="datepicker" placeholder="{{placeholder}}"
+                    {% if required %}  
+                        required
+                    {% endif %}/> 
+                </div>  
+                <script>
+                    var {{name}} = document.querySelector('#{{id}}'); 
+                    new mdb.Datepicker({{name}}, {
+                        datepicker: { format: 'mm-dd-yyyy'},
+                    });
+                </script>
+            {% else %}
+                <input id="{{id}}" name="{{name}}" class='{{class}} w-full focus:outline-none {% if classBorder %} {{classBorder}} {% else %} border-0 bg-gray-200 {% endif %} ' type="{{type}}" placeholder="{{placeholder}}" 
+                {% if required %}  
+                    required
+                {% endif %}
+                /> 
+            {% endif %}
+            
+        </div> 
+        <div>
+            
+        </div>
+    </div>  
+</div> 

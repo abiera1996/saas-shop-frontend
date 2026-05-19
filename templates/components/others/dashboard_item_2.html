@@ -1,0 +1,39 @@
+{% comment %}
+    Variables
+    - id
+    - class  
+    - title
+    - value
+    - link
+{% endcomment %}
+
+<div class="{{class}} rounded-2xl text-white pt-5 px-3 pb-3 ">
+    <div class="flex">
+        <div class="pr-3 text-sm">
+            <div>{{title}}</div>
+        </div>
+        <div id="{{id}}" class="flex-1 text-xl font-bold text-right">
+            {{value}}
+        </div>
+    </div>
+    
+    <div class="w-full text-sm">
+        <a href="{{link}}">View all <i class="far fa-long-arrow-alt-right"></i></a>
+    </div>
+</div>
+
+<!-- <div id="{{id}}" class="{{class}} flex">
+    <div>
+        <div class="{{iconBgClass}} p-[23px] rounded-xl">
+            <img src="{{icon}}" class="object-contain w-7 h-7"/>
+        </div>
+    </div>
+    <div class="ml-3">
+        <div class="font-bold text-lg">
+            {{value}}
+        </div>
+        <div class="font-light text-sm">
+            {{title}}
+        </div>
+    </div>
+</div>  -->

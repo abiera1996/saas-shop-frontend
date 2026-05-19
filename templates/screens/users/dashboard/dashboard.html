@@ -1,0 +1,314 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+
+{% block breadcrumb %}
+    <div class="bg-white w-full px-8 py-4 row">
+        <div class="col-xl-12">
+            <div class="font-bold text-xl">
+                Dashboard
+            </div>
+            <div class="text-black">
+                Dashboard > Reports
+            </div>
+        </div>
+        
+    </div>
+{% endblock %}
+
+
+{% block content %} 
+<div class="container  mb-[217px] px-4 mt-3">
+    <div class="row bg-white px-3 py-1 rounded-md w-full items-center">
+        <div class="col-xl-12  mt-6 bg-white py-1">  
+            <div class="w-full flex xl:flex-row flex-col px-3 ">
+                <div>
+                    <div class="font-dmsans-bold text-xl">
+                        W Express Details
+                    </div>
+                    <div class="text-xs">
+                        <span id="count-sales"></span> summary details
+                    </div>
+                </div>
+                <div class="flex-1 flex justify-end flex-col xl:flex-row"> 
+                    <div class="mt-[13px] xl:mt-[0] mr-0 xl:mr-2 w-full xl:w-fit">
+                        <div class="text-black text-left self-start text-sm mb-2">
+                            Filter by
+                        </div>
+                        <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                            <div class="flex items-stretch justify-center flex-1">
+                                <select id="my_status" name="my_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                                    <option value="">
+                                        Show All
+                                    </option>
+                                    <option value="branch"  {% if params.my_status == 'active' %}selected{% endif %}>
+                                        Branch
+                                    </option> 
+                                    <option value="manila" {% if params.my_status == 'inactive' %}selected{% endif %}>
+                                        Manila
+                                    </option>  
+                                </select> 
+                            </div> 
+                        </div> 
+                    </div> 
+                    <div class="mt-[13px] xl:mt-[0] mr-0 xl:mr-2 w-full xl:w-[442px]"> 
+                        {% include 'components/inputs/input_with_label.html' with label="Filter by Date Range" id="daterange" name="daterange" fromName="date_from" toName="date_to" placeholder="Filter by date" labelClass='text-black text-sm' class='py-[1px]' type="date_range" classBorder="border-gray-400" %} 
+                    </div> 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex mt-6 p-0"> 
+                    <div id="sales" class="SLSTRNSCTN permission-container bg-white rounded-md w-full">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+    <div class="row bg-white px-3 py-10 rounded-md w-full items-center">
+        <div class="col-12">
+            <div class="row">
+                <div class="VW_VHCLS_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=active_vehicle"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E6F2E2] w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]"> No. of active vehicles</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="active_vehicle"></span>
+                                </div>
+                            </div> 
+                        </div> 
+                    </a> 
+                </div>
+                
+                <div class="VW_VHCLS_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=short_term_vehicle"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E6F2E2]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of short-term breakdown vehicles</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="short_term_vehicle"></span>
+                                </div>
+                            </div>
+                            <!-- <div class="">
+                                <div class="text-white bg-[#73B8D4] rounded-2xl px-3 py-2 text-xs">
+                                    +50%
+                                </div>
+                            </div> -->
+                        </div> 
+                    </a> 
+                </div>
+                <div class="VW_VHCLS_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=long_term_vehicle"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E6F2E2]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of permanent breakdown vehicles</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="long_term_vehicle"></span>
+                                </div>
+                            </div>
+                            <!-- <div class="">
+                                <div class="text-white bg-[#73B8D4] rounded-2xl px-3 py-2 text-xs">
+                                    +50%
+                                </div>
+                            </div> -->
+                        </div> 
+                    </a> 
+                </div>
+                <div class="VW_VHCLS_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=disposal_vehicle"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E6F2E2]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of vehicles for disposal</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="disposal_vehicle"></span>
+                                </div>
+                            </div>
+                            <!-- <div class="">
+                                <div class="text-white bg-[#73B8D4] rounded-2xl px-3 py-2 text-xs">
+                                    +50%
+                                </div>
+                            </div> -->
+                        </div> 
+                    </a> 
+                </div> 
+                <div class="VW_SRF_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=srf_pending_approval"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E1F0F5]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of SRF pending approval</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="srf_pending_approval"></span>
+                                </div>
+                            </div>
+                            <!-- <div class="">
+                                <div class="text-white bg-[#657CEE] rounded-2xl px-3 py-2 text-xs">
+                                    +50%
+                                </div>
+                            </div> -->
+                        </div> 
+                    </a> 
+                </div>
+        
+                <div class="VW_SRF_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=srf_pending_actual"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#E1F0F5]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of SRF pending actual repair</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="srf_pending_actual"></span>
+                                </div>
+                            </div>
+                            <!-- <div class="">
+                                <div class="text-white bg-[#657CEE] rounded-2xl px-3 py-2 text-xs">
+                                    +50%
+                                </div>
+                            </div> -->
+                        </div> 
+                    </a> 
+                </div>
+                <div class="VW_NSRNC_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=expired_insurance"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#F8F0E7]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of expired comprehensive insurance</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="expired_insurance"></span>
+                                </div>
+                            </div> 
+                        </div> 
+                    </a> 
+                </div>
+                <div class="VW_NSRNC_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=pending_insurance_cliams"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#F8F0E7]  w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of pending insurance claims</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="pending_insurance_cliams"></span>
+                                </div>
+                            </div> 
+                        </div> 
+                    </a> 
+                </div> 
+                <div class="VW_VDF_NFRMTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=vdf_pending_approval"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3 bg-[#EEF0F8] w-full">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of VDF pending approval</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="vdf_pending_approval"></span>
+                                </div>
+                            </div>
+                            <div class="">
+                                
+                            </div>
+                        </div> 
+                    </a> 
+                </div>
+                <div class="VW_VHCL_RGSTRTN col-xl-3 mt-1 flex">
+                    <a href="{% url 'main:dashboard_list_modal' %}?type=expired_registration"  data-open-modal 
+                    data-modal-size="modal-xl"
+                    data-modal-type="modal_rounded" class="flex rounded-2xl py-[35px] px-3   w-full" style="background: #d7b5fc;">
+                        <div class="flex items-center">
+                            <div class="w-full text-sm flex-1">
+                                <div class="pr-3 text-sm">
+                                    <div class="text-[#565656]">No. of expired registration</div>
+                                </div>
+                                <div class="text-xl font-bold">
+                                    <span id="expired_registration"></span>
+                                </div>
+                            </div>
+                            <div class="">
+                                
+                            </div>
+                        </div> 
+                    </a> 
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div> 
+{% endblock %}
+
+{% block scripts %} 
+<script>
+    loadDetails()
+    function loadDetails() {
+        var date_from = $("input[name=date_from]").val() || ""; 
+        var date_to = $("input[name=date_to]").val() || ""; 
+        var filter_branch_type = $('#my_status').val() || ""; 
+ 
+        var query_params = urlParameterize({ 
+            "date_from": date_from,
+            "date_to": date_to,
+            "branch_type": filter_branch_type
+        }); 
+ 
+        $.ajax({
+            url: "{% url 'main:dashboard_details' %}?"+query_params,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                if(response){   
+                    $('#active_vehicle').html(response.active_vehicle)
+                    $('#short_term_vehicle').html(response.short_term_vehicle)
+                    $('#long_term_vehicle').html(response.long_term_vehicle)
+                    $('#disposal_vehicle').html(response.disposal_vehicle)
+                    $('#srf_pending_approval').html(response.srf_pending_approval)
+                    $('#srf_pending_actual').html(response.srf_pending_actual)
+                    $('#vdf_pending_approval').html(response.vdf_pending_approval)
+                    $('#expired_insurance').html(response.expired_insurance)
+                    $('#pending_insurance_cliams').html(response.pending_insurance_cliams)
+                    $('#expired_registration').html(response.expired_registration)
+                }
+            }
+        })
+    }
+
+
+    $('#my_status').on('change', function() {
+        const my_status = $(this).val(); 
+        loadDetails()
+    })
+
+    function onDateRangeChange_daterange(startDate, endDate){  
+        loadDetails()
+    }
+</script>
+{% endblock %}

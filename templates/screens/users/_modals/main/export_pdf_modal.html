@@ -1,0 +1,40 @@
+{% load custom_filters %}
+
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            View Generated Form
+        </h5>
+        <label class="text-xs">
+            Please click the generate to export the form.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0"> 
+    <div id="form-generated"></div>
+    <div class="grid place-items-center">
+        {% include 'components/buttons/btn_regular.html' with title='GENERATE' id='generate-form' class='bg-primaryColor text-white rounded-md ' %}
+                
+    </div>
+</div>  
+
+<script>
+    {% if data.type == 'vdf_form' %}
+        var generate_link = "{% url 'vehicle:generate_vdf_form' data.id %}"
+    {% elif data.type == 'srf_form' %}
+        var generate_link = "{% url 'vehicle:generate_srf_form' data.id %}"
+    {% elif data.type == 'srf_concise_form' %}
+        var generate_link = "{% url 'vehicle:generate_srf_concise_form' data.id %}"
+    {% elif data.type == 'disposal_form' %}
+        var generate_link = "{% url 'vehicle:generate_disposal_form' data.id %}"
+    {% endif %}
+
+    $('#form-generated').load(generate_link + "?view=true");
+    
+    $('#generate-form').off('click')
+    $('#generate-form').on('click',function(){
+        location.href = generate_link
+    })
+</script> 

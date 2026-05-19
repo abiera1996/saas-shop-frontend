@@ -1,0 +1,83 @@
+{% load custom_filters %}
+<style>
+    span.select2-container{
+        z-index: 1000000 !important;
+    }
+</style>
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Reassign Vehicle
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data" 
+        {% if id %}
+            action="{% url 'vehicle:update_vehicle' id %}"
+        {% else %}
+            action="{% url 'vehicle:create_vehicle' %}"
+        {% endif %}
+        >
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-xl-12">
+                    <input type="hidden" name="is_reassign" value="true">
+                    {% url 'branch:branch_search' as branch_search %}
+                    {% include 'components/inputs/input_with_label.html' with label="ASSIGNED TO" name="branch" url=branch_search placeholder="Search Branch / Dept" labelClass='text-black text-sm' class='my-1 py-[2px]' type="dropdown_search" id="branch" classBorder="border-gray-400" required=True %}
+                </div>
+                <div class="col-xl-12 mt-2"> 
+                    {% include 'components/inputs/input_with_label.html' with label="START DATE ASSIGNED" name="start_date_assignment" id="start_date_assignment" labelClass='text-black text-sm' class='my-1' type="date" required=True classBorder="border-gray-400"  %}
+                </div>
+            </div> 
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div>
+                    {% if id %}
+                        {% include 'components/buttons/btn_regular.html' with title='UPDATE BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% else %}
+                        {% include 'components/buttons/btn_regular.html' with title='ONBOARD BRANCH' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                </div>
+               
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    )
+    {% if id %}
+        $('#branch').html(`
+            <option value="{{details.branch.pk}}" selected>{{details.branch.branch_code}}</option>
+        `).trigger('change')  
+    {% endif %}
+</script> 

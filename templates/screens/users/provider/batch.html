@@ -1,0 +1,131 @@
+{% extends 'base/user_base.html' %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Masterlist of Third Party Providers
+        </div>
+        <div class="text-black text-[10px]">
+            Masterlist of Third Party Providers > List
+        </div>
+    </div>
+    <div class="CRTSRVCPRVDR col-xl-9 flex justify-end">
+        <!-- <div class="mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'vehicle:modal_provider' as modal_provider %} 
+            {% include 'components/buttons/btn_regular.html' with link=modal_provider isModal=True title='Onboard Accredited provider' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>  -->
+        <div class="ml-0 lg:ml-2 mt-2 lg:mt-[0] w-full lg:w-fit">
+            {% url 'user:provider_import' as provider_import %} 
+            {% include 'components/buttons/btn_border.html' with link=provider_import title='Import Batch Accredited Providers' class='w-full rounded-md' icon="fal fa-file-export" %}
+        </div> 
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <!-- <div class="VWMPLY mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_dropdown.html' with title='Filters' classItem="filter_item" icon="fal fa-filter mx-1" items=filter_items  class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                    </div>  -->
+                    <div class="  mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'main:filter_modal' as filter_modal %} 
+                        {% with filter_modal|addstr:'?type=batch&no_export=true' as filter_modal_vehicle %}
+                            {% include 'components/buttons/btn_border.html' with title='Filters' id="filter-modal" isModal=True link=filter_modal_vehicle icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                        {% endwith %}   
+                    </div> 
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+
+    let branch_type = ''
+
+    $(document).ready(function(e){ 
+        loadData();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadTable(params){
+        params['type'] = "batch"
+        params['no_export'] = "true" 
+        console.log(params)
+        var query_params = urlParameterize(params);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params}`) 
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_batch_service' %}?"+query_params,
+        })
+    }
+
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "branch_type": branch_type
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'vehicle:table_batch_service' %}?"+query_params,
+        })
+    } 
+ 
+    $('.filter_item').click(function() {
+        const value = $(this).data('value')
+        if(value != ''){
+            if(value.includes('sort_')){
+                // let sort_column = value.replace('sort_', '')
+                // console.log(sort_column, sort, sort.includes(sort_column))
+                // if(sort.includes(sort_column))
+                // {
+                //     if(sort.includes('-')){
+                //         sort = sort.replace('-','')
+                //     } else{
+                //         sort = '-' + sort
+                //     }
+                // } else {
+                //     sort = '-' + sort_column
+                // }
+            } else {
+                branch_type = value
+            } 
+            setTimeout(() => {
+                loadData()
+            }, 400);
+        } 
+    })
+</script>
+{% endblock %}

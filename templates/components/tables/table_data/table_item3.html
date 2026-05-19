@@ -1,0 +1,132 @@
+{% comment %}
+    Variables 
+    - data_lists:object
+        Sample 
+        type: (value, image_name, checkbox, html)
+        {   
+            'column_count': 5,
+            'data': [ 
+                [
+                    {
+                        'type': 'value',
+                        'value': '001',
+                        'td_class': 'whitespace-nowrap'
+                    },
+                    {
+                        'type': 'image_name',
+                        'image': '/static/image/test/test3.png',
+                        'name': 'Cendy De Vera',
+                        'td_class': 'whitespace-nowrap'
+                    },
+                    {
+                        'type': 'value',
+                        'value': 'Cryo Facial Age Freeze Treatment'
+                    },
+                    {
+                        'type': 'value',
+                        'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        'is_ellipsis_value': True
+                    },
+                    {
+                        'type': 'value',
+                        'value': '₱3000'
+                    }
+                ]
+            ],
+            'empty': {
+                'image': '/static/image/rafiki.png',
+                'message': 'No recent transactions!'
+            }
+        }
+{% endcomment %}
+
+
+{% if data_lists.data|length == 0 %}
+    <tr>
+        <td class="py-6" colspan="{{data_lists.column_count}}">
+            {% include 'components/others/empty_list.html' with image=data_lists.empty.image message=data_lists.empty.message icon=data_lists.empty.icon %}
+        </td>
+    </tr>
+{% else %}
+    {% for details in data_lists.data %}
+        <tr class="bg-white border-b">
+            {% for detail in details %}
+                <td scope="row" class="px-6 py-4 font-normal text-black {{detail.td_class}} ">
+                    
+                    {% if detail.type == 'value' %}
+                        {% if detail.is_ellipsis_value %}
+                            <div class="whitespace-nowrap w-52 overflow-hidden text-ellipsis">
+                                {{detail.value|safe}}
+                            </div>  
+                        {% else %}
+                            {{detail.value|safe}}
+                        {% endif %}
+                    {% elif detail.type == 'link' %}
+                        <a href="{{detail.value}}">
+                            {{detail.value}}
+                        </a>
+                    {% elif detail.type == 'image_name' %}
+                        {% include 'components/tables/table_data/image_name.html' with image=detail.image name=detail.name %} 
+                    {% elif detail.type == 'image_box' %}
+                        {% include 'components/tables/table_data/image_box.html' with image=detail.image empty_message="No Receipt" %} 
+                    {% elif detail.type == 'html' %}
+                        {{detail.value|safe}}
+                    {% elif detail.type == 'checkbox' %} 
+                        <div class="flex items-center">
+                            <input id="checkbox-table-search-1" name="{{table_id}}_checkbox" value="{{detail.value}}" type="checkbox"
+                            {% if detail.checked %}
+                                checked
+                            {% endif %} 
+                                class="{{table_id}}_checkbox w-4 h-4 text-blue-600 bg-gray-100 border-primaryColor rounded focus:ring-blue-500">
+                            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+                        </div> 
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+{% endif %}
+
+{% if not is_hide_pagination %}
+    <script>
+        $('#{{table_id}}_pagination').remove()
+        $('#{{table_id}}').parent().parent().parent().append(` 
+            <div id="{{table_id}}_pagination" class="pb-4">
+                <div class="pt-3 px-4" colspan="{{data_lists.column_count}}">
+                    <div class="w-full grid place-items-start md:place-items-end">
+                        <div class="flex items-center"> 
+            <select name="pagination_limit" class="paginate-limit" style="    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 6px;
+    border-color: silver;
+    margin-right: 12px;"> 
+                <option value='10' {% if data_lists.pages.limit == 10 %}selected{% endif %}>10</option>
+                <option value='20' {% if data_lists.pages.limit == 20 %}selected{% endif %}>20</option>
+                <option value='50' {% if data_lists.pages.limit == 50 %}selected{% endif %}>50</option>
+                <option value='100' {% if data_lists.pages.limit == 100 %}selected{% endif %}>100</option> 
+            </select> 
+                            <!-- Help text -->
+                            <span class="text-sm text-gray-700 mr-3">
+                                Page <span class="font-semibold text-gray-900 ">{{data_lists.pages.page}}</span> to <span class="font-semibold text-gray-900 ">{{data_lists.pages.page_count}}</span> of <span class="font-semibold text-gray-900 ">{{data_lists.pages.count}}</span> Items
+                            </span>
+                            <!-- Buttons -->
+                            <div class="inline-flex mt-2 xs:mt-0">
+                                <div data-status="{% if data_lists.pages.prev %}active{% else %}disabled{% endif %}"
+                                    class="cursor-pointer prev-page block px-3 py-2 ml-0 leading-tight text-black bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 ">
+                                    <span class="sr-only">Previous</span>
+                                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div data-status="{% if data_lists.pages.next %}active{% else %}disabled{% endif %}"
+                                class="cursor-pointer next-page block px-3 py-2 leading-tight text-black bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700">
+                                    <span class="sr-only">Next</span>
+                                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        `)
+    </script>
+
+{% endif %}

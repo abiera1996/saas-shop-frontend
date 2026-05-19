@@ -1,0 +1,138 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Service Request
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data"  
+            action="{% url 'vehicle:update_srf_status' %}" 
+        >
+        <div class="bg-white py-3 px-4">
+            <input type="hidden" name="id" value="{{details.pk}}">
+            <input type="hidden" name="status" value="approved">
+            <div class="row"> 
+                <div class="col-xl-12">
+                   <div class="row">
+                        {% comment %}
+                        {% if display_image %}
+                        <div class="mt-2">
+                            <div class="text-black text-xs mt-3 mb-2">
+                                PICTURE
+                            </div>
+                            <input type="file" name="repair_image" accept="image/*" id="repair_image" multiple> 
+                        </div>
+                        {% endif %} 
+                        {% endcomment %}
+                        <div class="mt-2 col-lg-12">
+                            {% if details.pr_no %}
+                            {% include 'components/inputs/input_with_label.html' with label="PR No." name="pr_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.pr_no  %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="PR No." name="pr_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="N/A"  %}
+                            {% endif %}
+                            
+                        </div>
+                        <div class="mt-2 col-lg-12">
+                            {% if details.po_no %}
+                            {% include 'components/inputs/input_with_label.html' with label="PO No." name="po_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.po_no %}
+                            {% else %}
+                            {% include 'components/inputs/input_with_label.html' with label="PO No." name="po_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value="N/A"  %}
+                            {% endif %}
+                            
+                        </div>
+                        <div class="mt-2 col-lg-6"> 
+                            {% url 'vehicle:supplier_search' as supplier_search %} 
+                        {% include 'components/inputs/input_with_label.html' with label="Accredited supplier name" allowClear=True url=supplier_search placeholder="Please Supplier" name="accreditation_no_supplier" id="accreditation_no_supplier" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" value=profile.country disabled=is_supplier_name_not_editable modalParent=True  %}
+                        <!-- {% include 'components/inputs/input_with_label.html' with label="Accreditation no. of supplier" name="accreditation_no_supplier" id="accreditation_no_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" attribute='list="supplier-list"' value=profile.user.first_name  %}
+                        <datalist id="supplier-list">
+                            {% for data in supplier %}
+                                <option value="{{data.accreditation_no}}">
+                            {% endfor %} 
+                        </datalist> -->
+                        </div> 
+                        {% if details.unaccredited_supplier %}
+                        <div class="mt-2 col-lg-6">
+                            {% include 'components/inputs/input_with_label.html' with label="Un-accredited supplier name" name="unaccredited_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.unaccredited_supplier readonly=is_unaccred_supplier_name_not_editable  %}
+                        </div>
+                        {% else %}
+                        <div class="mt-2 col-lg-6">
+                            {% include 'components/inputs/input_with_label.html' with label="Un-accredited supplier name" name="unaccredited_supplier" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" readonly=is_unaccred_supplier_name_not_editable  %}
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                <div class="col-xl-12 mt-2">
+                    {% with details.total_request_amount|moneyfy as total_request_amount %}
+                        {% include 'components/inputs/input_with_label.html' with label="APPROVED AMOUNT" name="total_approved_amount" number_validation="money" id="total_approved_amount" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=total_request_amount  %}
+                    {% endwith %}   
+                    
+                </div>
+                {% comment %}
+                <div class="col-xl-6">
+                    <div class="row mt-2">
+                       
+                        <div class="col-xl-12 mt-2"> 
+                            {% include 'components/inputs/input_with_label.html' with label="ACTUAL REPAIR DATE" name="actual_repair_date" id="actual_repair_date" labelClass='text-black text-sm' class='my-1' type="date" required=True classBorder="border-gray-400" value=details.repair_date  %}
+                        </div>
+                        <div class="col-xl-12 mt-2"> 
+                            {% include 'components/inputs/input_with_label.html' with label="APPROVED AMOUNT" name="total_approved_amount" number_validation="money" id="total_approved_amount" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" required=True value=details.total_request_amount  %}
+                        </div>
+                        
+                    </div>
+                </div>
+                {% endcomment %}
+            </div>
+            
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='COMPLETE' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                
+                </div>
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    ) 
+
+    // $(document).on('input', 'input[name=unaccredited_supplier]', function() {
+    //     $('#accreditation_no_supplier').attr('required', $(this).val().replace(/ /g, '') == ''); 
+    // })
+
+    $('#accreditation_no_supplier').html(`
+             <option value="{{details.supplier.accreditation_no}}" selected>{{details.supplier.name}}</option>
+         `).trigger('change') 
+         
+</script> 

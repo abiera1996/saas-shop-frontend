@@ -1,0 +1,103 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Audit Logs
+        </div>
+        <div class="text-black text-[10px]">
+            Settings > Audit Logs
+        </div>
+    </div>
+    <div class="col-xl-9 flex justify-end">
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="w-full row mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4 ">
+                <div class="col-lg-4 flex items-center">
+                     
+                  
+                </div>
+                <div class="col-lg-8 flex justify-end">
+                    <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <div class="mt-[13px] lg:mt-[0] w-full lg:w-fit">
+                        {% url 'main:filter_modal' as filter_modal %} 
+                        {% with filter_modal|addstr:'?type=activity' as filter_modal_vehicle %}
+                            {% include 'components/buttons/btn_border.html' with title='Filter and Export' id="filter-modal" isModal=True link=filter_modal_vehicle icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                        {% endwith %}   
+                    </div> 
+                </div>
+            </div>
+            <!-- <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class=" flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                    </div>
+                    <div class=" mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'user:role_export' as role_export %} 
+                        {% include 'components/buttons/btn_regular.html' with title='Export' link=role_export size="md" class='bg-primaryColor text-white rounded-md ' %} 
+                    </div>  
+                </div> 
+            </div>   -->
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="activity_container" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+    $(document).ready(function(e){
+        loadUserRole();  
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadUserRole();
+    }));
+
+    function loadTable(params){
+        params['type'] = "activity" 
+        console.log(params)
+        var query_params = urlParameterize(params);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params}`) 
+        
+        $('#activity_container').loadSubpage({
+            url: "{% url 'user:table_audit_logs' %}?"+query_params,
+        })
+    }
+
+    function loadUserRole(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        
+        var query_params = urlParameterize({
+            "search": filter_search
+        });
+        
+        $('#activity_container').loadSubpage({
+            url: "{% url 'user:table_audit_logs' %}?"+query_params,
+        })
+    } 
+</script>
+{% endblock %}

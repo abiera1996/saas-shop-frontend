@@ -1,0 +1,56 @@
+{% load custom_filters %}
+<div class="col-xl-12  bg-white p-8 ">  
+    <div class="flex">
+        <div class="flex-1">
+            <div  class="text-2xl font-semibold">
+                Vehicle Status History
+            </div>
+            <div class="text-xs text-black">
+                List of Vehicle Status History
+            </div>
+        </div> 
+        <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+            <div class="">  
+                {% url "vehicle:vehicle_search" as vehicle_search %}
+                {% with vehicle_search|addstr:'?vehicles='|addstr:params.vehicles as new_vehicle_search %}
+                    {% include 'components/inputs/input_with_label.html' with name="vehicle_id" id="vehicle_id" url=new_vehicle_search placeholder="Filter by Vehicle" allowClear=True labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" %}
+                {% endwith %}   
+                
+               
+            </div> 
+        </div>  
+    </div>
+    <div class="row mt-4"> 
+        <div id="container_branch" class="bg-white rounded-md w-full permission-container">
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(e){
+        loadTable();   
+    }) 
+
+    
+    $('#vehicle_id').on('change', function() { 
+        loadTable();
+    })
+    function loadTable(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10;
+        var filter_status = $("input[name=filter_status]").val() || ""; 
+        var filter_repair_status = $("input[name=filter_repair_status]").val() || ""; 
+        var vehicle_id = $("#vehicle_id").val() || "-1"; 
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "vehicle_id": vehicle_id,
+            "repair_status": filter_repair_status
+        });
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_status_all_history' %}?"+query_params,
+        })
+    } 
+</script>

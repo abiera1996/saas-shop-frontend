@@ -1,0 +1,106 @@
+{% load custom_filters %}
+<form id="form-add-data" 
+
+{% if id  %}
+    {% if details.status != 'approved' %}
+    action="{% url 'insurance:update_insurance' id %}"
+    {% endif %}
+
+    
+{% else %}
+    action="{% url 'insurance:create_insurance' %}"
+{% endif %}
+>
+    <div class="bg-white py-3 px-4">
+        <div class="row mt-2">
+            <div class="mt-2 col-xl-12">
+                {% url 'vehicle:vehicle_search' as vehicle_search %}
+                {% include 'components/inputs/input_with_label.html' with label="Vehicle" url=vehicle_search placeholder="Please select vehicle" name="vehicle" id="vehicle" labelClass='text-black text-sm' class='my-1' type="dropdown_search" classBorder="border-gray-400" required=True value=details.vehicle modalParent=True disabled=is_readonly %}
+            
+            </div>
+        </div>
+        <div class="row mt-2">   
+            <div class="mt-2 col-xl-12">
+                {% include 'components/inputs/input_with_label.html' with label="POLICY NUMBER" placeholder="Enter Policy number" name="policy_no" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.policy_no readonly=is_readonly %}
+                
+            </div>   
+            
+        </div> 
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="INSURED AMOUNT" number_validation='money' id="insured_amount" name="insured_amount" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.insured_amount readonly=is_readonly %}
+            </div> 
+            <div class="mt-2 col-lg-6">
+                {% include 'components/inputs/input_with_label.html' with label="PREMIUM AMOUNT" number_validation='money' id="premium_amount" name="premium_amount" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.premium_amount readonly=is_readonly %}
+            </div> 
+            <div class="mt-2 col-xl-12">
+                {% include 'components/inputs/input_with_label.html' with label="INSURANCE COMPANY" placeholder="Enter Insurance Company" name="insurance_company" labelClass='text-black text-sm' class='my-1' type="text" classBorder="border-gray-400" value=details.insurance_company readonly=is_readonly %}
+                
+            </div>  
+        
+        </div>
+        <div class="row mt-2">
+            <div class="mt-2 col-lg-12">
+                {% include 'components/inputs/input_with_label.html' with label="EXPIRY DATE" name='expiry_date' labelClass='text-black text-sm' class='my-1' iconRight="fal fa-calendar" type="date" classBorder="border-gray-400" id="expiry_date" required=True value=details.expiry_date disabled=is_readonly %}
+            </div>  
+        </div>  
+        <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+            <div class="mr-2">
+                {% if id %} 
+                {% else %}
+                {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                {% endif %}
+                
+            </div>
+            <div>
+                {% if id  %}
+                    {% if details.status != 'approved' %}
+                    {% include 'components/buttons/btn_regular.html' with title='UPDATE INSURANCE' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                    {% endif %}
+                    
+                {% else %}
+                    {% include 'components/buttons/btn_regular.html' with title='CREATE INSURANCE' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                {% endif %}
+                
+            </div>
+        
+        </div>
+    </div>  
+</form> 
+</div>  
+
+<script>
+    API.formRequest(
+    '#form-add-data',
+    extended_data={},
+    processData=() => {},
+    checkValidation=(form_data) => {return true},
+    callback=(response)=>{
+        console.log(response)
+        if (response.status != 400) {
+            Swal.fire({
+                icon: [200,201].includes(response.status)?'success':'error',
+                title:  'Message', 
+                text: response.message || response.data?.message, 
+            }).then(()=>{
+                if([200,201].includes(response.status)){  
+                    location.reload() 
+                } 
+            })
+        }
+    },
+    isMultiForm=true
+    )
+
+    {% if id %}
+         $('#vehicle').html(`
+            <option value="{{details.vehicle.pk}}" selected>
+                {% if details.vehicle.plate_no %}
+                    {{details.vehicle.plate_no}}
+                {% else %}
+                    {{details.vehicle.conduction_sticker_no}}
+                {% endif %}  
+            </option>
+         `).trigger('change')  
+     {% endif %}
+</script> 

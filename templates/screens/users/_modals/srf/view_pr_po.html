@@ -1,0 +1,62 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            View PR/PO
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data"  
+            action="{% url 'vehicle:update_srf_status' %}" 
+        >
+        <div class="bg-white py-3 px-4">
+            <input type="hidden" name="id" value="{{details.pk}}">
+            <div class="row"> 
+                <div class="col-xl-12"> 
+                    <div class="mt-2 col-lg-12">
+                        <label class="font-bold">
+                            SRF No.
+                        </label><br>
+                        <label>
+                            {% if details.srf_no %}
+                                {{details.srf_no}}
+                            {% else %}
+                                ----
+                            {% endif %}
+                        </label> 
+                    </div>
+                    <div class="mt-2 col-lg-12">
+                        <label class="font-bold">
+                            PR No.
+                        </label><br>
+                        <label>
+                            {% if details.pr_no %}
+                                {{details.pr_no}}
+                            {% else %}
+                                ----
+                            {% endif %}
+                        </label> 
+                    </div>
+                    <div class="mt-2 col-lg-12">
+                        <label class="font-bold">
+                            PO No.
+                        </label><br>
+                        <label>
+                            {% if details.po_no %}
+                                {{details.po_no}}
+                            {% else %}
+                                ----
+                            {% endif %} 
+                        </label> 
+                    </div>
+                </div>  
+            </div> 
+        </div>  
+    </form> 
+</div>  

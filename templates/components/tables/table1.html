@@ -1,0 +1,131 @@
+{% comment %}
+    Variables
+    - table_id:string 
+    - removeRounded
+    - data:object
+        sample data
+        type: (value, image_name, checkbox)
+        {
+            'column': [
+                {
+                    'name': 'Trans. No.',
+                    'is_sorted': False
+                },
+                {
+                    'name': 'Customer Name',
+                    'is_sorted': True
+                },
+                {
+                    'name': 'Service/Product Name',
+                    'is_sorted': True
+                },
+                {
+                    'name': 'Description',
+                    'is_sorted': True
+                },
+                {
+                    'name': 'Price',
+                    'is_sorted': False,
+                    'flex_align': 'justify-center'
+                },
+            ]
+        }
+
+{% endcomment %}
+ 
+</style>
+<div class="bg-white {% if not removeRounded %} rounded-md {% endif %} w-full h-full">
+    <div class="relative overflow-x-auto {% if not removeRounded %}  sm:rounded-lg {% endif %}" style="padding-bottom: 100px;">
+        <table class="table-responsive w-full text-sm text-left text-black">
+            <thead class="text-xs text-white bg-primaryColor">
+                <tr>
+                    {% for column in data.column %} 
+                        <th scope="col" class="px-6 py-3">
+                            <div class="flex items-center {{column.class}} {{column.flex_align}}">
+                                {% if column.is_checked %}
+                                    <div class="flex items-center">
+                                        <input id="checkbox-table-search-1" name="{{table_id}}_checkbox_all" value="{{detail.value}}" type="checkbox" 
+                                        class="w-4 h-4 rounded  bg-blue-500 text-blue-600 border-gray-300  focus:ring-white">
+                                        <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+                                    </div> 
+                                {% endif %}
+
+                                
+                                {% if column.is_sorted %}
+                                    <a href="#" data-sort="{{column.sort_key}}" class="{{table_id}}_sort flex hover:text-gray-400">
+                                        {{column.name|safe}}
+                                        {% include 'components/svg/sort_icon.html' %}
+                                    </a>
+                                {% else %}
+                                    {{column.name|safe}}
+                                {% endif %}
+                            </div> 
+                        </th>
+                    {% endfor %} 
+                </tr>
+            </thead>
+            <tbody id="{{table_id}}"> 
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    
+    $(document).off('click', '#{{table_id}} .next-page')
+    $(document).on('click', '#{{table_id}} .next-page', function(){
+        const status = $(this).data('status');
+        alert("asdasd")
+        if(status != 'disabled'){
+            {{table_id}}_handler.nextPage()
+        }
+    })
+
+    $(document).off('click', '#{{table_id}} .prev-page')
+    $(document).on('click', '#{{table_id}} .prev-page', function(){
+        const status = $(this).data('status');
+        if(status != 'disabled'){
+            {{table_id}}_handler.prevPage()
+        }
+    })
+
+    $(document).off('click', 'input[name={{table_id}}_checkbox_all]')
+    $(document).on('click', 'input[name={{table_id}}_checkbox_all]', function(){ 
+        const is_checked = $(this).is(':checked');
+        $('.{{table_id}}_checkbox').prop('checked', false);
+        if(is_checked) {
+            $('.{{table_id}}_checkbox').prop('checked', true);
+        } 
+    })
+
+
+
+    $(document).off('click', '#{{table_id}}_pagination .next-page')
+    $(document).on('click', '#{{table_id}}_pagination .next-page', function(){
+        const status = $(this).data('status');
+        if(status != 'disabled'){
+            {{table_id}}_handler.nextPage()
+        }
+    })
+
+    $(document).off('change', '#{{table_id}}_pagination .paginate-limit')
+    $(document).on('change', '#{{table_id}}_pagination .paginate-limit', function(){ 
+        {{table_id}}_handler.updateLimit($(this).val()) 
+    })
+
+    
+
+    $(document).off('click', '#{{table_id}}_pagination .prev-page')
+    $(document).on('click', '#{{table_id}}_pagination .prev-page', function(){
+        const status = $(this).data('status');
+        if(status != 'disabled'){
+            {{table_id}}_handler.prevPage()
+        }
+    })
+
+    $(document).off('click', '.{{table_id}}_sort')
+    $(document).on('click', '.{{table_id}}_sort', function(){
+        const sort = $(this).data('sort');
+        {{table_id}}_handler.sortPage(sort)
+    })
+</script>

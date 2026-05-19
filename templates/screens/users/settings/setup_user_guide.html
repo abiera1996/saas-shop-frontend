@@ -1,0 +1,125 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% load custom_tags %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3"> 
+        <div class="font-bold text-xl">
+            Setup User Guide
+        </div>
+        <div class="text-black text-[10px]">
+            Settings > Setup User Guide
+        </div> 
+    </div>
+    <div class="CRTMPRTVHCLE col-xl-9 flex justify-end">
+        <div class="mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'main:user_guide_upload' as user_guide_upload %} 
+            {% include 'components/buttons/btn_regular.html' with link=user_guide_upload isModal=True title='Setup User Guide' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>  
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6 flex items-center">
+                    <label class="font-bold">
+                        User Guide Upload History
+                    </label>
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                   
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>  
+
+    let branch_type = ''
+
+    $(document).ready(function(e){ 
+        loadData();   
+    }) 
+    
+    {% if params %}
+    loadTable({
+        'vehicle_status': "{{params.vehicle_status}}"
+    })
+    {% endif %}
+
+    function loadTable(params){
+        params['type'] = "vehicle" 
+        var query_params = urlParameterize(params);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params}`) 
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'main:table_user_guide' %}?"+query_params,
+        })
+    }
+
+
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+        
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "branch_type": branch_type
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'main:table_user_guide' %}?"+query_params,
+        })
+    } 
+ 
+    
+    $('.filter_item').click(function() {
+        const value = $(this).data('value')
+        if(value != ''){
+            if(value.includes('sort_')){
+                // let sort_column = value.replace('sort_', '')
+                // console.log(sort_column, sort, sort.includes(sort_column))
+                // if(sort.includes(sort_column))
+                // {
+                //     if(sort.includes('-')){
+                //         sort = sort.replace('-','')
+                //     } else{
+                //         sort = '-' + sort
+                //     }
+                // } else {
+                //     sort = '-' + sort_column
+                // }
+            } else {
+                branch_type = value
+            } 
+            setTimeout(() => {
+                loadData()
+            }, 400);
+        } 
+    })
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% comment %}
+    Variables
+    - id
+    - class 
+    - icon
+    - iconBgClass
+    - title
+    - value
+{% endcomment %}
+
+
+
+<div id="{{id}}" class="{{class}} bg-white flex border p-2 mt-2" style="border-radius:10px 10px;" onclick="{{function_name}}('{{function_param}}')">
+    <div>
+        <div class="rounded-xl " style="background-color:#F0F1F3;">
+            <img src="{{image}}" class="object-contain rounded-xl" style="height:90px"/>
+        </div>
+    </div>
+    <div class="ml-3 mt-4">
+        <div class="font-bold  text-md">
+            {{title}}
+        </div>
+        <div class="flex">
+            <div class="font-bold text-md">
+                {{value}}
+            </div>
+            <div class="ml-1 text-sm px-3 rounded-full" style="background-color:#F2F8FF">
+                {{session}}
+            </div>
+        </div>
+        
+    </div>
+</div> 

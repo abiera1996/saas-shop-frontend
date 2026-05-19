@@ -1,0 +1,46 @@
+{% comment %}
+    Variables
+    - title:string
+    - isActive:bool
+    - icon:string
+    - url:string
+    - subItems:array [{"url": "", "name":"", "isActive": False}]
+{% endcomment %}
+
+{% if subItems %}
+    <div class="nav-item {% if isActive %}active{% endif %}" title="{{title}}">
+        <div class="flex items-center nav-item-container
+            {% if request.session.user_type == 'user_2' %}
+                    text-black
+                {% endif %}">
+            <div class="w-[38px] h-[38px] grid place-items-center">
+                {% include icon %}
+            </div>
+            <span class="side-label ml-4 font-poppins-regular">{{title}}</span>
+            <div class="nav-drop-icon">
+                <i class="fas fa-caret-right"></i>
+            </div>
+        </div>  
+        <div class="nav-sub-item" style="display:{% if isActive %} block {% endif %}">
+            {% for subitem in subItems %}
+                <a href="{{subitem.url}}" class="radio-btn-container"> 
+                    <input type="radio" name="radio" {% if subitem.isActive %}checked{% endif %}>
+                    <span class="checkmark"></span>
+                    <span class="radio-btn-label font-poppins-light text-black">{{subitem.name}}</span> 
+                </a>
+            {% endfor %}
+        </div> 
+    </div>
+{% else %}
+    <a href="{{url}}" class="nav-item {% if isActive %}active{% endif %}" title="{{title}}">
+        <div class="flex items-center nav-item-container 
+                    {% if request.session.user_type == 'user_2' %}
+                        text-black
+                    {% endif %}">  
+            <div class="w-[38px] h-[38px] grid place-items-center">
+                {% include icon %}
+            </div> 
+            <span class="side-label ml-4 font-poppins-regular">{{title}}</span>
+        </div> 
+    </a>
+{% endif %}

@@ -1,0 +1,114 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            VDF Approval KPI
+        </div>
+        <div class="text-black text-[10px]">
+            VDF Approval KPI  > List
+        </div>
+    </div>
+    <div class="col-xl-9 flex justify-end">
+         
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6">
+                    
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div>
+                    <!-- <div class=" mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">  
+                        {% url 'branch:branch_search' as branch_search %}
+                        {% include 'components/inputs/input_with_label.html' with name="branch_filter" id="branch_filter" url=branch_search placeholder="Filter by branch" allowClear=True labelClass='text-black text-sm'  type="dropdown_search" classBorder="border-gray-400 py-[2px]" %}
+                    
+                    </div> -->
+                    <div class=" mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'main:filter_modal' as filter_modal %} 
+                        {% with filter_modal|addstr:'?type=vdf_kpi' as filter_modal_vehicle %}
+                            {% include 'components/buttons/btn_border.html' with title='Filter and Export' id="filter-modal" isModal=True link=filter_modal_vehicle icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                        {% endwith %}  
+                    </div>  
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_branch" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+<script>
+    function initial_modal_filter(params_modal_filter = {}){ 
+        params_modal_filter['type'] = "vdf_kpi"
+        params_modal_filter['defined_status'] = "true"  
+        params_modal_filter['status'] = "approved"  
+        var query_params_modal_filter = urlParameterize(params_modal_filter);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params_modal_filter}`)  
+        return query_params_modal_filter
+    }
+    initial_modal_filter()
+</script>
+
+<script>
+    function loadTable(params){ 
+        var query_params = initial_modal_filter(params)
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_vdf_kpi' %}?"+query_params,
+        })
+    }
+    
+    $(document).ready(function(e){
+        loadBranch();  
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadBranch();
+    }));
+
+    $('#branch_filter').change(function(){
+        setTimeout(() => {
+            loadBranch();
+        }, 500);
+    })
+    function loadBranch(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_branch [name='pagination_limit']").val() || 10;
+        var filter_branch = $('#branch_filter').val() || ""; 
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit,
+            "branch": filter_branch,
+            "status": 'approved'
+        });
+        
+        $('#container_branch').loadSubpage({
+            url: "{% url 'vehicle:table_vdf_kpi' %}?"+query_params,
+        })
+    } 
+
+</script>
+{% endblock %}

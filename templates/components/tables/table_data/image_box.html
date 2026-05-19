@@ -1,0 +1,16 @@
+{% comment %}
+    Variables 
+    - image:string
+    - name:string 
+{% endcomment %}
+
+
+{% if image != '' %}
+
+<a href="{{image}}" target="_blank" class="flex ml-5">
+    <img src="{{image}}" class="rounded-md w-[50px] h-[50px] object-cover"/>
+</a>
+{% else %}
+
+    {{empty_message}}
+{% endif %}

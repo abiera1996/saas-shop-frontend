@@ -1,0 +1,76 @@
+{% load custom_filters %}
+<div class="modal-header border-none">
+    <div class="modal-title ">
+        <h5 class="font-semibold text-xl text-black" id="staticBackdropLabel">
+            Accredited Supplier Status
+        </h5>
+        <label class="text-xs">
+            Complete the item information.
+        </label>
+    </div>
+    
+    <button type="button" class="btn-close text-black" data-bs-dismiss="modal" aria-label="Close"><i class="fal fa-times"></i></button>
+</div>
+<div class="modal-body p-0">
+    <form id="form-add-data"  
+            action="{% url 'vehicle:update_supplier' id %}" 
+        >
+        <div class="bg-white py-3 px-4">
+            <div class="row mt-2">
+                <div class="mt-2 col-xl-12">
+                    <div class="text-black text-left self-start text-sm mb-2">
+                        STATUS
+                    </div>
+                    <div class="border-gray-400 my-1 flex w-full border-1 text-sm rounded-md">
+                        <div class="flex items-stretch justify-center flex-1">
+                            <select id="supplier_status" name="supplier_status" class="my-1 w-full focus:outline-none focus:ring-0 border-0 " style="padding: 5px 9px; padding-right: 32px;" required>
+                                <option value="">
+                                    Please select status
+                                </option>
+                                <option value="active"  >
+                                    Active
+                                </option> 
+                                <option value="inactive" >
+                                    Inactive
+                                </option>  
+                            </select> 
+                        </div> 
+                    </div> 
+                </div>
+            </div>
+            <div class="ml-3 flex-1 flex items-end justify-end mt-3 mb-4">
+                <div class="mr-2">
+                    {% include 'components/buttons/btn_regular.html' with title='CANCEL' class='bg-[#FF5353] text-white rounded-md ' attribute='data-bs-dismiss="modal"' %}
+                </div>
+                <div> 
+                    {% include 'components/buttons/btn_regular.html' with title='UPDATE STATUS' id='add-item-consumable' type="submit"  class='bg-primaryColor text-white rounded-md ' %}
+                
+                </div>
+            </div>
+        </div>  
+    </form> 
+</div>  
+
+<script>
+    API.formRequest(
+        '#form-add-data',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {return true},
+        callback=(response)=>{
+            console.log(response)
+            if (response.status != 400) {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Message', 
+                    text: response.message || response.data?.message, 
+                }).then(()=>{
+                    if([200,201].includes(response.status)){  
+                        location.reload() 
+                    } 
+                })
+            }
+        },
+        isMultiForm=true
+    ) 
+</script> 

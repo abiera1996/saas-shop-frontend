@@ -1,0 +1,65 @@
+{% extends 'base/auth_base.html' %}
+{% block content %} 
+    <div class="w-[80%]" data-aos="fade-up" data-aos-delay=400>
+        
+        <div class="font-semibold text-3xl">
+            Welcome back
+        </div>
+        <div class="mb-14">
+            Log in to access your account 
+        </div>
+        <form id="form-login" action="{% url 'main:login_request' %}">
+            <div class="mb-3">
+                {% include 'components/inputs/input_with_label.html' with label="Username" name="username" placeholder='Enter Username' class='my-1' iconRight="fal fa-envelope" type="text" classBorder="border-gray-400"  %}
+            </div>
+            <div>
+                {% include 'components/inputs/input_with_label.html' with label="Password" isDisabledPsswordValidation=True name="password" id="password" placeholder='Fill in your password' class='my-1' iconRight="fal fa-lock" type="password" classBorder="border-gray-400"  %}
+            </div>
+            <div class="w-full flex mt-4">
+                <div class="w-1/2">
+                    <div class="flex items-center mb-4">
+                        <!-- <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="default-checkbox" class="ml-2 text-md font-medium text-gray-900 ">Keep me logged in</label> -->
+                    </div>
+                </div>
+                <div class="w-1/2 text-right flex justify-end">
+                    <a href="{% url 'main:forgot_password' %}" class="text-blue-400 font-bold">Forgot Password</a>
+                </div>
+            </div>
+            <div class="mt-5">
+                {% include 'components/buttons/btn_regular.html' with title='Log in' type="submit" class='bg-primaryColor text-white rounded-md' size='lg' %} 
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    API.formRequest(
+        '#form-login',
+        extended_data={},
+        processData=() => {},
+        checkValidation=(form_data) => {
+            return true
+        },
+        callback=(response)=>{ 
+            console.log(response)
+            if([200,201].includes(response.status)){
+                location.reload()
+            } else if (response.status == 400) {
+                if(response.isResetPassword) {
+                    location.href = response.reset_url
+                } 
+            } 
+            else {
+                Swal.fire({
+                    icon: [200,201].includes(response.status)?'success':'error',
+                    title:  'Login Validation',
+                    text: response.message || response.data?.message,
+                })
+            } 
+        },
+        isMultiForm=false
+    )
+</script>
+{% endblock %}

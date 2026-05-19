@@ -1,0 +1,152 @@
+{% extends 'base/user_base.html' %}
+{% load custom_filters %}
+{% block breadcrumb %} 
+<div class="bg-white w-full px-8 py-4 row">
+    <div class="col-xl-3">
+        <div class="font-bold text-xl">
+            Vehicle Rental Billing History
+        </div>
+        <div class="text-black  text-[10px]">
+            Vehicle Rental Billing History > History
+        </div>
+    </div>
+    <div class="col-xl-9 flex justify-end">
+        <!-- <div class="DDDTSRRL mt-2 lg:mt-[0] w-full lg:w-fit">  
+            {% url 'user:create_billing' as create_billing %} 
+            {% include 'components/buttons/btn_regular.html' with link=create_billing title='Billing Rental Creation' icon="fal fa-plus" class='bg-primaryColor text-white rounded-md ' %} 
+        </div>   -->
+    </div>
+</div>
+{% endblock %}
+
+{% block content %} 
+<div class="container my-[20px] mb-[217px] px-4">
+    
+    <div class="row p-4">
+        <div class="col-xl-12  mt-6 bg-white ">  
+            <div class="row">
+                <div class="col-xl-6 font-bold items-center flex text-primaryColor">
+                    Note: Please export or download excel file to view the complete data.
+                </div>
+                <div class="col-xl-6 mt-[0] lg:mt-[13px] xl:mt-[0] flex justify-end flex-col lg:flex-row py-4"> 
+                    <div class="VWMPLY flex-1 mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit">
+                        {% include 'components/inputs/input_with_icon.html' with placeholder='Search' name="filter_search" icon="fal fa-search" type="text" classContainer="rounded-md"  %}
+                    </div> 
+                    <div class="mt-[13px] lg:mt-[0] mr-0 lg:mr-2 w-full lg:w-fit"> 
+                        {% url 'main:filter_modal' as filter_modal %} 
+                        {% with filter_modal|addstr:'?type=billing_hitory' as filter_modal_provider %}
+                            {% include 'components/buttons/btn_border.html' with title='Filter and Export' id="filter-modal" isModal=True link=filter_modal_provider icon="fal fa-filter mx-1" class="text-primaryColor border-1 border-primaryColor rounded-md" %}
+                        {% endwith %}  
+                    </div> 
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 flex p-0"> 
+                    <div id="container_data" class="bg-white rounded-md w-full permission-container">
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div> 
+</div> 
+
+<!-- Modals --> 
+{% endblock %}
+
+
+{% block scripts %} 
+
+<script>
+    function initial_modal_filter(params_modal_filter = {}){ 
+        params_modal_filter['type'] = "billing_history"  
+        params_modal_filter['status'] = "approved"  
+
+        var query_params_modal_filter = urlParameterize(params_modal_filter);
+
+        let modal_vehicle = $('#filter-modal').attr('href'); 
+        $('#filter-modal').attr('href', modal_vehicle.split('?')[0] + `?${query_params_modal_filter}`)  
+        return query_params_modal_filter
+    }
+    initial_modal_filter()
+
+    function loadTable(params){ 
+        var query_params = initial_modal_filter(params)
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'billing:table_billing' %}?"+query_params,
+        })
+    }
+</script>
+
+<script>  
+    
+    let branch_type = ''
+    let filter_month = ''
+    let filter_year = ''
+    $('#filter-btn').click(function(){
+        if($('input[name="filter_cover_date"]').val() != ''){
+            filter_month = new Date($('input[name="filter_cover_date"]').val()).getMonth() + 1
+            filter_year = new Date($('input[name="filter_cover_date"]').val()).getFullYear()
+        }
+        setTimeout(() => { 
+            loadData()
+        }, 400);
+    })
+
+    $(document).ready(function(e){ 
+        loadData();   
+    })
+    
+    $("input[name=filter_search]").on("input", debounced(500, function(e){
+        loadData();
+    }));
+
+    function loadData(){
+        var filter_search = $("input[name=filter_search]").val() || ""; 
+        var filter_limit = $("#container_data [name='pagination_limit']").val() || 10;
+
+        var query_params = urlParameterize({
+            "search": filter_search,
+            "limit": filter_limit, 
+            "month": filter_month,
+            "year":filter_year,
+            "status": 'approved'
+        });
+        
+        $('#container_data').loadSubpage({
+            url: "{% url 'billing:table_billing' %}?"+query_params,
+        })
+    } 
+
+    $(".filter_month, .filter_year").on('click', function() { 
+        setTimeout(() => {
+            loadData();
+        }, 600);
+    })
+    
+    $('.filter_item').click(function() {
+        const value = $(this).data('value')
+        if(value != ''){
+            if(value.includes('sort_')){
+                // let sort_column = value.replace('sort_', '')
+                // console.log(sort_column, sort, sort.includes(sort_column))
+                // if(sort.includes(sort_column))
+                // {
+                //     if(sort.includes('-')){
+                //         sort = sort.replace('-','')
+                //     } else{
+                //         sort = '-' + sort
+                //     }
+                // } else {
+                //     sort = '-' + sort_column
+                // }
+            } else {
+                branch_type = value
+            } 
+            setTimeout(() => {
+                loadData()
+            }, 400);
+        } 
+    })
+</script>
+{% endblock %}
