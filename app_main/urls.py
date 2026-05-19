@@ -59,6 +59,7 @@ urlpatterns_ajax = [
     path('ajax/forget-password-request', views_ajax.forgot_password_request, name='forgot_password_request'),
     path('ajax/reset-password-request', views_ajax.reset_password_request, name='reset_password_request'),
     path('ajax/login-request', views_ajax.login_request, name='login_request'),
+    path('ajax/merchant-register-request', views_ajax.merchant_register, name='merchant_register'),
     path('ajax/reminder_off', views_ajax.reminder_off, name='reminder_off'),
     path('otp-code-resend/request/', views_ajax.otp_code_resend_request, name="otp_code_resend_request"),
     path('otp-code/request/', views_ajax.otp_code_request, name="otp_code_request"),

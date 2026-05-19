@@ -7,3 +7,4 @@ django-environ
 django-browser-reload
 python-dateutil
 pytz
+djangorestframework

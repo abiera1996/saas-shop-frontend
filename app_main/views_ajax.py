@@ -21,6 +21,7 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import pytz
 import string
+from utils.api import API
 
 
 def otp_code_request(request):
@@ -104,6 +105,25 @@ def reminder_off(request):
         'message': 'Successfully updated.'
     }, status=200)
 
+
+@require_http_methods(['POST'])
+def merchant_register(request):
+    try:
+        data = decode_request_body(request.body)
+    except Exception as e:
+        data = request.POST  
+    response = API().http_request(
+        "auth/set-credentials",
+        "post",
+        payload=data
+    )  
+    if response.status_code in (200, 201):
+        return JsonResponse({
+            'message': 'Merchant successfully registered. Please login to continue.'
+        }, status=200)
+    return JsonResponse({
+        'message': response.json().get('message', 'Failed to registration.')
+    }, status=200)
 
 @require_http_methods(['POST'])
 def login_request(request):

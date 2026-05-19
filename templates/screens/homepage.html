@@ -7,25 +7,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block meta %}
-    <meta name="description" content="Launch your premium digital storefront in seconds. Solid catalog management, lightning-fast order fulfillment, and beautiful customized merchant templates." />
+    <meta name="description"
+        content="Launch your premium digital storefront in seconds. Solid catalog management, lightning-fast order fulfillment, and beautiful customized merchant templates." />
     {% endblock %}
     <title>SwiftShop SaaS | Replicating Cruip Solid Theme</title>
-    
+
     <!-- PWA Integration Manifest & App configuration -->
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#875ef5">
     <link rel="apple-touch-icon" href="https://preview.cruip.com/solid/dist/images/logo.svg">
-    
+
     <!-- Google Fonts: Heebo (Cruip Solid Signature Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="/static/plugins/fontawesomepro/css/all.min.css" />
     <link href="/static/plugins/bootstrap 5.0.2/bootstrap.min.css" rel="stylesheet">
     <link href="/static/plugins/aos/aos.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/static/css/global.css" />
-    
+
     {% block style %}
     <style>
         body {
@@ -70,13 +72,16 @@
         ::-webkit-scrollbar-track {
             background: #151719;
         }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #875ef5;
             border-radius: 3px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #9d7df7;
         }
@@ -86,15 +91,18 @@
             box-shadow: 0 0 0 0 rgba(135, 94, 245, 0.7);
             animation: pulse-solid-anim 2s infinite;
         }
+
         @keyframes pulse-solid-anim {
             0% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(135, 94, 245, 0.7);
             }
+
             70% {
                 transform: scale(1);
                 box-shadow: 0 0 0 6px rgba(135, 94, 245, 0);
             }
+
             100% {
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(135, 94, 245, 0);
@@ -102,7 +110,8 @@
         }
 
         /* Form styling matching Cruip Solid design system */
-        input[type="email"], input[type="password"] {
+        input[type="email"],
+        input[type="password"] {
             background-color: #24282c !important;
             border: 1px solid #2e333a !important;
             color: #ffffff !important;
@@ -111,7 +120,9 @@
             height: 48px !important;
             transition: all 0.2s ease;
         }
-        input[type="email"]:focus, input[type="password"]:focus {
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
             border-color: #875ef5 !important;
             background-color: #2b3036 !important;
             box-shadow: none !important;
@@ -126,6 +137,7 @@
             height: 48px;
             transition: all 0.2s ease;
         }
+
         .solid-btn-primary:hover {
             background-color: #9d7df7;
             transform: translateY(-1px);
@@ -140,6 +152,7 @@
             border: 1px solid #2e333a;
             transition: all 0.2s ease;
         }
+
         .solid-btn-secondary:hover {
             background-color: #2e333a;
             color: #ffffff !important;
@@ -153,6 +166,7 @@
             transition: all 0.2s ease;
             border-bottom: 2px solid transparent;
         }
+
         .form-tab-btn-solid.active {
             color: #ffffff !important;
             border-bottom-color: #875ef5;
@@ -184,7 +198,7 @@
         }
     </style>
     {% endblock %}
-    
+
     <script src="/static/js/jquery-3.6.3.min.js"></script>
     {% tailwind_css %}
 </head>
@@ -197,15 +211,16 @@
     <div class="solid-circle-dec bottom-[10%] left-[5%] w-[55vw] h-[55vw]"></div>
 
     <!-- Header / Navigation Bar -->
-    <nav class="border-b solid-border sticky top-0 w-full z-50 bg-[#151719]/90 backdrop-blur-md transition-all duration-300 py-3.5">
+    <nav
+        class="border-b solid-border sticky top-0 w-full z-50 bg-[#151719]/90 backdrop-blur-md transition-all duration-300 py-3.5">
         <div class="max-w-6xl mx-auto px-4 md:px-8 w-full flex items-center justify-between">
             <!-- Logo Block -->
             <div class="flex items-center gap-2.5 w-auto md:w-1/4">
                 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="logo-a">
-                            <stop stop-color="#ab90fa" offset="0%"/>
-                            <stop stop-color="#875ef5" offset="100%"/>
+                            <stop stop-color="#ab90fa" offset="0%" />
+                            <stop stop-color="#875ef5" offset="100%" />
                         </linearGradient>
                     </defs>
                     <path d="M16 0L32 16L16 32L0 16L16 0Z" fill="url(#logo-a)" />
@@ -214,35 +229,45 @@
                     SOLID<span class="text-[#875ef5]">.</span>
                 </span>
             </div>
-            
+
             <!-- Navigation Menu Links (Desktop) -->
             <div class="hidden md:flex items-center justify-center gap-8 w-2/4">
-                <a href="#features" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Features</a>
-                <a href="#details" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">How it works</a>
-                <a href="#register-portal" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Register</a>
+                <a href="#features"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Features</a>
+                <a href="#details"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">How
+                    it works</a>
+                <a href="#register-portal"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">Register</a>
             </div>
 
             <!-- Auth CTAs (Desktop Only) -->
             <div class="hidden md:flex items-center justify-end gap-4 w-1/4">
                 {% if request.user.is_authenticated %}
-                    <a href="/authentication" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">
-                        Dashboard
-                    </a>
-                    <a href="{% url 'main:logout' %}" class="solid-btn-secondary px-5 py-2 flex items-center justify-center text-xs uppercase tracking-wider">
-                        Log Out
-                    </a>
+                <a href="/authentication"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">
+                    Dashboard
+                </a>
+                <a href="{% url 'main:logout' %}"
+                    class="solid-btn-secondary px-5 py-2 flex items-center justify-center text-xs uppercase tracking-wider">
+                    Log Out
+                </a>
                 {% else %}
-                    <a href="/authentication" class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">
-                        Log In
-                    </a>
-                    <a href="#register-portal" class="solid-btn-primary px-5 py-2 flex items-center justify-center text-xs uppercase tracking-wider">
-                        Register Shop
-                    </a>
+                <a href="/authentication"
+                    class="text-xs font-semibold uppercase tracking-wider text-[#9ca9b3] hover:text-white-pure transition-colors">
+                    Log In
+                </a>
+                <a href="#register-portal"
+                    class="solid-btn-primary px-5 py-2 flex items-center justify-center text-xs uppercase tracking-wider">
+                    Register Shop
+                </a>
                 {% endif %}
             </div>
 
             <!-- Hamburger Icon Button (Mobile / Tablet) -->
-            <button onclick="toggleMobileMenu(true)" class="md:hidden text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer" aria-label="Open Mobile Menu">
+            <button onclick="toggleMobileMenu(true)"
+                class="md:hidden text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer"
+                aria-label="Open Mobile Menu">
                 <i class="fal fa-bars text-xl"></i>
             </button>
         </div>
@@ -258,20 +283,25 @@
                 </svg>
                 <span class="font-bold text-sm tracking-wider text-white-pure">SOLID MENU</span>
             </div>
-            <button onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer" aria-label="Close Mobile Menu">
+            <button onclick="toggleMobileMenu(false)"
+                class="text-[#9ca9b3] hover:text-white-pure p-2 focus:outline-none cursor-pointer"
+                aria-label="Close Mobile Menu">
                 <i class="fal fa-times text-lg"></i>
             </button>
         </div>
-        
+
         <!-- Drawer Menu Navigation Links -->
         <div class="flex flex-col gap-5 text-xs font-semibold uppercase tracking-wider mb-6 text-left">
-            <a href="#features" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+            <a href="#features" onclick="toggleMobileMenu(false)"
+                class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
                 <i class="fal fa-bolt text-[#875ef5]"></i> Features
             </a>
-            <a href="#details" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+            <a href="#details" onclick="toggleMobileMenu(false)"
+                class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
                 <i class="fal fa-cogs text-[#875ef5]"></i> How it works
             </a>
-            <a href="#register-portal" onclick="toggleMobileMenu(false)" class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
+            <a href="#register-portal" onclick="toggleMobileMenu(false)"
+                class="text-[#9ca9b3] hover:text-white-pure transition-colors py-1.5 flex items-center gap-2.5">
                 <i class="fal fa-user-plus text-[#875ef5]"></i> Register
             </a>
         </div>
@@ -279,19 +309,23 @@
         <!-- Drawer Auth CTAs (Mobile) -->
         <div class="flex flex-col gap-3 mt-auto">
             {% if request.user.is_authenticated %}
-                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
-                    Dashboard
-                </a>
-                <a href="{% url 'main:logout' %}" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
-                    Log Out
-                </a>
+            <a href="/authentication"
+                class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                Dashboard
+            </a>
+            <a href="{% url 'main:logout' %}"
+                class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                Log Out
+            </a>
             {% else %}
-                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
-                    Log In
-                </a>
-                <a href="#register-portal" onclick="toggleMobileMenu(false)" class="solid-btn-primary w-full flex items-center justify-center text-xs uppercase tracking-wider">
-                    Register Shop
-                </a>
+            <a href="/authentication"
+                class="solid-btn-secondary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                Log In
+            </a>
+            <a href="#register-portal" onclick="toggleMobileMenu(false)"
+                class="solid-btn-primary w-full flex items-center justify-center text-xs uppercase tracking-wider">
+                Register Shop
+            </a>
             {% endif %}
         </div>
     </div>
@@ -305,14 +339,17 @@
                 Landing template for startups
             </h1>
             <p class="text-slate-light text-lg sm:text-xl font-light mb-8 max-w-2xl mx-auto leading-relaxed">
-                Our landing page template works on all devices, so you only have to set it up once, and get beautiful results forever.
+                Our landing page template works on all devices, so you only have to set it up once, and get beautiful
+                results forever.
             </p>
-            
+
             <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-sm mx-auto mb-16">
-                <a href="#register-portal" class="solid-btn-primary w-full flex items-center justify-center px-8 text-sm uppercase tracking-wider">
+                <a href="#register-portal"
+                    class="solid-btn-primary w-full flex items-center justify-center px-8 text-sm uppercase tracking-wider">
                     Pre order now
                 </a>
-                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center px-8 text-sm uppercase tracking-wider">
+                <a href="/authentication"
+                    class="solid-btn-secondary w-full flex items-center justify-center px-8 text-sm uppercase tracking-wider">
                     Get in touch
                 </a>
             </div>
@@ -321,12 +358,15 @@
             <div class="relative max-w-3xl mx-auto mt-12" data-aos="fade-up" data-aos-delay="200">
                 <!-- Glowing background accents behind frame -->
                 <div class="absolute inset-0 bg-[#875ef5]/5 rounded-xl filter blur-3xl z-0 pointer-events-none"></div>
-                <div class="absolute top-[-40px] left-[-40px] w-24 h-24 rounded-full border border-purple-500/10 z-0"></div>
-                <div class="absolute bottom-[-30px] right-[-30px] w-32 h-32 rounded-full border border-pink-500/10 z-0"></div>
-                
+                <div class="absolute top-[-40px] left-[-40px] w-24 h-24 rounded-full border border-purple-500/10 z-0">
+                </div>
+                <div class="absolute bottom-[-30px] right-[-30px] w-32 h-32 rounded-full border border-pink-500/10 z-0">
+                </div>
+
                 <!-- Media Window Frame representing Cruip play preview layout -->
                 <div class="solid-card rounded-lg overflow-hidden shadow-2xl relative z-10 p-2">
-                    <div class="bg-[#151719] rounded-md p-4 min-h-[300px] flex flex-col justify-between border solid-border">
+                    <div
+                        class="bg-[#151719] rounded-md p-4 min-h-[300px] flex flex-col justify-between border solid-border">
                         <!-- Preview Header -->
                         <div class="flex items-center justify-between border-b solid-border pb-3 mb-4">
                             <div class="flex items-center gap-1.5">
@@ -334,7 +374,8 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></span>
                             </div>
-                            <div class="flex items-center gap-2 bg-[#1d2023] px-3.5 py-1 rounded text-[11px] text-[#9ca9b3] font-medium border solid-border">
+                            <div
+                                class="flex items-center gap-2 bg-[#1d2023] px-3.5 py-1 rounded text-[11px] text-[#9ca9b3] font-medium border solid-border">
                                 <i class="fal fa-link text-[#875ef5]"></i> swiftshop.store/interactive-demo
                             </div>
                         </div>
@@ -342,38 +383,54 @@
                         <!-- Store Theme Customizer Mockup inside Solid frame -->
                         <div class="grid md:grid-cols-12 gap-4 flex-grow items-center">
                             <div class="md:col-span-7 text-left flex flex-col justify-center">
-                                <span id="mock-badge" class="bg-[#875ef5]/10 text-[#ab90fa] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-[#875ef5]/20 mb-2 w-max">Active Live Customizer</span>
-                                <h3 id="mock-banner-title" class="font-bold text-white-pure text-2xl tracking-tight mb-2">My Brand Storefront</h3>
-                                <p class="text-xs text-[#9ca9b3] leading-relaxed mb-4">Click theme nodes on the right to dynamically change the merchant color theme instantly.</p>
+                                <span id="mock-badge"
+                                    class="bg-[#875ef5]/10 text-[#ab90fa] text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-[#875ef5]/20 mb-2 w-max">Active
+                                    Live Customizer</span>
+                                <h3 id="mock-banner-title"
+                                    class="font-bold text-white-pure text-2xl tracking-tight mb-2">My Brand Storefront
+                                </h3>
+                                <p class="text-xs text-[#9ca9b3] leading-relaxed mb-4">Click theme nodes on the right to
+                                    dynamically change the merchant color theme instantly.</p>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2.5 h-2.5 rounded-full bg-green-500 pulse-solid"></span>
-                                    <span class="text-[10px] uppercase font-bold text-green-400">Live Merchant Connection</span>
+                                    <span class="text-[10px] uppercase font-bold text-green-400">Live Merchant
+                                        Connection</span>
                                 </div>
                             </div>
-                            
+
                             <!-- Interactive Theme selector -->
                             <div class="md:col-span-5 bg-[#1d2023] rounded-lg p-4 border solid-border text-left">
-                                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-3">Merchant Theme node</span>
+                                <span
+                                    class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-3">Merchant
+                                    Theme node</span>
                                 <div class="flex flex-col gap-2">
-                                    <button onclick="changeMockTheme('#875ef5', 'purple')" class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-[#875ef5] text-white-pure rounded transition-all cursor-pointer">
+                                    <button onclick="changeMockTheme('#875ef5', 'purple')"
+                                        class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-[#875ef5] text-white-pure rounded transition-all cursor-pointer">
                                         <span>Indigo-Purple Solid</span>
-                                        <span class="w-3.5 h-3.5 rounded-full bg-[#875ef5] border border-white/20"></span>
+                                        <span
+                                            class="w-3.5 h-3.5 rounded-full bg-[#875ef5] border border-white/20"></span>
                                     </button>
-                                    <button onclick="changeMockTheme('#ff3366', 'pink')" class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-pink-500 text-white-pure rounded transition-all cursor-pointer">
+                                    <button onclick="changeMockTheme('#ff3366', 'pink')"
+                                        class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-pink-500 text-white-pure rounded transition-all cursor-pointer">
                                         <span>Hot Pink Gradient</span>
-                                        <span class="w-3.5 h-3.5 rounded-full bg-pink-500 border border-white/20"></span>
+                                        <span
+                                            class="w-3.5 h-3.5 rounded-full bg-pink-500 border border-white/20"></span>
                                     </button>
-                                    <button onclick="changeMockTheme('#00c0a5', 'teal')" class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-teal-400 text-white-pure rounded transition-all cursor-pointer">
+                                    <button onclick="changeMockTheme('#00c0a5', 'teal')"
+                                        class="w-full flex items-center justify-between text-xs py-2 px-3 bg-[#151719] border solid-border hover:border-teal-400 text-white-pure rounded transition-all cursor-pointer">
                                         <span>Solid Clean Teal</span>
-                                        <span class="w-3.5 h-3.5 rounded-full bg-teal-400 border border-white/20"></span>
+                                        <span
+                                            class="w-3.5 h-3.5 rounded-full bg-teal-400 border border-white/20"></span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Footer stats within mockup -->
-                        <div class="flex items-center justify-between border-t solid-border pt-3 mt-4 text-[10px] uppercase tracking-wider text-[#9ca9b3]">
-                            <div>Configured colors: <span id="theme-color-label" class="text-white-pure font-bold">Purple</span></div>
+                        <div
+                            class="flex items-center justify-between border-t solid-border pt-3 mt-4 text-[10px] uppercase tracking-wider text-[#9ca9b3]">
+                            <div>Configured colors: <span id="theme-color-label"
+                                    class="text-white-pure font-bold">Purple</span></div>
                             <div>Merchant slug state: <span class="text-green-400">Available</span></div>
                         </div>
 
@@ -389,7 +446,8 @@
                     Be Productive
                 </h2>
                 <p class="text-[#9ca9b3] font-light leading-relaxed">
-                    Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris. Nam at lectus urna duis convallis.
+                    Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                    mauris. Nam at lectus urna duis convallis.
                 </p>
             </div>
 
@@ -397,67 +455,79 @@
             <div class="grid md:grid-cols-3 gap-10">
                 <!-- Feature 1 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-bolt"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
 
                 <!-- Feature 2 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-palette"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
 
                 <!-- Feature 3 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-analytics"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
 
                 <!-- Feature 4 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="400">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-list-music"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
 
                 <!-- Feature 5 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="500">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-shopping-bag"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
 
                 <!-- Feature 6 -->
                 <div class="flex flex-col items-center text-center p-2" data-aos="fade-up" data-aos-delay="600">
-                    <div class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
+                    <div
+                        class="w-16 h-16 rounded-full bg-[#875ef5]/10 border border-[#875ef5]/20 text-[#ab90fa] flex items-center justify-center text-2xl mb-6 shadow-inner shadow-[#875ef5]/10">
                         <i class="fal fa-bags-shopping"></i>
                     </div>
                     <h3 class="font-bold text-lg text-white-pure mb-2">Be Productive</h3>
                     <p class="text-sm text-[#9ca9b3] font-light leading-relaxed">
-                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue mauris.
+                        Fermentum posuere urna nec tincidunt praesent semper feugiat nibh. A arcu cursus vitae congue
+                        mauris.
                     </p>
                 </div>
             </div>
@@ -465,7 +535,7 @@
 
         <!-- Segment Breakdown Rows Section (Alternating columns style) -->
         <section id="details" class="max-w-6xl mx-auto px-4 py-20 border-t solid-border">
-            
+
             <!-- Segment Row 1 -->
             <div class="grid md:grid-cols-12 gap-12 items-center mb-24" data-aos="fade-up">
                 <!-- Copy content column -->
@@ -475,12 +545,16 @@
                         Unlimited for all
                     </h2>
                     <p class="text-[#9ca9b3] font-light leading-relaxed mb-6">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ad quis nostrud.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Ut ad quis nostrud.
                     </p>
                     <ul class="flex flex-col gap-3 text-xs uppercase tracking-wider font-semibold text-white-pure">
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
                     </ul>
                 </div>
                 <!-- Visual placeholder column -->
@@ -489,14 +563,22 @@
                         <div class="absolute inset-0 bg-[#875ef5]/5 filter blur-2xl rounded-lg"></div>
                         <div class="flex items-center justify-between border-b solid-border pb-3">
                             <span class="text-xs uppercase font-bold text-white-pure">Storefront Analytics</span>
-                            <span class="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20 flex items-center gap-0.5"><i class="fal fa-trend-up"></i> +12%</span>
+                            <span
+                                class="text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20 flex items-center gap-0.5"><i
+                                    class="fal fa-trend-up"></i> +12%</span>
                         </div>
-                        <div class="w-full h-32 rounded bg-[#151719] flex items-end justify-between p-3 border solid-border gap-2">
-                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t" style="height: 40%"></div>
-                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t" style="height: 60%"></div>
-                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t" style="height: 55%"></div>
-                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t" style="height: 80%"></div>
-                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t" style="height: 90%"></div>
+                        <div
+                            class="w-full h-32 rounded bg-[#151719] flex items-end justify-between p-3 border solid-border gap-2">
+                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t"
+                                style="height: 40%"></div>
+                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t"
+                                style="height: 60%"></div>
+                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t"
+                                style="height: 55%"></div>
+                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t"
+                                style="height: 80%"></div>
+                            <div class="w-full bg-[#875ef5] hover:bg-[#9d7df7] transition-all rounded-t"
+                                style="height: 90%"></div>
                         </div>
                     </div>
                 </div>
@@ -510,14 +592,17 @@
                         <div class="absolute inset-0 bg-pink-500/5 filter blur-2xl rounded-lg"></div>
                         <div class="flex items-center justify-between border-b solid-border pb-3">
                             <span class="text-xs uppercase font-bold text-white-pure">Product Inventory</span>
-                            <span class="text-[10px] text-slate-light font-bold bg-slate-800 px-2 py-0.5 rounded">Active catalog</span>
+                            <span class="text-[10px] text-slate-light font-bold bg-slate-800 px-2 py-0.5 rounded">Active
+                                catalog</span>
                         </div>
                         <div class="flex flex-col gap-2">
-                            <div class="flex items-center justify-between bg-[#151719] p-2 rounded.5 text-xs border solid-border">
+                            <div
+                                class="flex items-center justify-between bg-[#151719] p-2 rounded.5 text-xs border solid-border">
                                 <span class="text-white-pure">Cozy Woolen Cap</span>
                                 <span class="text-[#9ca9b3] font-light">48 items left</span>
                             </div>
-                            <div class="flex items-center justify-between bg-[#151719] p-2 rounded.5 text-xs border solid-border">
+                            <div
+                                class="flex items-center justify-between bg-[#151719] p-2 rounded.5 text-xs border solid-border">
                                 <span class="text-white-pure">Retro Denim Jacket</span>
                                 <span class="text-[#9ca9b3] font-light">12 items left</span>
                             </div>
@@ -531,12 +616,16 @@
                         Unlimited for all
                     </h2>
                     <p class="text-[#9ca9b3] font-light leading-relaxed mb-6">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ad quis nostrud.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Ut ad quis nostrud.
                     </p>
                     <ul class="flex flex-col gap-3 text-xs uppercase tracking-wider font-semibold text-white-pure">
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
-                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
+                        <li class="flex items-center gap-3"><i class="fal fa-check text-green-400"></i> Lorem ipsum
+                            dolor sit nisi</li>
                     </ul>
                 </div>
             </div>
@@ -548,22 +637,26 @@
             <div class="solid-card rounded-2xl p-8 md:p-12 relative overflow-hidden text-center shadow-2xl">
                 <!-- Circular vector decorations within panel -->
                 <div class="absolute top-[-30px] left-[-30px] w-24 h-24 rounded-full border border-purple-500/5"></div>
-                <div class="absolute bottom-[-40px] right-[-40px] w-36 h-36 rounded-full border border-[#875ef5]/10"></div>
-                
+                <div class="absolute bottom-[-40px] right-[-40px] w-36 h-36 rounded-full border border-[#875ef5]/10">
+                </div>
+
                 <h3 class="font-bold text-2xl md:text-3xl text-white-pure tracking-tight mb-4">
                     Still not convinced on buying?
                 </h3>
                 <p class="text-[#9ca9b3] font-light mb-8 max-w-lg mx-auto text-sm leading-relaxed">
-                    Set up your secure merchant credentials right here, explore storefront color selectors, and let us onboard you today.
+                    Set up your secure merchant credentials right here, explore storefront color selectors, and let us
+                    onboard you today.
                 </p>
 
                 <!-- Sliding form card inside Solid block -->
                 <div class="max-w-md mx-auto bg-[#151719] border solid-border rounded-xl overflow-hidden shadow-2xl">
                     <div class="flex border-b solid-border bg-[#1a1c1e]">
-                        <button onclick="toggleForm('register')" id="tab-register-btn" class="form-tab-btn-solid flex-1 py-3 text-slate-light hover:text-white-pure active border-r solid-border">
+                        <button onclick="toggleForm('register')" id="tab-register-btn"
+                            class="form-tab-btn-solid flex-1 py-3 text-slate-light hover:text-white-pure active border-r solid-border">
                             <i class="fal fa-user-plus mr-2 text-[#ab90fa]"></i> Register
                         </button>
-                        <button onclick="toggleForm('login-tab')" id="tab-login-btn" class="form-tab-btn-solid flex-1 py-3 text-[#9ca9b3] hover:text-white-pure">
+                        <button onclick="toggleForm('login-tab')" id="tab-login-btn"
+                            class="form-tab-btn-solid flex-1 py-3 text-[#9ca9b3] hover:text-white-pure">
                             <i class="fal fa-sign-in mr-2 text-[#9d7df7]"></i> Portal
                         </button>
                     </div>
@@ -571,29 +664,42 @@
                     <div class="p-6 md:p-8">
                         <!-- Register panel -->
                         <div id="panel-register">
-                            <form id="form-merchant-register" class="flex flex-col gap-4">
+                            <form id="form-merchant-register" action="{% url 'main:merchant_register' %}"
+                                class="flex flex-col gap-4">
                                 <div class="text-left">
-                                    <label class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Merchant Email Address</label>
+                                    <label
+                                        class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Merchant
+                                        Email Address</label>
                                     <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fal fa-envelope"></i></span>
-                                        <input type="email" name="email" required placeholder="name@yourcompany.com" class="w-full" />
+                                        <span
+                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
+                                                class="fal fa-envelope"></i></span>
+                                        <input type="email" name="email" required placeholder="name@yourcompany.com"
+                                            class="w-full" />
                                     </div>
                                 </div>
 
                                 <div class="text-left">
-                                    <label class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Secure Password</label>
+                                    <label
+                                        class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Secure
+                                        Password</label>
                                     <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i class="fal fa-lock"></i></span>
-                                        <input type="password" name="password" required placeholder="••••••••" class="w-full" />
+                                        <span
+                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
+                                                class="fal fa-lock"></i></span>
+                                        <input type="password" name="password" required placeholder="••••••••"
+                                            class="w-full" />
                                     </div>
                                 </div>
 
                                 <div class="flex items-start text-left mt-1 text-[#9ca9b3] text-xs font-light">
-                                    <input type="checkbox" required class="w-4 h-4 text-[#875ef5] bg-[#151719] rounded border-[#2e333a] focus:ring-[#875ef5] mt-0.5 mr-2" />
+                                    <input type="checkbox" required
+                                        class="w-4 h-4 text-[#875ef5] bg-[#151719] rounded border-[#2e333a] focus:ring-[#875ef5] mt-0.5 mr-2" />
                                     <span>I accept the merchant terms & privacy guidelines.</span>
                                 </div>
 
-                                <button type="submit" id="btn-submit-register" class="solid-btn-primary w-full mt-2 flex items-center justify-center gap-2">
+                                <button type="submit" id="btn-submit-register"
+                                    class="solid-btn-primary w-full mt-2 flex items-center justify-center gap-2">
                                     <span>Pre order now</span> <i class="fal fa-arrow-right"></i>
                                 </button>
                             </form>
@@ -602,14 +708,16 @@
                         <!-- Login redirection panel -->
                         <div id="panel-login" class="hidden">
                             <div class="py-4 text-center">
-                                <div class="w-14 h-14 rounded-full bg-[#875ef5]/10 text-[#ab90fa] flex items-center justify-center text-2xl mx-auto mb-4">
+                                <div
+                                    class="w-14 h-14 rounded-full bg-[#875ef5]/10 text-[#ab90fa] flex items-center justify-center text-2xl mx-auto mb-4">
                                     <i class="fal fa-user-shield"></i>
                                 </div>
                                 <h4 class="font-bold text-white-pure text-base mb-2">Secure Merchant Portal</h4>
                                 <p class="text-xs text-[#9ca9b3] font-light max-w-xs mx-auto mb-6">
                                     Access your storefront catalog and sales metrics inside our dedicated portal.
                                 </p>
-                                <a href="/authentication" class="solid-btn-secondary w-full flex items-center justify-center gap-2">
+                                <a href="/authentication"
+                                    class="solid-btn-secondary w-full flex items-center justify-center gap-2">
                                     <span>Go to Login Screen</span> <i class="fal fa-sign-in"></i>
                                 </a>
                             </div>
@@ -624,7 +732,8 @@
     </main>
 
     <!-- Footer (Cruip Solid style layout) -->
-    <footer class="border-t solid-border py-12 px-4 md:px-12 text-center md:text-left text-xs text-[#9ca9b3] flex flex-col md:flex-row justify-between items-center gap-6 max-w-6xl mx-auto w-full relative z-10 bg-[#151719]">
+    <footer
+        class="border-t solid-border py-12 px-4 md:px-12 text-center md:text-left text-xs text-[#9ca9b3] flex flex-col md:flex-row justify-between items-center gap-6 max-w-6xl mx-auto w-full relative z-10 bg-[#151719]">
         <div class="flex items-center gap-2">
             <svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                 <path d="M16 0L32 16L16 32L0 16L16 0Z" fill="#875ef5" />
@@ -638,8 +747,10 @@
             <a href="#" class="hover:text-white-pure transition-colors">Support</a>
         </div>
         <div class="flex items-center gap-4 text-sm text-[#9ca9b3]">
-            <a href="#" class="hover:text-white-pure transition-colors" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="hover:text-white-pure transition-colors" title="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="hover:text-white-pure transition-colors" title="Facebook"><i
+                    class="fab fa-facebook-f"></i></a>
+            <a href="#" class="hover:text-white-pure transition-colors" title="Twitter"><i
+                    class="fab fa-twitter"></i></a>
             <a href="#" class="hover:text-white-pure transition-colors" title="Google"><i class="fab fa-google"></i></a>
         </div>
     </footer>
@@ -653,7 +764,7 @@
 
     <script src="/static/js/axios.min.js"></script>
     <script src="/static/js/api_request.js"></script>
-    
+
     <script>
         setupAxios("{{csrf_token}}");
         AOS.init({
@@ -699,10 +810,10 @@
             const bannerTitle = document.getElementById('mock-banner-title');
             const themeLabel = document.getElementById('theme-color-label');
             const badge = document.getElementById('mock-badge');
-            
+
             // Re-apply focus colors and texts
             themeLabel.textContent = colorName.charAt(0).toUpperCase() + colorName.slice(1);
-            
+
             if (colorName === 'purple') {
                 bannerTitle.style.color = '#ffffff';
                 badge.style.color = '#ab90fa';
@@ -722,54 +833,45 @@
         }
 
         // Catch Merchant Registration Submit Handler
-        $('#form-merchant-register').on('submit', function(e) {
-            e.preventDefault();
-            
-            const btn = $('#btn-submit-register');
-            const email = $('input[name="email"]').val();
-            const password = $('input[name="password"]').val();
-
-            // Load animation state
-            btn.prop('disabled', true).html('<i class="fal fa-spinner-third animate-spin mr-2"></i> Initializing Pre order...');
-
-            // Submit payload
-            const postData = {
-                email: email,
-                password: password
-            };
-
-            // Post register or redirect to auth gateway
-            axios.post('http://127.0.0.1:8000/api/auth/register/', postData)
-                .then(function(response) {
+        API.formRequest(
+            '#form-merchant-register',
+            extended_data = {},
+            processData = () => { },
+            checkValidation = (form_data) => {
+                return true
+            },
+            callback = (response) => {
+                console.log(response)
+                if ([200, 201].includes(response.status)) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Pre order successfully logged!',
+                        title: 'Merchant registration successful!',
                         text: 'Welcome on board! Redirection loading to complete your merchant credentials.',
                         background: '#1d2023',
                         color: '#ffffff',
                         confirmButtonColor: '#875ef5',
                         timer: 4000,
                         timerProgressBar: true
-                    }).then(function() {
+                    }).then(function () {
                         window.location.href = '/authentication';
                     });
-                })
-                .catch(function(error) {
-                    console.warn("Direct API connection bypassed, running local session gateway onboarding.", error);
-                    
+                } else if (response.status == 400) {
+                    if (response.isResetPassword) {
+                        location.href = response.reset_url
+                    }
+                }
+                else {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Pre order Initiated!',
-                        html: '<p class="text-sm text-[#9ca9b3]">Account created successfully! Let\'s proceed to complete your storefront authorization gateway.</p>',
-                        background: '#1d2023',
-                        color: '#ffffff',
-                        confirmButtonText: 'Proceed to Portal',
-                        confirmButtonColor: '#875ef5'
-                    }).then(function() {
-                        window.location.href = '/authentication';
-                    });
-                });
-        });
+                        icon: [200, 201].includes(response.status) ? 'success' : 'error',
+                        title: 'Message',
+                        text: response.message || response.data?.message,
+                    })
+                }
+            },
+            isMultiForm = false
+        )
+
+
     </script>
     {% block scripts %}
     {% endblock %}
