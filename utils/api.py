@@ -9,7 +9,7 @@ import datetime
 
 logging = logging.getLogger('django')
 
-DIMES_BASE_URL = "http://localhost:8000/"
+DIMES_BASE_URL = "http://localhost:8000"
 
 class CustomException(exceptions.APIException):
     status_code = 500
@@ -39,6 +39,9 @@ class API:
     headers = {"Content-Type": "application/json"}
     code = None
     method = ''
+
+    def __init__(self, request):
+        self.request = request
 
     def api_logging(self, url, method, headers, payload, result):
         if payload:
@@ -94,7 +97,22 @@ class API:
             args=(url, method, headers, data, result)
         ).start()
           
-        return result 
+        response_data = {}
+     
+        try:
+            response_data = result.json() 
+        except Exception as e: 
+            response_data = {
+                "message": f"Server Error",
+                "data": {}
+            }
+        
+        response_data = {
+            **response_data, 
+            'status_code': result.status_code
+        } 
+
+        return response_data
 
     def get_url(self, url_path):
         if self.base_url == 1:
@@ -105,7 +123,11 @@ class API:
     def get_headers(self, xheaders={}):
         merge_headers = self.headers 
         if self.base_url == 1:
-            auth_header = {} 
+            auth_header = {}  
+            if self.request.user.is_authenticated:
+                auth_header = {"Authorization": f"Bearer {self.request.session['token']}"}
+            else:
+                auth_header = {"api-key": settings.API_KEY}
             if auth_header:
                 merge_headers = {**merge_headers, **auth_header}
         

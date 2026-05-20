@@ -56,6 +56,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    'config.middleware.APIAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_browser_reload.middleware.BrowserReloadMiddleware',
@@ -164,48 +166,58 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
         },
         'custom':{
-            'format':"LOG [%(levelname)s] %(asctime)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
+            'format':"API [%(levelname)s] %(asctime)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
         },
-    },
+    }, 
     'handlers': {
-        'custom_handler':{
+        'logging_handler':{
             'class':'config.logger.CustomFileHandler',
-            'level': 'WARNING',
+            'level': 'WARNING' if PROJECT_ENVIRONMENT == 'production' else 'DEBUG',
             'formatter': 'custom',
-            'maxBytes': 1024*1024*10, # 10MB
+            'maxBytes': 31457280,  # 1024 * 1024 * 30B = 30MB
             'backupCount': 5,
-            'filename':'config.log',
+            'filename':'logs/front.log',
         },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'custom'
-        },
+        },  
     },
     'loggers': {
         'django': {
-            'handlers': ['custom_handler', 'console'],
-            'level': 'WARNING',
+            'handlers': ['logging_handler', 'console'],
+            'level': 'WARNING' if PROJECT_ENVIRONMENT == 'production' else 'DEBUG',
             'propagate': True,
         },
-        'django.db.backends': {
+        'django.db.backends': { 
+            'handlers': ['console'],
+            'level': 'WARNING',   # DEBUG will log all queries, so change it to WARNING.
+            'propagate': False,   # Don't propagate to other handlers
+        },
+        'django.utils.autoreload': {
+            'handlers': ['console'],
             'level': 'WARNING',   # DEBUG will log all queries, so change it to WARNING.
             'propagate': False,   # Don't propagate to other handlers
         },
         'django.template': {
+            'handlers': ['console'],
             'level': 'WARNING',   # DEBUG will log all queries, so change it to WARNING.
             'propagate': False,   # Don't propagate to other handlers
-        }, 
-        'django.utils.autoreload': {
+        },
+        'django.request': {
+            'handlers': ['logging_handler','console'],
             'level': 'WARNING',   # DEBUG will log all queries, so change it to WARNING.
             'propagate': False,   # Don't propagate to other handlers
         },
         'django.server': {
-            'level': 'WARNING',   # DEBUG will log all queries, so change it to WARNING.
+            'handlers': ['console'],
+            'level': 'INFO',   # DEBUG will log all queries, so change it to WARNING.
             'propagate': False,   # Don't propagate to other handlers
-        },
+        }, 
     }
 }
+
 
 # https://django-tailwind.readthedocs.io/en/latest/installation.html
 TAILWIND_APP_NAME = 'tailwind_theme'
@@ -230,7 +242,7 @@ SMTP_HOST = ''
 SMTP_EMAIL = ''
 SMTP_PASSWORD = ''
 BASE_URL = 'http://192.168.16.31/'
-API_KEY = ''
+API_KEY = 'x'
 
 SUB_ADMIN = ''
 try:

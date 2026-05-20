@@ -49,7 +49,7 @@
         {% else %}
             <div class='border-{{name}} input-border-component {% if classBorder %}{{classBorder}}{% else %}border-primaryColor{% endif %} {{class}} flex w-full border-1 text-sm rounded-md'
             {% if type == 'date' %}
-                data-mdb-format="mm-dd-yyyy"  id="{{id}}" data-mdb-toggle-button="false"
+                data-mdb-format="yyyy-mm-dd"  id="{{id}}" data-mdb-toggle-button="false"
             {% endif %}>
                 {% if iconLeft %}
                     <div class='grid place-items-center px-3 pr-[10px]'>
@@ -59,14 +59,14 @@
                 <div class='flex items-stretch justify-center flex-1'>
                     {% if type == 'date' %}
                         <input type="text" {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class=" w-full focus:outline-none border-0 bg-transparent  " 
-                        value="{{ value|date:"m-d-Y" }}" name="{{name}}" data-mdb-toggle="datepicker" placeholder="{{placeholder}}"
+                        value="{{ value|date:"Y-m-d" }}" name="{{name}}" data-mdb-toggle="datepicker" placeholder="{{placeholder}}"
                         {% if required %}  
                             required
                         {% endif %}/> 
                         <script>
                             var {{name}} = document.querySelector('#{{id}}'); 
                             new mdb.Datepicker({{name}}, {
-                                datepicker: { format: 'mm-dd-yyyy'},
+                                datepicker: { format: 'yyyy-mm-dd'},
                             });
                         </script>
                         {% elif type == 'date_range' %}
@@ -202,42 +202,46 @@
                         
                         <script>
                         {% if url %}
-                            $("#{{id}}").select2({
-                                theme: "bootstrap-5",
-                                placeholder: "{{placeholder}}",
-                                closeOnSelect: true,
-                                allowClear: {% if allowClear %} true{% else %} false{% endif %},
-                                {% if multiple %}
-                                    multiple: true,
-                                {% else %} 
-                                    multiple: false, 
-                                {% endif %}
-                                {% if modalParent %}
-                                    dropdownParent: $("#modal_rounded"),
-                                {% endif %}
-                                ajax: {
-                                    url: "{{url}}",
-                                    dataType: 'json',
-                                    delay: 250,
-                                    data: function(params) {
-                                        return {
-                                            search: params.term,
-                                            page: params.page || 1,
-                                            limit: 10
-                                        };
-                                    },
-                                    processResults: function(response, params) {
-                                        params.page = params.page || 1;
-                                        return {
-                                            results: response.data,
-                                            pagination: {
-                                                more: (params.page) < response.page_count
-                                            }
-                                        };
-                                    },
-                                    cache: true
-                                    },
+                            $('select:not(.normal)').each(function () {
+                                $("#{{id}}").select2({
+                                    theme: "bootstrap-5",
+                                    placeholder: "{{placeholder}}",
+                                    closeOnSelect: true,
+                                    allowClear: {% if allowClear %} true{% else %} false{% endif %},
+                                    {% if multiple %}
+                                        multiple: true,
+                                    {% else %} 
+                                        multiple: false, 
+                                    {% endif %}           
+                                    
+                                    {% if modalParent %}
+                                        dropdownParent: $(this).parent(),
+                                    {% endif %}
+                                    ajax: {
+                                        url: "{{url}}",
+                                        dataType: 'json',
+                                        delay: 250,
+                                        data: function(params) {
+                                            return {
+                                                search: params.term,
+                                                page: params.page || 1,
+                                                limit: 10
+                                            };
+                                        },
+                                        processResults: function(response, params) {
+                                            params.page = params.page || 1;
+                                            return {
+                                                results: response.data,
+                                                pagination: {
+                                                    more: (params.page) < response.page_count
+                                                }
+                                            };
+                                        },
+                                        cache: true
+                                        },
+                                });
                             });
+                            
                         {% endif %}
                             {% for option in default_value %}
                                 {% if not forloop.last %}
@@ -249,7 +253,9 @@
                     {% elif type == 'phone_number' %} 
                         <input type="text" {% if readonly %}readonly{% endif %} name="{{name}}" id="{{id}}" 
                         class="w-full focus:outline-none border-0 bg-transparent py-[9px]"
-                        placeholder="{{placeholder}}" value="{{value}}" required/>
+                        placeholder="{{placeholder}}" value="{{value}}" {% if required %}  
+                            required
+                        {% endif %}/>
                         <script>
                                 $('#{{id}}').numberfy({
                                     "allow_negative": false,
@@ -259,7 +265,7 @@
                                 
                                 var {{name}} = document.querySelector("#{{id}}");
                                 var {{name}}_intel = window.intlTelInput({{name}},{
-                                        preferredCountries: ['ph'],
+                                        preferredCountries: ['us'],
                                         separateDialCode: true,
                                         utilsScript: "/static/plugins/phone_country_code/js/utils.js",
                                 });
@@ -268,12 +274,6 @@
                         <input id="{{id}}" name="{{name}}" {% if readonly %}readonly{% endif %}  class=' w-full focus:outline-none border-0 bg-transparent my-[1px]'
                         value="{{value}}" type="{{type}}" placeholder="{{placeholder}}" 
                         {{attribute}}
-
-                        {% if type == 'password' and not isDisabledPsswordValidation %} 
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$"
-                        title="Must include at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)"
-                        {% endif %}
-
                         {% if pattern %} 
                             pattern="{{pattern}}"
                         {% endif %}
@@ -304,6 +304,19 @@
                                     "comma_formatted": false,
                                     "allow_decimal": true,
                                 });
+                            {% endif %}
+                            
+                            {% if value or number_validation %}
+
+                                    setTimeout(function () {
+                                        var valNumber = "{{value}}".split('.')
+                                        if(valNumber.length == 2){
+                                            if(parseInt(valNumber[1]) == 0){
+                                                $('#{{id}}').val(valNumber[0])
+                                            }
+                                        }
+                                        $('#{{id}}').trigger('input');
+                                    }, 500);
                             {% endif %}
 
                             {% if type == 'password' %}

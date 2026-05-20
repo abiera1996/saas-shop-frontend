@@ -28,6 +28,12 @@
     <link href="/static/plugins/aos/aos.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/static/css/global.css" />
 
+    <link rel="stylesheet" href="/static/plugins/phone_country_code/css/intlTelInput.min.css">
+    <script src="/static/js/jquery-3.6.3.min.js"></script>
+    <script src="{% static 'libs/numberfy/numberfy2.js' %}"></script>
+    <script src="/static/plugins/phone_country_code/js/intlTelInput.min.js"></script>
+    <script src="/static/js/numeral.js"></script>
+
     {% block style %}
     <style>
         body {
@@ -111,18 +117,19 @@
 
         /* Form styling matching Cruip Solid design system */
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="text"]{
             background-color: #24282c !important;
             border: 1px solid #2e333a !important;
             color: #ffffff !important;
-            border-radius: 4px !important;
-            padding-left: 2.5rem !important;
+            border-radius: 4px !important; 
             height: 48px !important;
             transition: all 0.2s ease;
         }
 
         input[type="email"]:focus,
-        input[type="password"]:focus {
+        input[type="password"]:focus,
+        input[type="text"]:focus {
             border-color: #875ef5 !important;
             background-color: #2b3036 !important;
             box-shadow: none !important;
@@ -199,7 +206,7 @@
     </style>
     {% endblock %}
 
-    <script src="/static/js/jquery-3.6.3.min.js"></script>
+    
     {% tailwind_css %}
 </head>
 
@@ -667,29 +674,17 @@
                             <form id="form-merchant-register" action="{% url 'main:merchant_register' %}"
                                 class="flex flex-col gap-4">
                                 <div class="text-left">
-                                    <label
-                                        class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Merchant
-                                        Email Address</label>
-                                    <div class="relative">
-                                        <span
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
-                                                class="fal fa-envelope"></i></span>
-                                        <input type="email" name="email" required placeholder="name@yourcompany.com"
-                                            class="w-full" />
-                                    </div>
+                                    <!-- prettier-ignore -->
+                                    {% include 'components/inputs/input_with_label.html' with label="Business Name" name="business_name" placeholder="Enter your business name" class="my-1" iconRight="fal fa-store" type="text" classBorder="border-gray-400" required=True %}
                                 </div>
 
                                 <div class="text-left">
-                                    <label
-                                        class="text-[10px] uppercase font-bold tracking-wider text-slate-light block mb-2">Secure
-                                        Password</label>
-                                    <div class="relative">
-                                        <span
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500"><i
-                                                class="fal fa-lock"></i></span>
-                                        <input type="password" name="password" required placeholder="••••••••"
-                                            class="w-full" />
-                                    </div>
+                                    <!-- prettier-ignore -->
+                                    {% include 'components/inputs/input_with_label.html' with label="Email Address" name="email" placeholder="Enter your email address" class="my-1" iconRight="fal fa-envelope" type="email" classBorder="border-gray-400" required=True %}
+                                </div>
+                                <div class="text-left">
+                                    <!-- prettier-ignore -->
+                                    {% include 'components/inputs/input_with_label.html' with label="Phone Number" placeholder="Enter phone number" name="phone_number" id="phone_number" class='my-1' type="phone_number" classBorder="border-gray-400" required=True %}
                                 </div>
 
                                 <div class="flex items-start text-left mt-1 text-[#9ca9b3] text-xs font-light">
@@ -700,7 +695,7 @@
 
                                 <button type="submit" id="btn-submit-register"
                                     class="solid-btn-primary w-full mt-2 flex items-center justify-center gap-2">
-                                    <span>Pre order now</span> <i class="fal fa-arrow-right"></i>
+                                    <span>Register now</span> <i class="fal fa-arrow-right"></i>
                                 </button>
                             </form>
                         </div>

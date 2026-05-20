@@ -112,18 +112,18 @@ def merchant_register(request):
         data = decode_request_body(request.body)
     except Exception as e:
         data = request.POST  
-    response = API().http_request(
-        "auth/set-credentials",
+    api = API(request)
+    response = api.http_request(
+        "/api/merchant/register",
         "post",
         payload=data
-    )  
-    if response.status_code in (200, 201):
+    )   
+
+    if response['status_code'] in (200, 201):
         return JsonResponse({
             'message': 'Merchant successfully registered. Please login to continue.'
         }, status=200)
-    return JsonResponse({
-        'message': response.json().get('message', 'Failed to registration.')
-    }, status=200)
+    return JsonResponse(response, status=response['status_code'])
 
 @require_http_methods(['POST'])
 def login_request(request):
@@ -133,116 +133,36 @@ def login_request(request):
         data = request.POST 
     username = data.get('username', '')
     password = data.get('password', '')
-     
-    username_data = User.objects.filter(username=username)
- 
-    user = authenticate(request, username=username, password=password)
-    if user is None:
-        error_msg = 'Username or password is incorrect.' 
-
-        if username_data.exists():
-            username_data = username_data[0]
-            # if  hasattr(username_data, 'profile'):
-            #     profile = username_data.profile
-            #     password_attempt = profile.password_attempt + 1
-            #     profile.password_attempt = password_attempt
-                
-            #     if password_attempt == 5:
-            #         profile.unlocke_date = relativedelta(minutes=15) + datetime.datetime.now()
-            #         error_msg = 'Your account is currently locked.'
-            #     elif password_attempt > 5:
-            #         error_msg = 'Your account is currently locked.'
-            #     profile.save()
-        else:
-            username_data = None
-        create_activity(request, username_data, 'Login', f'Failed login ({error_msg})', data={
-            'username': username
-        })
-        return JsonResponse({
-            'message': error_msg
-        }, status=400)
+    # 1. Call your backend API directly
+    api = API()
+    response = api.http_request(
+        "/api/login/", # <-- Change to your actual backend login endpoint
+        "post",
+        payload={"username": username, "password": password}
+    )
+    # 2. Check if login was successful
+    if response.get('status_code') in (200, 201):
+        api_data = response.get('data', {}) 
+        # Extract user details and token from your API response
+        user_info = api_data.get('user', {})
+        
+        # 3. Save everything you need into the session
+        request.session['user_data'] = {
+            'id': user_info.get('id'),
+            'username': user_info.get('username'),
+            'first_name': user_info.get('first_name'),
+            'last_name': user_info.get('last_name'),
+            'email': user_info.get('email'),
+            'role_code': user_info.get('role_code'),
+            'token': api_data.get('token'), # Save the auth token for future API calls
+        }
+        
+        return JsonResponse({'message': 'Successfully logged in.'}, status=200)
     
-    if not hasattr(user, 'profile'):
-        if user.is_superuser:  
-            # role = Role.objects.get(role_code='DMN_1')
-            # Profile.objects.create(
-            #     user=user,
-            #     role=role
-            # )
-            pass
-        else:
-            create_activity(request, user, 'Login', 'Failed login (Invalid user to login)')
-            return JsonResponse({
-                'message': 'Invalid user to login.'
-            }, status=400)
     else:
-        if not user.is_superuser:  
-            if user.profile.status != 'active' or user.profile.user_role.status != 'active':
-                create_activity(request, user, 'Login', 'Failed login (User is deactivated)')
-                return JsonResponse({
-                    'message': 'User is deactivated.'
-                }, status=400)
-
-    profile = user.profile
-    # profile.password_attempt = 0
-    # profile.save()
-    # if profile.unlocke_date:
-    #     if profile.unlocke_date > datetime.datetime.now():
-    #         now = datetime.datetime.now()
-    #         time_left = profile.unlocke_date - now
-    #         minutes_left = int(time_left.total_seconds() // 60)
-    #         seconds_left = int(time_left.total_seconds() % 60)
-    #         create_activity(request, user, 'Login', f'Failed login (Account is currently locked. Wait {minutes_left} minutes and {seconds_left} seconds to unlocked.)')
-    #         return JsonResponse({
-    #             'message': f'Your account is currently locked. Please wait {minutes_left} minutes and {seconds_left} seconds.'
-    #         }, status=400)
-    
-
-    # today = datetime.date.today()
-
-    # if user.profile.password_expiration:
-    #     days_until_expiration = (user.profile.password_expiration - today).days
-   
-    #     if days_until_expiration <= 0:
-    #         create_activity(request, user, 'Login', 'Failed login (expired password)')
-    #         return JsonResponse({
-    #             'message': 'Your password has expired. Please reset your password or use forgot password to reset password.'
-    #         }, status=400)
-    #     elif days_until_expiration <= 10:
-    #         profile = user.profile
-    #         profile.is_remind_expired_password = True
-    #         profile.save()
-    
-    # try:
-    #     password_validation.validate_password(password)
-    # except ValidationError as e: 
-    #     code = get_code(user) 
-    #     reset_url = settings.BASE_URL + 'auth/reset/'+ code 
-    #     return JsonResponse({
-    #             'isResetPassword': True,
-    #             'reset_url': reset_url
-    #         }, status=400)
-    
-    # if not user.is_superuser and profile.is_auth_otp:  
-    #     request.session['show_otp'] = True
-    #     code = id_generator(size=4, chars=string.digits)
-    #     OTPCode.objects.filter(user=user,is_used=False).update(is_invalid=True)
-    #     otp_code = OTPCode.objects.create(user=user,code=code)
-    #     email_status, email_response = send_email_otp(request, user, code)
-    #     if not email_status:
-    #         create_activity(request, user, 'Login', f'Failed login ({email_response})')
-    #         return JsonResponse({
-    #                 'message':  email_response
-    #             }, status=400)
-                
-    login(request, user) 
-    request.session['role_code'] = user.profile.role.role_code
-    if user.profile.role.role_code == 'SYSTMSR_1':
-        request.session['user_role_code'] = user.profile.user_role.role_code 
-    create_activity(request, user, 'Login', 'Successfully login')
-    return JsonResponse({
-        'message': 'Successfully login.'
-    }, status=200)
+        # Login failed
+        error_msg = response.get('message', 'Username or password is incorrect.')
+        return JsonResponse({'message': error_msg}, status=400)
 
 
 @require_http_methods(['POST'])
