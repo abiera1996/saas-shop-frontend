@@ -66,3 +66,12 @@ def reset_view(request, code):
     context = get_global_context(request, context)
     
     return render(request, template_name='screens/authentication/reset_password.html', context=context)
+
+def merchant_register_complete(request, code):
+    context = {
+        'title': 'FMS - Complete Registration',
+        'code': code
+    }
+    context = get_global_context(request, context)
+    return render(request, template_name='screens/authentication/register_completion.html', context=context)
+

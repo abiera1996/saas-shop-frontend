@@ -671,7 +671,7 @@
                     <div class="p-6 md:p-8">
                         <!-- Register panel -->
                         <div id="panel-register">
-                            <form id="form-merchant-register" action="{% url 'main:merchant_register' %}"
+                            <form id="form-merchant-register" action="{% url 'main:merchant_initial_register' %}"
                                 class="flex flex-col gap-4">
                                 <div class="text-left">
                                     <!-- prettier-ignore -->
@@ -831,7 +831,23 @@
         API.formRequest(
             '#form-merchant-register',
             extended_data = {},
-            processData = () => { },
+            processData = () => { 
+                let data = {}
+                if($('#phone_number').val() != ''){
+                    let phone_dial_code = '+' + phone_number_intel.getSelectedCountryData().dialCode
+                    let phone_data = $('#phone_number').val().replace(phone_dial_code, '')
+                    let phone_number_format = phone_dial_code + phone_data
+
+                    data = {
+                        ...data,
+                        'phone_country_code': phone_number_intel.getSelectedCountryData().iso2,
+                        'phone_number': phone_number_format
+                    }
+                
+                }
+
+                return data
+            },
             checkValidation = (form_data) => {
                 return true
             },
@@ -840,15 +856,11 @@
                 if ([200, 201].includes(response.status)) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Merchant registration successful!',
-                        text: 'Welcome on board! Redirection loading to complete your merchant credentials.',
+                        title: 'Registration initialized!',
+                        text: 'Please check your email for the activation link to complete your registration.',
                         background: '#1d2023',
                         color: '#ffffff',
                         confirmButtonColor: '#875ef5',
-                        timer: 4000,
-                        timerProgressBar: true
-                    }).then(function () {
-                        window.location.href = '/authentication';
                     });
                 } else if (response.status == 400) {
                     if (response.isResetPassword) {

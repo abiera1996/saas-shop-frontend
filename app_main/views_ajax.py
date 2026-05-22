@@ -107,6 +107,22 @@ def reminder_off(request):
 
 
 @require_http_methods(['POST'])
+def merchant_initial_register(request):
+    try:
+        data = decode_request_body(request.body)
+    except Exception as e:
+        data = request.POST
+    api = API(request)
+    response = api.http_request(
+        "/api/merchant/initial-register",
+        "post",
+        payload=data
+    )
+    if response.get('status_code') in (200, 201):
+        return JsonResponse(response.get('data', {}), status=200)
+    return JsonResponse(response, status=response.get('status_code', 400))
+
+@require_http_methods(['POST'])
 def merchant_register(request):
     try:
         data = decode_request_body(request.body)
@@ -124,6 +140,51 @@ def merchant_register(request):
             'message': 'Merchant successfully registered. Please login to continue.'
         }, status=200)
     return JsonResponse(response, status=response['status_code'])
+
+@require_http_methods(['GET'])
+def get_countries(request):
+    api = API(request)
+    response = api.http_request("/api/location/countries", "get")
+
+
+
+        data = request.GET
+    context = {}
+    json_data = []
+    
+    queryset = Country.objects.all() 
+    if data.get('search'):
+        search =  data.get('search')
+        orm_lookups = ['country__icontains']
+        
+        queryset = helpers.search_result(queryset, search, orm_lookups, 0, False)
+    queryset = helpers.Paginator(queryset).paginate(page=data.get('page',1), limit=data.get('limit', 10))
+
+    for details in queryset.get('data', None):
+        json_data.append({
+            'id': details.pk,
+            'text': details.country
+        })
+
+    context = { 'data': json_data, 'page_count': queryset.get('page_count', None) }
+    return JsonResponse(context, status=200)
+
+    
+    return JsonResponse(response, status=response.get('status_code', 400))
+
+@require_http_methods(['GET'])
+def get_states(request):
+    api = API(request)
+    country_id = request.GET.get('country', '')
+    response = api.http_request(f"/api/location/states?country_id={country_id}", "get")
+    return JsonResponse(response, status=response.get('status_code', 400))
+
+@require_http_methods(['GET'])
+def get_cities(request):
+    api = API(request)
+    state_id = request.GET.get('state', '')
+    response = api.http_request(f"/api/location/cities?state_id={state_id}", "get")
+    return JsonResponse(response, status=response.get('status_code', 400))
 
 @require_http_methods(['POST'])
 def login_request(request):

@@ -26,6 +26,7 @@ urlpatterns = [
     path('forgot-password', views.forgot_password, name='forgot_password'),
     path('logout', views.logout_account, name='logout'),
     path('auth/reset/<str:code>', views.reset_view, name="reset_view"),
+    path('merchant-register-complete/<str:code>', views.merchant_register_complete, name='merchant_register_complete'),
 ]
 
 
@@ -59,7 +60,11 @@ urlpatterns_ajax = [
     path('ajax/forget-password-request', views_ajax.forgot_password_request, name='forgot_password_request'),
     path('ajax/reset-password-request', views_ajax.reset_password_request, name='reset_password_request'),
     path('ajax/login-request', views_ajax.login_request, name='login_request'),
+    path('ajax/merchant-initial-register-request', views_ajax.merchant_initial_register, name='merchant_initial_register'),
     path('ajax/merchant-register-request', views_ajax.merchant_register, name='merchant_register'),
+    path('ajax/location/countries', views_ajax.get_countries, name='get_countries'),
+    path('ajax/location/states', views_ajax.get_states, name='get_states'),
+    path('ajax/location/cities', views_ajax.get_cities, name='get_cities'),
     path('ajax/reminder_off', views_ajax.reminder_off, name='reminder_off'),
     path('otp-code-resend/request/', views_ajax.otp_code_resend_request, name="otp_code_resend_request"),
     path('otp-code/request/', views_ajax.otp_code_request, name="otp_code_request"),
